@@ -74,6 +74,11 @@ def localized_reader(ref: str | None, root: Path | None):
 
 
 def check_cs(path: str, base: str, localized: str, report: Report) -> None:
+    base_units = scan_cs_comments(base)
+    loc_units = scan_cs_comments(localized)
+    if len(base_units) != len(loc_units):
+        report.error(f"{path}: 注释块数量变化 {len(base_units)} -> {len(loc_units)}")
+
     base_code = normalize_code(strip_cs_comments(base))
     loc_code = normalize_code(strip_cs_comments(localized))
     if base_code != loc_code:
@@ -103,8 +108,12 @@ def strip_hash_comments(text: str) -> str:
 
 
 def check_md(path: str, base: str, localized: str, report: Report) -> None:
-    base_blocks = [u for u in split_md_blocks(base) if u["kind"] == "code"]
-    loc_blocks = [u for u in split_md_blocks(localized) if u["kind"] == "code"]
+    base_all = split_md_blocks(base)
+    loc_all = split_md_blocks(localized)
+    if len(base_all) != len(loc_all):
+        report.error(f"{path}: Markdown 块数量变化 {len(base_all)} -> {len(loc_all)}")
+    base_blocks = [u for u in base_all if u["kind"] == "code"]
+    loc_blocks = [u for u in loc_all if u["kind"] == "code"]
     if len(base_blocks) != len(loc_blocks):
         report.error(f"{path}: 代码围栏数量变化 {len(base_blocks)} -> {len(loc_blocks)}")
     else:
