@@ -87,7 +87,7 @@ class RoundTripTest(unittest.TestCase):
         self.assertFalse(pending_json.exists() and pending_json.read_text().strip() not in ("", "[]"))
 
         mismatches = []
-        for path in git("ls-tree", "-r", "--name-only", self.zh_ref).splitlines():
+        for path in git("ls-tree", "-r", "--name-only", self.base_ref).splitlines():
             actual = (self.source / path).read_bytes()
             expected = subprocess.check_output(["git", "show", f"{self.zh_ref}:{path}"], cwd=ROOT)
             if actual != expected:
