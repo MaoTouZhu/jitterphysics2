@@ -1,0 +1,39 @@
+# 允许保留英文的片段（子串匹配，大小写不敏感）。
+# 主要用于许可证、第三方出处、API 名称和公式。
+Jitter2 Physics Library
+Thorben Linneweber
+SPDX-License-Identifier
+Apache License
+MIT License
+Copyright
+Permission is hereby granted
+THE SOFTWARE IS PROVIDED
+WITHOUT WARRANTIES OR CONDITIONS
+Box2D
+XenoCollide
+Bullet
+ExactHull
+BepuPhysics
+ReSharper
+https://
+yaml-language-server
+dotnet
+NuGet
+GitHub
+SIMD
+AABB
+MPR
+EPA
+GJK
+ISCD
+Jitter2
+Jitter Physics
+.NET
+C#
+OpenGL
+Raylib
+Godot
+GLFW
+VellumUI
+BenchmarkDotNet
+NUnit

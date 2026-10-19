@@ -1,0 +1,15 @@
+{
+  "base_ref": "main",
+  "base_commit": "1f2bdb40a5454a8a326ac5697f3d1922de7807b3",
+  "localized_ref": "zh",
+  "localized_commit": "cc072a9eecb18fb89bfe5004f7921526686cd2fb",
+  "counts": {
+    "md": 794,
+    "md_files": 27,
+    "yaml": 88,
+    "yaml_files": 8,
+    "files": 4,
+    "csharp": 2409,
+    "csharp_files": 293
+  }
+}
