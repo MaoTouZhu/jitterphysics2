@@ -63,3 +63,7 @@ renderer: 渲染器
 demo: 演示
 position_correction: 位置修正
 angular_limit: 角度限位
+servo: 伺服
+joint_drive: 关节驱动
+prismatic_joint: 移动关节
+universal_joint: 万向节
