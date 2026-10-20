@@ -10,68 +10,68 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Provides built-in primitive support-mapped query types and helper methods for constructing them.
+/// 提供内置的图元支撑映射查询类型，以及用于构建它们的辅助方法。
 /// </summary>
 public static class SupportPrimitives
 {
     /// <summary>
-    /// Creates a point support primitive at the origin.
+    /// 在原点处创建一个点支撑图元。
     /// </summary>
     public static Point CreatePoint() => default;
 
     /// <summary>
-    /// Creates a sphere support primitive.
+    /// 创建一个球体支撑图元。
     /// </summary>
-    /// <param name="radius">The sphere radius.</param>
+    /// <param name="radius">球体半径。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> is less than or equal to zero or not finite.
+    /// 当 <paramref name="radius"/> 小于或等于零，或不是有限值时引发。
     /// </exception>
     public static Sphere CreateSphere(Real radius) => new(radius);
 
     /// <summary>
-    /// Creates a box support primitive.
+    /// 创建一个盒体支撑图元。
     /// </summary>
-    /// <param name="halfExtents">The positive half-extents of the box.</param>
+    /// <param name="halfExtents">盒体的正半尺寸。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when any component of <paramref name="halfExtents"/> is less than or equal to zero or not finite.
+    /// 当 <paramref name="halfExtents"/> 的任一分量小于或等于零，或不是有限值时引发。
     /// </exception>
     public static Box CreateBox(JVector halfExtents) => new(halfExtents);
 
     /// <summary>
-    /// Creates a capsule support primitive whose symmetry axis is the Y-axis.
+    /// 创建一个胶囊体支撑图元，其对称轴为 Y 轴。
     /// </summary>
-    /// <param name="radius">The capsule radius.</param>
-    /// <param name="halfLength">The non-negative half-length of the capsule segment.</param>
+    /// <param name="radius">胶囊体半径。</param>
+    /// <param name="halfLength">胶囊体线段的非负半长。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> is less than or equal to zero, when
-    /// <paramref name="halfLength"/> is negative, or when either value is not finite.
+    /// 当 <paramref name="radius"/> 小于或等于零、<paramref name="halfLength"/> 为负，
+    /// 或任一值不是有限值时引发。
     /// </exception>
     public static Capsule CreateCapsule(Real radius, Real halfLength) => new(radius, halfLength);
 
     /// <summary>
-    /// Creates a cylinder support primitive whose symmetry axis is the Y-axis.
+    /// 创建一个圆柱体支撑图元，其对称轴为 Y 轴。
     /// </summary>
-    /// <param name="radius">The cylinder radius.</param>
-    /// <param name="halfHeight">The positive half-height of the cylinder.</param>
+    /// <param name="radius">圆柱体半径。</param>
+    /// <param name="halfHeight">圆柱体的正半高。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> or <paramref name="halfHeight"/> is less than or equal to zero
-    /// or not finite.
+    /// 当 <paramref name="radius"/> 或 <paramref name="halfHeight"/> 小于或等于零，
+    /// 或不是有限值时引发。
     /// </exception>
     public static Cylinder CreateCylinder(Real radius, Real halfHeight) => new(radius, halfHeight);
 
     /// <summary>
-    /// Creates a cone support primitive whose symmetry axis is the Y-axis.
+    /// 创建一个圆锥体支撑图元，其对称轴为 Y 轴。
     /// </summary>
-    /// <param name="radius">The cone radius.</param>
-    /// <param name="height">The cone height.</param>
+    /// <param name="radius">圆锥体半径。</param>
+    /// <param name="height">圆锥体高度。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> or <paramref name="height"/> is less than or equal to zero
-    /// or not finite.
+    /// 当 <paramref name="radius"/> 或 <paramref name="height"/> 小于或等于零，
+    /// 或不是有限值时引发。
     /// </exception>
     public static Cone CreateCone(Real radius, Real height) => new(radius, height);
 
     /// <summary>
-    /// Represents a point as a lightweight support-mapped query primitive.
+    /// 将点表示为轻量级的支撑映射查询图元。
     /// </summary>
     public readonly struct Point : ISupportMappable
     {
@@ -81,7 +81,7 @@ public static class SupportPrimitives
     }
 
     /// <summary>
-    /// Represents a sphere as a lightweight support-mapped query primitive.
+    /// 将球体表示为轻量级的支撑映射查询图元。
     /// </summary>
     public readonly struct Sphere(Real radius) : ISupportMappable
     {
@@ -93,7 +93,7 @@ public static class SupportPrimitives
     }
 
     /// <summary>
-    /// Represents a box as a lightweight support-mapped query primitive.
+    /// 将盒体表示为轻量级的支撑映射查询图元。
     /// </summary>
     public readonly struct Box(JVector halfExtents) : ISupportMappable
     {
@@ -110,7 +110,7 @@ public static class SupportPrimitives
     }
 
     /// <summary>
-    /// Represents a capsule as a lightweight support-mapped query primitive. The symmetry axis is the Y-axis.
+    /// 将胶囊体表示为轻量级的支撑映射查询图元。其对称轴为 Y 轴。
     /// </summary>
     public readonly struct Capsule(Real radius, Real halfLength) : ISupportMappable
     {
@@ -127,7 +127,7 @@ public static class SupportPrimitives
     }
 
     /// <summary>
-    /// Represents a cylinder as a lightweight support-mapped query primitive. The symmetry axis is the Y-axis.
+    /// 将圆柱体表示为轻量级的支撑映射查询图元。其对称轴为 Y 轴。
     /// </summary>
     public readonly struct Cylinder(Real radius, Real halfHeight) : ISupportMappable
     {
@@ -156,8 +156,8 @@ public static class SupportPrimitives
     }
 
     /// <summary>
-    /// Represents a cone as a lightweight support-mapped query primitive. The symmetry axis is the Y-axis.
-    /// The cone is centered at its centroid: the base sits at Y = -height/4 and the apex at Y = 3*height/4.
+    /// 将圆锥体表示为轻量级的支撑映射查询图元。其对称轴为 Y 轴。
+    /// 圆锥体以其质心为中心：底面位于 Y = -height/4，顶点位于 Y = 3*height/4。
     /// </summary>
     public readonly struct Cone(Real radius, Real height) : ISupportMappable
     {

@@ -129,8 +129,8 @@ public class CollisionTests
         bool hit = NarrowPhase.RayCast(s1, JQuaternion.CreateRotationX((Real)0.32), sp,
             op, sp - op, out Real lambda, out JVector normal);
 
-        JVector cn = JVector.Normalize(op - sp); // analytical normal
-        JVector hp = op + (sp - op) * lambda; // hit point
+        JVector cn = JVector.Normalize(op - sp); // 解析法线
+        JVector hp = op + (sp - op) * lambda; // 命中点
 
         Assert.That(hit, Is.True);
         Assert.That(MathHelper.CloseToZero(normal - cn, (Real)1e-6));
@@ -258,14 +258,14 @@ public class CollisionTests
         Assert.That(NarrowPhase.MprEpa(s1, s2, JQuaternion.Identity, JQuaternion.Identity, new JVector(-(Real)0.25, 0, 0), new JVector(+(Real)0.25, 0, 0),
             out JVector pointA, out JVector pointB, out JVector normal, out Real penetration), Is.True);
 
-        // pointA is on s1 and pointB is on s2
+        // pointA 位于 s1 上，pointB 位于 s2 上
         Assert.That(pointA.X, Is.GreaterThan((Real)0.0));
         Assert.That(pointB.X, Is.LessThan((Real)0.0));
 
-        // the collision normal points from s2 to s1
+        // 碰撞法线由 s2 指向 s1
         Assert.That(normal.X, Is.GreaterThan(0));
 
-        // the separation is negative
+        // 分离量为负
         Assert.That(penetration, Is.GreaterThan(0));
 
         // -----------------------------------------------
@@ -273,14 +273,14 @@ public class CollisionTests
         Assert.That(NarrowPhase.Collision(s1, s2, JQuaternion.Identity, JQuaternion.Identity, new JVector(-(Real)0.25, 0, 0), new JVector(+(Real)0.25, 0, 0),
             out pointA, out pointB, out normal, out penetration), Is.True);
 
-        // pointA is on s1 and pointB is on s2
+        // pointA 位于 s1 上，pointB 位于 s2 上
         Assert.That(pointA.X, Is.GreaterThan(0));
         Assert.That(pointB.X, Is.LessThan(0));
 
-        // the collision normal points from s2 to s1
+        // 碰撞法线由 s2 指向 s1
         Assert.That(normal.X, Is.GreaterThan(0));
 
-        // the separation is negative
+        // 分离量为负
         Assert.That(penetration, Is.GreaterThan(0));
 
         // -----------------------------------------------
@@ -291,14 +291,14 @@ public class CollisionTests
         Assert.That(NarrowPhase.MprEpa(b1, b2, JQuaternion.Identity, JQuaternion.Identity, new JVector(-(Real)0.25, (Real)0.1, 0), new JVector(+(Real)0.25, -(Real)0.1, 0),
             out pointA, out pointB, out normal, out penetration), Is.True);
 
-        // pointA is on s1 and pointB is on s2
+        // pointA 位于 s1 上，pointB 位于 s2 上
         Assert.That(pointA.X, Is.GreaterThan(0));
         Assert.That(pointB.X, Is.LessThan(0));
 
-        // the collision normal points from s2 to s1
+        // 碰撞法线由 s2 指向 s1
         Assert.That(normal.X, Is.GreaterThan(0));
 
-        // the penetration is positive
+        // 穿透量为正
         Assert.That(penetration, Is.GreaterThan(0));
 
         // -----------------------------------------------
@@ -306,10 +306,10 @@ public class CollisionTests
         Assert.That(NarrowPhase.Collision(b1, b2, JQuaternion.Identity, JQuaternion.Identity, new JVector(-(Real)2.25, 0, 0), new JVector(+(Real)2.25, 0, 0),
             out pointA, out pointB, out normal, out penetration), Is.True);
 
-        // the collision normal points from s2 to s1
+        // 碰撞法线由 s2 指向 s1
         Assert.That(normal.X, Is.GreaterThan(0));
 
-        // the penetration is negative
+        // 穿透量为负
         Assert.That(penetration, Is.LessThan(0));
     }
 }

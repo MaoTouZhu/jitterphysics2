@@ -11,9 +11,9 @@ using System.Runtime.CompilerServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Interop helpers for JVector and JQuaternion.
-/// Includes safe implicit conversions to System.Numerics types, and opt-in unsafe
-/// bit reinterpretation for high-performance interop with layout-compatible structs.
+/// JVector 与 JQuaternion 的互操作辅助方法。
+/// 包含到 System.Numerics 类型的安全隐式转换，以及针对布局兼容结构体、
+/// 用于高性能互操作的按需启用的非安全位重解释。
 /// </summary>
 internal static class UnsafeInterop
 {
@@ -32,15 +32,15 @@ internal static class UnsafeInterop
 public partial struct JVector
 {
     /// <summary>
-    /// Reinterprets the bits of this <see cref="JVector"/> as <typeparamref name="T"/>.
+    /// 将此 <see cref="JVector"/> 的位重新解释为 <typeparamref name="T"/>。
     /// </summary>
     /// <remarks>
-    /// Valid only if <typeparamref name="T"/> has identical size and compatible layout.
+    /// 仅当 <typeparamref name="T"/> 具有相同大小且布局兼容时有效。
     /// </remarks>
-    /// <typeparam name="T">The target unmanaged type.</typeparam>
-    /// <returns>The reinterpreted value.</returns>
+    /// <typeparam name="T">目标非托管类型。</typeparam>
+    /// <returns>重新解释后的值。</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <typeparamref name="T"/> does not have the same size as <see cref="JVector"/>.
+    /// 当 <typeparamref name="T"/> 与 <see cref="JVector"/> 的大小不同时抛出。
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T UnsafeAs<T>() where T : unmanaged
@@ -54,16 +54,16 @@ public partial struct JVector
     }
 
     /// <summary>
-    /// Reinterprets the bits of <paramref name="value"/> as a <see cref="JVector"/>.
+    /// 将 <paramref name="value"/> 的位重新解释为 <see cref="JVector"/>。
     /// </summary>
     /// <remarks>
-    /// Valid only if <typeparamref name="T"/> has identical size and compatible layout.
+    /// 仅当 <typeparamref name="T"/> 具有相同大小且布局兼容时有效。
     /// </remarks>
-    /// <typeparam name="T">The source unmanaged type.</typeparam>
-    /// <param name="value">The value to reinterpret.</param>
-    /// <returns>The reinterpreted vector.</returns>
+    /// <typeparam name="T">源非托管类型。</typeparam>
+    /// <param name="value">要重新解释的值。</param>
+    /// <returns>重新解释后的向量。</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <typeparamref name="T"/> does not have the same size as <see cref="JVector"/>.
+    /// 当 <typeparamref name="T"/> 与 <see cref="JVector"/> 的大小不同时抛出。
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector UnsafeFrom<T>(in T value) where T : unmanaged
@@ -86,16 +86,16 @@ public partial struct JVector
 public partial struct JQuaternion
 {
     /// <summary>
-    /// Reinterprets the bits of this <see cref="JQuaternion"/> as <typeparamref name="T"/>.
+    /// 将此 <see cref="JQuaternion"/> 的位重新解释为 <typeparamref name="T"/>。
     /// </summary>
     /// <remarks>
-    /// Valid only if <typeparamref name="T"/> has identical size and compatible layout.
-    /// Memory order is X, Y, Z, W (W is last).
+    /// 仅当 <typeparamref name="T"/> 具有相同大小且布局兼容时有效。
+    /// 内存顺序为 X、Y、Z、W（W 在最后）。
     /// </remarks>
-    /// <typeparam name="T">The target unmanaged type.</typeparam>
-    /// <returns>The reinterpreted value.</returns>
+    /// <typeparam name="T">目标非托管类型。</typeparam>
+    /// <returns>重新解释后的值。</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <typeparamref name="T"/> does not have the same size as <see cref="JQuaternion"/>.
+    /// 当 <typeparamref name="T"/> 与 <see cref="JQuaternion"/> 的大小不同时抛出。
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T UnsafeAs<T>() where T : unmanaged
@@ -109,17 +109,17 @@ public partial struct JQuaternion
     }
 
     /// <summary>
-    /// Reinterprets the bits of <paramref name="value"/> as a <see cref="JQuaternion"/>.
+    /// 将 <paramref name="value"/> 的位重新解释为 <see cref="JQuaternion"/>。
     /// </summary>
     /// <remarks>
-    /// Valid only if <typeparamref name="T"/> has identical size and compatible layout.
-    /// Expects memory order X, Y, Z, W (W is last).
+    /// 仅当 <typeparamref name="T"/> 具有相同大小且布局兼容时有效。
+    /// 要求内存顺序为 X、Y、Z、W（W 在最后）。
     /// </remarks>
-    /// <typeparam name="T">The source unmanaged type.</typeparam>
-    /// <param name="value">The value to reinterpret.</param>
-    /// <returns>The reinterpreted quaternion.</returns>
+    /// <typeparam name="T">源非托管类型。</typeparam>
+    /// <param name="value">要重新解释的值。</param>
+    /// <returns>重新解释后的四元数。</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <typeparamref name="T"/> does not have the same size as <see cref="JQuaternion"/>.
+    /// 当 <typeparamref name="T"/> 与 <see cref="JQuaternion"/> 的大小不同时抛出。
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion UnsafeFrom<T>(in T value) where T : unmanaged

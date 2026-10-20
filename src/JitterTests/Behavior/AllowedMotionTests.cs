@@ -156,7 +156,7 @@ public class AllowedMotionTests
         body.AllowedMotion = MotionAxes.All & ~MotionAxes.LinearY;
         body.AddForce(new JVector(2, 4, 6));
         Real dt = (Real)(1.0 / 60.0);
-        // Force deltas are prepared at the end of a step and applied in the next step.
+        // 力的增量在一步结束时准备，并在下一步中应用。
         world.Step(dt, multiThread);
         world.Step(dt, multiThread);
 
@@ -467,7 +467,7 @@ public class AllowedMotionTests
         body.SetMassInertia(physicalInertia, 1);
         body.AllowedMotion = axes;
 
-        // Invert the permitted block of physical inertia independently of the Schur-complement implementation.
+        // 独立于 Schur 补实现，对物理惯性中允许的块求逆。
         JMatrix constrainedInertia = physicalInertia.ToMatrix();
         if ((axes & MotionAxes.AngularX) == 0)
         {

@@ -10,7 +10,7 @@ public class RayIntersectTests
     [SetUp]
     public void Setup()
     {
-        // Triangle in XY plane with counter-clockwise winding
+        // 位于 XY 平面内、按逆时针环绕的三角形
         tri = new JTriangle
         {
             V0 = new JVector(0, 0, 0),

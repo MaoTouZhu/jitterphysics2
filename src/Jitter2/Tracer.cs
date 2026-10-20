@@ -5,18 +5,18 @@
  */
 
 /*
- * This file defines the Tracer utility used to record performance data during simulation.
+ * 本文件定义了用于在模拟过程中记录性能数据的 Tracer 工具。
  *
- * When the symbol PROFILE is defined at compile time, the Tracer class is fully included.
- * It records events with minimal overhead using thread-local buffers and can export them
- * in Chrome Trace Event format for external analysis. The public surface is intentionally minimal:
- * external code can write out recorded traces, but the recording itself is controlled internally
- * by the engine.
+ * 当在编译时定义符号 PROFILE 时，会完整包含 Tracer 类。
+ * 它使用线程本地缓冲区以最小开销记录事件，并可以导出为
+ * Chrome Trace Event 格式以供外部分析。公开接口被有意设计得尽量精简：
+ * 外部代码可以写出已记录的跟踪数据，但记录本身由引擎在内部
+ * 控制。
  *
- * When PROFILE is not defined, the Tracer class is replaced by a stub implementation.
- * All trace methods in the stub are decorated with [Conditional("_NEVER")], ensuring that
- * every call to Tracer.* is completely stripped by the compiler. This eliminates any
- * runtime cost or dependency on the tracing system in non-profile builds.
+ * 当未定义 PROFILE 时，Tracer 类会被替换为存根实现。
+ * 存根中的所有跟踪方法都带有 [Conditional("_NEVER")] 特性，确保
+ * 对 Tracer.* 的每次调用都被编译器完全移除。这消除了非性能分析构建中
+ * 跟踪系统的任何运行时开销或依赖。
  */
 
 using System;
@@ -74,11 +74,11 @@ internal enum TracePhase : byte
 #if PROFILE
 
 /// <summary>
-/// Provides access to performance tracing features.
+/// 提供对性能跟踪功能的访问。
 /// </summary>
 /// <remarks>
-/// When tracing is enabled, performance data can be recorded during simulation
-/// and exported for analysis with external tools such as Chrome's tracing viewer.
+/// 启用跟踪后，可以在模拟过程中记录性能数据，
+/// 并导出以使用 Chrome 跟踪查看器等外部工具进行分析。
 /// </remarks>
 public static class Tracer
 {
@@ -229,12 +229,12 @@ public static class Tracer
     }
 
     /// <summary>
-    /// Starts measuring the duration of a profiling scope on the current thread.
+    /// 开始测量当前线程上性能分析作用域的持续时间。
     /// </summary>
     /// <remarks>
-    /// Only one scope measurement can be active per thread at a time. Nested calls to
-    /// <see cref="ProfileScopeBegin"/> will overwrite the previous start timestamp,
-    /// resulting in incorrect duration measurements.
+    /// 每个线程同一时间只能有一个作用域测量处于活动状态。嵌套调用
+    /// <see cref="ProfileScopeBegin"/> 会覆盖先前的起始时间戳，
+    /// 从而导致持续时间测量不正确。
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void ProfileScopeBegin()
@@ -243,7 +243,7 @@ public static class Tracer
     }
 
     /// <summary>
-    /// Ends the current profiling scope and records its duration if it exceeds the given threshold.
+    /// 结束当前性能分析作用域，并在其持续时间超过给定阈值时记录该持续时间。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void ProfileScopeEnd(
@@ -294,16 +294,16 @@ public static class Tracer
     }
 
     /// <summary>
-    /// Writes all recorded trace events to a JSON file.
+    /// 将所有已记录的跟踪事件写入 JSON 文件。
     /// </summary>
-    /// <param name="filename">The file path to write to. Defaults to <c>trace.json</c>.</param>
+    /// <param name="filename">要写入的文件路径。默认为 <c>trace.json</c>。</param>
     /// <param name="clear">
-    /// If <see langword="true"/>, all recorded data is cleared after writing.
-    /// If <see langword="false"/>, recorded data remains in memory.
+    /// 如果为 <see langword="true"/>，则写入后清除所有已记录的数据。
+    /// 如果为 <see langword="false"/>，则记录的数据保留在内存中。
     /// </param>
     /// <remarks>
-    /// The output file uses the Chrome Trace Event format and can be opened in
-    /// <a href="chrome://tracing">chrome://tracing</a> or compatible viewers.
+    /// 输出文件使用 Chrome Trace Event 格式，可以在
+    /// <a href="chrome://tracing">chrome://tracing</a> 或兼容的查看器中打开。
     /// </remarks>
     public static void WriteToFile(string filename = DefaultPath, bool clear = true)
     {

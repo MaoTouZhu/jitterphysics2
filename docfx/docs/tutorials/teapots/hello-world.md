@@ -1,60 +1,60 @@
-# Hello World
+# 你好，世界
 
-### Creating the `PointCloudShape`
+### 创建 `PointCloudShape`
 
-We can now create a `PointCloudShape` from the sampled vertices:
+现在我们可以根据采样得到的顶点创建 `PointCloudShape`：
 
 ```cs
-// find a few points on the convex hull of the teapot.
+// 在茶壶凸包上找出若干点。
 var vertices = ShapeHelper.SampleHull(allVertices, subdivisions: 3);
 
-// use these points to create a PointCloudShape.
+// 用这些点创建 PointCloudShape。
 var pointCloudShape = new PointCloudShape(vertices);
 ```
 
-However, we need to be a bit careful here.
-If we add this shape to a rigid body as-is, the body may not behave as intuitively expected.
-This is because the center of mass of a rigid body is always located at `(0, 0, 0)` in its local coordinate frame.
+不过，这里我们需要稍微小心一点。
+如果直接把这个形状添加到刚体上，刚体的行为可能不符合直觉。
+这是因为刚体的质心始终位于其局部坐标系的 `(0, 0, 0)` 处。
 
-If you open `teapot.obj` in a model editor, you'll notice that the model is not centered around the origin.
-To correct this, we either need to center the model manually in a model editor—or, more conveniently, use the `Shift` property of `PointCloudShape` to align the center of mass with the origin:
+如果你在模型编辑器中打开 `teapot.obj`，会注意到模型并不是以原点为中心的。
+要修正这一点，我们可以在模型编辑器中手动将模型居中——或者更方便地，使用 `PointCloudShape` 的 `Shift` 属性让质心与原点对齐：
 
 ```cs
-// find a few points on the convex hull of the teapot.
+// 在茶壶凸包上找出若干点。
 var vertices = ShapeHelper.SampleHull(allVertices, subdivisions: 3);
 
-// use these points to create a PointCloudShape.
+// 用这些点创建 PointCloudShape。
 var pointCloudShape = new PointCloudShape(vertices);
 
-// shift the shape so its center of mass is at the origin.
+// 平移形状，使其质心位于原点。
 pointCloudShape.GetCenter(out JVector centerOfMass);
 pointCloudShape.Shift = -centerOfMass;
 
-// pointCloudShape.GetCenter(out centerOfMass); // now returns (0, 0, 0)
+// pointCloudShape.GetCenter(out centerOfMass); // 现在返回 (0, 0, 0)
 
-// finally, create the rigid body for the teapot
+// 最后，为茶壶创建刚体
 var rigidBody = world.CreateRigidBody();
 rigidBody.AddShape(pointCloudShape);
 ```
 
 > [!WARNING]
-> The shift applied to the shape must also be taken into account when rendering the model, to ensure it aligns visually with the simulation.
+> 渲染模型时也必须考虑应用到形状上的平移，以确保模型在视觉上与模拟保持一致。
 
-#### Creating Multiple Instances of the Same Shape
+#### 创建同一形状的多个实例
 
-In Jitter, it is not valid to add the same shape instance to multiple rigid bodies.
-To create additional instances of a shape, use the `Clone()` method of `PointCloudShape`.
+在 Jitter 中，不能把同一个形状实例添加到多个刚体上。
+要创建形状的额外实例，请使用 `PointCloudShape` 的 `Clone()` 方法。
 
-This method creates a new shape object that shares the underlying data structure, saving both memory and computation time:
+该方法会创建一个新的形状对象，它共享底层数据结构，从而节省内存和计算时间：
 
 ```cs
 var shapeInstance1 = new PointCloudShape(vertices);
-var shapeInstance2 = shapeInstance1.Clone(); // Safe to use in a second body
+var shapeInstance2 = shapeInstance1.Clone(); // 可以安全地用于第二个刚体
 ```
 
-This approach is especially useful when many bodies share the same geometry, such as multiple identical props or characters in a simulation.
+当许多刚体共享同一几何体时（例如模拟中多个相同的道具或角色），这种做法尤其有用。
 
-### Putting it all together
+### 整合起来
 
 
 ```cs
@@ -87,21 +87,21 @@ static Texture2D GenCheckedTexture(int size, int checks, Color colorA, Color col
 
 const int numberOfTeapots = 12;
 
-// set a hint for anti-aliasing
+// 设置抗锯齿提示
 SetConfigFlags(ConfigFlags.Msaa4xHint);
 
-// initialize a 1200x800 px window with a title
+// 初始化一个 1200x800 像素的窗口并设置标题
 InitWindow(1200, 800, "TeaDrop example");
 
-// dynamically create a plane model
+// 动态创建一个平面模型
 Texture2D texture = GenCheckedTexture(10, 1,  Color.LightGray, Color.Gray);
 Model planeModel = LoadModelFromMesh(GenMeshPlane(20, 20, 10, 10));
 SetMaterialTexture(ref planeModel, 0, MaterialMapIndex.Diffuse, ref texture);
 
-// load the teapot model from file
+// 从文件加载茶壶模型
 Model teapotModel = LoadModel("teapot.obj");
 
-// load the mesh vertices
+// 加载网格顶点
 if (teapotModel.MeshCount == 0)
     throw new Exception("Model could not be loaded!");
 
@@ -109,18 +109,18 @@ Mesh teapotMesh;
 unsafe { teapotMesh = teapotModel.Meshes[0]; }
 var allVertices = teapotMesh.VerticesAs<JVector>();
 
-// sample vertices on the convex hull
+// 在凸包上采样顶点
 var vertices = ShapeHelper.SampleHull(allVertices, 4);
 
-// create the PointCloudShape from the reduced vertices
+// 用精简后的顶点创建 PointCloudShape
 var pointCloudShape = new PointCloudShape(vertices);
 
-// shift the shape, such that the center of mass is at the origin
+// 平移形状，使质心位于原点
 pointCloudShape.GetCenter(out JVector center);
 pointCloudShape.Shift = -center;
 
-// we need to take the transpose here, since Raylib and System.Numerics
-// use a different convention
+// 这里需要转置，因为 Raylib 和 System.Numerics
+// 使用了不同的约定
 Matrix4x4 shift = Matrix4x4.CreateTranslation(-center);
 shift = Matrix4x4.Transpose(shift);
 
@@ -128,17 +128,17 @@ texture = GenCheckedTexture(16, 2,  Color.White, Color.Magenta);
 Material teapotMat = LoadMaterialDefault();
 SetMaterialTexture(ref teapotMat, MaterialMapIndex.Diffuse, texture);
 
-// initialize the Jitter physics world
+// 初始化 Jitter 物理世界
 World world = new ();
 world.SubstepCount = 4;
 
-// add a body representing the plane
+// 添加一个表示平面的刚体
 RigidBody planeBody = world.CreateRigidBody();
 planeBody.AddShape(new BoxShape(20));
 planeBody.Position = new JVector(0, -10, 0);
 planeBody.MotionType = MotionType.Static;
 
-// add numberOfTeapots teapots
+// 添加 numberOfTeapots 个茶壶
 for(int i = 0; i < numberOfTeapots; i++)
 {
     RigidBody body = world.CreateRigidBody();
@@ -146,7 +146,7 @@ for(int i = 0; i < numberOfTeapots; i++)
     body.Position = new JVector(0, i * 4 + 0.5f, 0);
 }
 
-// create a camera
+// 创建相机
 Camera3D camera = new ()
 {
     Position = new Vector3(-40.0f, 16.0f, 20.0f),
@@ -156,10 +156,10 @@ Camera3D camera = new ()
     Projection = CameraProjection.Perspective
 };
 
-// 100 fps target
+// 目标 100 fps
 SetTargetFPS(100);
 
-// simple render loop
+// 简单的渲染循环
 while (!WindowShouldClose())
 {
     BeginDrawing();
@@ -173,7 +173,7 @@ while (!WindowShouldClose())
 
     foreach(var body in world.RigidBodies)
     {
-        if (body == planeBody || body == world.NullBody) continue; // do not draw this
+        if (body == planeBody || body == world.NullBody) continue; // 不要绘制这个
         DrawMesh(teapotMesh, teapotMat, GetRayLibTransformMatrix(body) * shift);
     }
 
@@ -186,4 +186,4 @@ while (!WindowShouldClose())
 CloseWindow();
 ```
 
-![plane](images/teapots.gif)
+![平面](images/teapots.gif)

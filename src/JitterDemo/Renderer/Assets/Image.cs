@@ -18,8 +18,7 @@ public class Image
     }
 
     /// <summary>
-    /// Minimal  *.tga (Truevision TGA) loader for true color images with runtime
-    /// length encoding support.
+    /// 极简的 *.tga（Truevision TGA）加载器，支持带游程编码的真彩色图像。
     /// </summary>
     public static Image LoadImage(string filename)
     {
@@ -33,11 +32,11 @@ public class Image
         int bitPerPixel = data[16];
         int descriptor = data[17];
 
-        // Image type 2 and 10: The image data is a direct representation of the pixel color.
-        // For a Pixel Depth of 15 and 16 bit, each pixel is stored with 5 bits per color.
-        // If the pixel depth is 16 bits, the topmost bit is reserved for transparency. For
-        // a pixel depth of 24 bits, each pixel is stored with 8 bits per color. A 32-bit pixel
-        // depth defines an additional 8-bit alpha channel.
+        // 图像类型 2 和 10：图像数据直接表示像素颜色。
+        // 对于 15 位和 16 位的像素深度，每个像素的每种颜色占 5 位。
+        // 如果像素深度为 16 位，最高位保留用于透明度。对于
+        // 24 位像素深度，每个像素的每种颜色占 8 位。32 位像素
+        // 深度则额外定义了一个 8 位 alpha 通道。
         // [https://en.wikipedia.org/wiki/Truevision_TGA]
 
         if (!(imageType is 2 or 10 && bitPerPixel is 24 or 32))

@@ -28,7 +28,7 @@ public class ArbiterCreationTests
             if (previous != null && !ReferenceEquals(previous, arbiter))
                 Interlocked.Increment(ref duplicates);
 
-            // Exercise contact writes while other threads allocate and resize the buffer.
+            // 在其他线程分配和调整缓冲区大小的同时，执行接触写入。
             world.RegisterContact(arbiter, JVector.Zero, JVector.Zero, JVector.UnitY);
         });
 
@@ -66,7 +66,7 @@ public class ArbiterCreationTests
             first ??= created;
             Assert.That(created, Is.SameAs(first));
 
-            // Process deferred island registration before removing the arbiter.
+            // 在移除仲裁器之前先处理延迟的岛注册。
             world.Step((Real)(1.0 / 60.0), multiThread: false);
             if (automaticRemoval)
                 world.Step((Real)(1.0 / 60.0), multiThread: false);
@@ -180,8 +180,8 @@ public class ArbiterCreationTests
 
         try
         {
-            // Trigger Allocate's checked resize before it touches memory, without
-            // allocating gigabytes or introducing fault hooks into the hot path.
+            // 在 Allocate 的带检查扩容触及内存之前触发它，从而既不必分配
+            // 数 GB 内存，也无需向热路径引入故障钩子。
             sizeField.SetValue(buffer, int.MaxValue);
             countProperty.SetValue(buffer, int.MaxValue);
             Assert.Throws<OverflowException>(() =>
@@ -197,7 +197,7 @@ public class ArbiterCreationTests
     }
 
 #if !DEBUG
-    // Debug precondition checks reject this fault stimulus before allocation.
+    // Debug 前置条件检查会在分配之前拒绝该故障激励。
     [Test]
     public void InitializationFailure_FreesAllocatedContactAndAllowsRetry()
     {
@@ -205,8 +205,8 @@ public class ArbiterCreationTests
         var body1 = world.CreateRigidBody();
         var body2 = world.CreateRigidBody();
 
-        // Fault stimulus only: this is not a contract to validate null bodies.
-        // Init fails after allocation but before the arbiter enters the deferred bag.
+        // 仅作为故障激励：这并不是要验证空刚体的契约。
+        // Init 在分配之后、仲裁器进入延迟包之前失败。
         Assert.Throws<NullReferenceException>(() =>
             world.GetOrCreateArbiter(1, 2, body1, null!, out _));
 
@@ -269,8 +269,8 @@ public class ArbiterCreationTests
         try
         {
             Assert.That(publishing.Wait(Timeout), Is.True);
-            // A different shard must be able to create a contact while publication
-            // of the failed arbiter is paused. Its contact will be moved by Free.
+            // 在失败仲裁器的发布暂停期间，另一个分片必须能够创建接触。
+            // 其接触将由 Free 移动。
             world.GetOrCreateArbiter(liveKey.Key1, liveKey.Key2, body1, body2, out live);
             Assert.That(buffer.GetIndex(live.Handle), Is.EqualTo(1));
 
@@ -279,8 +279,8 @@ public class ArbiterCreationTests
             {
                 ref ContactData data = ref live.Handle.Data;
                 failPublication.Set();
-                // Observe the writer intent to make this check independent of a
-                // scheduling delay between the exception and rollback's Free.
+                // 观察写者意图，使该检查不受异常与回滚 Free 之间
+                // 调度延迟的影响。
                 Assert.That(SpinWait.SpinUntil(() =>
                     GetField<int>(buffer.ResizeLock, "writer") != 0 || completed.IsSet, Timeout), Is.True);
                 Assert.That(completed.IsSet, Is.False, "Rollback must wait for the contact reader.");
@@ -355,7 +355,7 @@ public class ArbiterCreationTests
         int index = (key.GetHashCode() & 0x7FFFFFFF) % dictionaries.Length;
         Assert.That(dictionaries[index], Is.Empty);
         FailingComparer comparer = new();
-        // Allocate buckets so TryGetValue hashes even though the dictionary is empty.
+        // 分配桶，使 TryGetValue 即使在字典为空时也会计算哈希。
         dictionaries[index] = new Dictionary<ArbiterKey, Arbiter>(1, comparer);
         return comparer;
     }
@@ -370,7 +370,7 @@ public class ArbiterCreationTests
 
         public int GetHashCode(ArbiterKey key)
         {
-            // The initial lookup succeeds; the following Add fails before insertion.
+            // 初始查找成功；随后的 Add 在插入之前失败。
             if (++hashCalls == 2)
             {
                 BeforeFailure?.Invoke();

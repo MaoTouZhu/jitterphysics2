@@ -7,8 +7,7 @@ public static class ColorGenerator
 {
     private const int NumColors = 127;
 
-    // Surprisingly buffering the colors is about 20 times
-    // faster than generating them on the fly.
+    // 令人惊讶的是，缓冲颜色比即时生成颜色大约快 20 倍。
     private static readonly Vector3[] buffer = new Vector3[NumColors];
 
     static ColorGenerator()

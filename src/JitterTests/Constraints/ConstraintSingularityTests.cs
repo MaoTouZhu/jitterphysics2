@@ -155,7 +155,7 @@ public class ConstraintSingularityTests
         foreach (JVector direction in new[] { JVector.UnitX, JVector.UnitY, JVector.UnitZ })
         {
             body1.Orientation = JQuaternion.CreateFromAxisAngle(direction, delta) * initial;
-            // Evaluate the angle using atan2: asin loses accuracy near the half turn.
+            // 使用 atan2 计算角度：asin 在半圈附近会损失精度。
             JQuaternion q = twist.Data.Q0 * body1.Orientation.Conjugate() * body2.Orientation;
             Real projection = JVector.Dot(twist.Data.B, q.Vector);
             Real angleAfter = 2 * MathR.Atan2(projection,

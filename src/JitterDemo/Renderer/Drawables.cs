@@ -2,7 +2,7 @@ using JitterDemo.Renderer.OpenGL;
 
 namespace JitterDemo.Renderer;
 
-/// Drawable wrapping a mesh loaded from an OBJ file (plain or zipped).
+/// 包装从 OBJ 文件（普通或压缩）加载的网格的可绘制对象。
 public class TriangleMeshDrawable : InstancedDrawable
 {
     public TriangleMeshDrawable(string filename, float scale = 1f, bool reverseWinding = false)
@@ -13,14 +13,14 @@ public class TriangleMeshDrawable : InstancedDrawable
     public TriangleMeshDrawable(Mesh mesh) : base(mesh) { }
 }
 
-/// Drawable with runtime-mutable vertex data (used for soft bodies, heightmaps).
-/// Call <see cref="SetTriangles"/> once to establish the index buffer, then mutate
-/// <see cref="Mesh"/>.Vertices and call <see cref="RefreshGeometry"/> each frame.
+/// 顶点数据可在运行时修改的可绘制对象（用于软体、高度图）。
+/// 调用一次 <see cref="SetTriangles"/> 建立索引缓冲，之后每帧修改
+/// <see cref="Mesh"/>.Vertices 并调用 <see cref="RefreshGeometry"/>。
 public class MutableMeshDrawable : InstancedDrawable
 {
     public MutableMeshDrawable() : base(new Mesh(new Vertex[4], new TriangleVertexIndex[0]))
     {
-        // Seed with a placeholder so construction works; SetTriangles supplies real data.
+        // 先用占位数据初始化以便构造成功；SetTriangles 会提供真实数据。
         TwoSided = true;
         ShadowsDoubleSided = true;
     }
@@ -28,7 +28,7 @@ public class MutableMeshDrawable : InstancedDrawable
     public void SetTriangles(TriangleVertexIndex[] triangles)
     {
         Mesh.Indices = triangles;
-        // Same reason as in CreateBuffers: element-buffer binding is VAO state.
+        // 与 CreateBuffers 中原因相同：元素缓冲的绑定属于 VAO 状态。
         Vao.Bind();
         Ibo.Upload<TriangleVertexIndex>(triangles);
 
@@ -43,7 +43,7 @@ public class MutableMeshDrawable : InstancedDrawable
         Mesh.Vertices = new Vertex[largest + 1];
     }
 
-    /// Recomputes per-vertex normals from triangles and uploads the vertex data.
+    /// 根据三角形重新计算逐顶点法线并上传顶点数据。
     public void RefreshGeometry()
     {
         var verts = Mesh.Vertices;

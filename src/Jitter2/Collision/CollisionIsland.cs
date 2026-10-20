@@ -11,7 +11,7 @@ using Jitter2.Dynamics;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Represents a collection of bodies connected directly or indirectly by contacts or constraints.
+/// 表示通过接触或约束直接或间接连接的一组刚体。
 /// </summary>
 public sealed class Island : IPartitionedSetIndex
 {
@@ -19,27 +19,27 @@ public sealed class Island : IPartitionedSetIndex
     internal bool MarkedAsActive;
 
     /// <summary>
-    /// Has to be set if an island is active but might contain inactive bodies.
-    /// This happens, for example, if an inactive and an active island are merged.
+    /// 当岛处于活动状态但可能包含非活动刚体时，必须设置此标志。
+    /// 例如，当一个非活动岛与一个活动岛合并时就会发生这种情况。
     /// </summary>
     internal bool NeedsUpdate;
 
     /// <summary>
-    /// Gets a collection of all the bodies present in this island.
+    /// 获取此岛中所有刚体的集合。
     /// </summary>
     public ReadOnlyHashSet<RigidBody> Bodies => new(InternalBodies);
 
     int IPartitionedSetIndex.SetIndex { get; set; } = -1;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Island"/> class.
+    /// 初始化 <see cref="Island"/> 类的新实例。
     /// </summary>
     public Island()
     {
     }
 
     /// <summary>
-    /// Clears all the bodies from the lists within this island.
+    /// 清除此岛内部列表中的所有刚体。
     /// </summary>
     internal void ClearLists()
     {

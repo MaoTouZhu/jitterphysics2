@@ -14,46 +14,46 @@ namespace Jitter2.Collision;
 public partial class DynamicTree
 {
     /// <summary>
-    /// Represents the result of a distance query against the dynamic tree.
+    /// 表示对动态树进行距离查询的结果。
     /// </summary>
     public struct FindNearestResult
     {
-        /// <summary>The closest proxy found.</summary>
+        /// <summary>找到的最近代理。</summary>
         public IDynamicTreeProxy? Entity;
 
-        /// <summary>Closest point on the query shape in world space. Undefined when the shapes overlap.</summary>
+        /// <summary>查询形状在世界空间中的最近点。形状重叠时无定义。</summary>
         public JVector PointA;
 
-        /// <summary>Closest point on the found proxy in world space. Undefined when the shapes overlap.</summary>
+        /// <summary>找到的代理在世界空间中的最近点。形状重叠时无定义。</summary>
         public JVector PointB;
 
         /// <summary>
-        /// Unit direction from the query shape toward the found proxy, or <see cref="JVector.Zero"/>
-        /// when the shapes overlap. Do not use this to test whether a result was found.
+        /// 从查询形状指向找到的代理的单位方向，形状重叠时为 <see cref="JVector.Zero"/>。
+        /// 不要用它来判断是否找到了结果。
         /// </summary>
         public JVector Normal;
 
-        /// <summary>The separation distance between the query shape and the found proxy. Zero when the shapes overlap.</summary>
+        /// <summary>查询形状与找到的代理之间的分离距离。形状重叠时为零。</summary>
         public Real Distance;
     }
 
     /// <summary>
-    /// Delegate for filtering distance query results after the exact shape distance test.
+    /// 用于在精确形状距离测试之后过滤距离查询结果的委托。
     /// </summary>
-    /// <param name="result">The distance result to evaluate.</param>
-    /// <returns><c>false</c> to filter out this result; <c>true</c> to keep it.</returns>
+    /// <param name="result">要评估的距离结果。</param>
+    /// <returns><c>false</c> 表示过滤掉此结果；<c>true</c> 表示保留。</returns>
     public delegate bool FindNearestFilterPost(FindNearestResult result);
 
     /// <summary>
-    /// Delegate for filtering distance query candidates before the exact shape distance test.
+    /// 用于在精确形状距离测试之前过滤距离查询候选的委托。
     /// </summary>
-    /// <param name="proxy">The proxy to evaluate.</param>
-    /// <returns><c>false</c> to skip this proxy; <c>true</c> to test it.</returns>
+    /// <param name="proxy">要评估的代理。</param>
+    /// <returns><c>false</c> 表示跳过此代理；<c>true</c> 表示对其进行测试。</returns>
     public delegate bool FindNearestFilterPre(IDynamicTreeProxy proxy);
 
     /// <summary>
-    /// Convenience overload of <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that queries with a <see cref="SupportPrimitives.Point"/>.
+    /// <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
+    /// 的便捷重载，使用 <see cref="SupportPrimitives.Point"/> 进行查询。
     /// </summary>
     public bool FindNearestPoint(in JVector position,
         FindNearestFilterPre? pre, FindNearestFilterPost? post,
@@ -62,8 +62,8 @@ public partial class DynamicTree
             out proxy, out pointA, out pointB, out normal, out distance);
 
     /// <summary>
-    /// Convenience overload of <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, Real, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that queries with a <see cref="SupportPrimitives.Point"/>.
+    /// <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, Real, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
+    /// 的便捷重载，使用 <see cref="SupportPrimitives.Point"/> 进行查询。
     /// </summary>
     public bool FindNearestPoint(in JVector position, Real maxDistance,
         FindNearestFilterPre? pre, FindNearestFilterPost? post,
@@ -72,18 +72,18 @@ public partial class DynamicTree
             out proxy, out pointA, out pointB, out normal, out distance);
 
     /// <summary>
-    /// Convenience overload of <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that queries with a <see cref="SupportPrimitives.Sphere"/>.
+    /// <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
+    /// 的便捷重载，使用 <see cref="SupportPrimitives.Sphere"/> 进行查询。
     /// </summary>
-    /// <param name="radius">The sphere radius.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The closest point on the query shape in world space.</param>
-    /// <param name="pointB">The closest point on the found proxy in world space.</param>
-    /// <param name="normal">Unit direction toward the found proxy, or zero for overlapping shapes.</param>
-    /// <param name="distance">The separation distance to the found proxy.</param>
+    /// <param name="radius">球体半径。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理，若未找到则为 null。</param>
+    /// <param name="pointA">查询形状在世界空间中的最近点。</param>
+    /// <param name="pointB">找到的代理在世界空间中的最近点。</param>
+    /// <param name="normal">指向找到的代理的单位方向，形状重叠时为零。</param>
+    /// <param name="distance">到找到的代理的分离距离。</param>
     public bool FindNearestSphere(Real radius, in JVector position,
         FindNearestFilterPre? pre, FindNearestFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real distance) =>
@@ -91,19 +91,19 @@ public partial class DynamicTree
             out proxy, out pointA, out pointB, out normal, out distance);
 
     /// <summary>
-    /// Convenience overload of <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, Real, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that queries with a <see cref="SupportPrimitives.Sphere"/>.
+    /// <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, Real, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
+    /// 的便捷重载，使用 <see cref="SupportPrimitives.Sphere"/> 进行查询。
     /// </summary>
-    /// <param name="radius">The sphere radius.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="maxDistance">The maximum separation distance to consider.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The closest point on the query shape in world space.</param>
-    /// <param name="pointB">The closest point on the found proxy in world space.</param>
-    /// <param name="normal">Unit direction toward the found proxy, or zero for overlapping shapes.</param>
-    /// <param name="distance">The separation distance to the found proxy.</param>
+    /// <param name="radius">球体半径。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="maxDistance">要考虑的最大分离距离。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理，若未找到则为 null。</param>
+    /// <param name="pointA">查询形状在世界空间中的最近点。</param>
+    /// <param name="pointB">找到的代理在世界空间中的最近点。</param>
+    /// <param name="normal">指向找到的代理的单位方向，形状重叠时为零。</param>
+    /// <param name="distance">到找到的代理的分离距离。</param>
     public bool FindNearestSphere(Real radius, in JVector position, Real maxDistance,
         FindNearestFilterPre? pre, FindNearestFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real distance) =>
@@ -124,26 +124,26 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Finds the closest <see cref="IDistanceTestable"/> proxy in the tree to the query shape
-    /// and returns the exact closest points.
+    /// 在树中查找距离查询形状最近的 <see cref="IDistanceTestable"/> 代理，
+    /// 并返回精确的最近点。
     /// </summary>
-    /// <param name="support">The query shape.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="pre">Optional pre-filter that can skip candidate proxies before the exact distance test.</param>
-    /// <param name="post">Optional post-filter that can reject exact results and continue the search.</param>
-    /// <param name="proxy">The nearest accepted proxy, or <c>null</c> if no proxy is found.</param>
-    /// <param name="pointA">Closest point on the query shape in world space. Undefined when the shapes overlap.</param>
-    /// <param name="pointB">Closest point on the found proxy in world space. Undefined when the shapes overlap.</param>
-    /// <param name="normal">Unit direction from the query shape toward the found proxy, or <see cref="JVector.Zero"/> when the shapes overlap.</param>
-    /// <param name="distance">Separation distance between the query shape and the found proxy. Zero when they overlap.</param>
+    /// <param name="support">查询形状。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="pre">可选的前置过滤器，可在精确距离测试前跳过候选代理。</param>
+    /// <param name="post">可选的后置过滤器，可拒绝精确结果并继续搜索。</param>
+    /// <param name="proxy">最近且被接受的代理，若未找到任何代理则为 <c>null</c>。</param>
+    /// <param name="pointA">查询形状在世界空间中的最近点。形状重叠时无定义。</param>
+    /// <param name="pointB">找到的代理在世界空间中的最近点。形状重叠时无定义。</param>
+    /// <param name="normal">从查询形状指向找到的代理的单位方向，形状重叠时为 <see cref="JVector.Zero"/>。</param>
+    /// <param name="distance">查询形状与找到的代理之间的分离距离。两者重叠时为零。</param>
     /// <returns>
-    /// <c>true</c> if an accepted proxy is found. This includes the overlapping case, where <paramref name="distance"/>
-    /// is zero. <c>false</c> if no accepted proxy is found, in which case <paramref name="proxy"/> is <c>null</c>.
+    /// 若找到被接受的代理则返回 <c>true</c>。这包括重叠的情况，此时 <paramref name="distance"/>
+    /// 为零。若未找到被接受的代理则返回 <c>false</c>，此时 <paramref name="proxy"/> 为 <c>null</c>。
     /// </returns>
     /// <remarks>
-    /// To skip overlapping proxies and continue searching for separated ones, use a <paramref name="post"/>
-    /// filter that returns <c>false</c> for results with <c>distance == 0</c>.
+    /// 若要跳过重叠的代理并继续搜索分离的代理，请使用对 <c>distance == 0</c>
+    /// 的结果返回 <c>false</c> 的 <paramref name="post"/> 过滤器。
     /// </remarks>
     public bool FindNearest<T>(in T support, in JQuaternion orientation, in JVector position,
         FindNearestFilterPre? pre, FindNearestFilterPost? post,
@@ -169,20 +169,20 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Bounded variant of <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that limits the search to <paramref name="maxDistance"/>.
+    /// <see cref="FindNearest{T}(in T, in JQuaternion, in JVector, FindNearestFilterPre?, FindNearestFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
+    /// 的限定范围变体，将搜索限制在 <paramref name="maxDistance"/> 以内。
     /// </summary>
-    /// <param name="support">The query shape.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="maxDistance">Maximum separation distance to consider. Proxies farther than this are ignored.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The closest point on the query shape in world space.</param>
-    /// <param name="pointB">The closest point on the found proxy in world space.</param>
-    /// <param name="normal">Unit direction toward the found proxy, or zero for overlapping shapes.</param>
-    /// <param name="distance">The separation distance to the found proxy.</param>
+    /// <param name="support">查询形状。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="maxDistance">要考虑的最大分离距离。距离超过此值的代理将被忽略。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理，若未找到则为 null。</param>
+    /// <param name="pointA">查询形状在世界空间中的最近点。</param>
+    /// <param name="pointB">找到的代理在世界空间中的最近点。</param>
+    /// <param name="normal">指向找到的代理的单位方向，形状重叠时为零。</param>
+    /// <param name="distance">到找到的代理的分离距离。</param>
     public bool FindNearest<T>(in T support, in JQuaternion orientation, in JVector position, Real maxDistance,
         FindNearestFilterPre? pre, FindNearestFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real distance)
@@ -206,9 +206,9 @@ public partial class DynamicTree
         return hit;
     }
 
-    // Returns the minimum distance between the query AABB and a tree node's expanded AABB.
-    // Uses the Minkowski sum: expand the target by the query half-extents, then measure
-    // point-to-AABB distance from the query center. Returns 0 if the AABBs overlap.
+    // 返回查询 AABB 与树节点扩展 AABB 之间的最小距离。
+    // 使用闵可夫斯基和：先将目标按查询的半尺寸扩展，再从查询中心测量
+    // 点到 AABB 的距离。若 AABB 重叠则返回 0。
     private static Real MinDistBox(in JVector queryExtents, in JVector queryCenter, in TreeBox targetBox)
     {
         Real dx = MathR.Max(MathR.Max(targetBox.Min.X - queryExtents.X - queryCenter.X, queryCenter.X - targetBox.Max.X - queryExtents.X), (Real)0.0);

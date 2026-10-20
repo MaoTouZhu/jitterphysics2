@@ -12,18 +12,18 @@ using Jitter2.LinearMath;
 namespace Jitter2.SoftBodies;
 
 /// <summary>
-/// A broad-phase filter that handles collisions involving soft body shapes.
-/// It delegates collision detection to the narrow phase and registers contacts with the
-/// closest rigid body vertices of the soft body.
+/// 一个宽相过滤器，用于处理涉及软体形状的碰撞。
+/// 它将碰撞检测委托给窄相，并将接触注册到软体
+/// 最接近的刚体顶点上。
 /// </summary>
 public class BroadPhaseCollisionFilter : IBroadPhaseFilter
 {
     private readonly World world;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BroadPhaseCollisionFilter"/> class.
+    /// 初始化 <see cref="BroadPhaseCollisionFilter"/> 类的新实例。
     /// </summary>
-    /// <param name="world">The world instance.</param>
+    /// <param name="world">世界实例。</param>
     public BroadPhaseCollisionFilter(World world)
     {
         this.world = world;

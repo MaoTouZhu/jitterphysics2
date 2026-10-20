@@ -10,10 +10,9 @@ using Jitter2.LinearMath;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Creates a rigid weld joint between two bodies using a <see cref="Constraints.FixedAngle"/> 
-/// constraint for orientation locking and a <see cref="BallSocket"/> constraint
-/// for positional locking. This effectively removes all relative motion between
-/// the connected bodies.
+/// 使用 <see cref="Constraints.FixedAngle"/> 约束锁定朝向、使用 <see cref="BallSocket"/> 约束
+/// 锁定位置，在两个刚体之间创建刚性焊接关节。这会有效消除相连刚体之间的
+/// 所有相对运动。
 /// </summary>
 public class WeldJoint : Joint
 {
@@ -24,11 +23,11 @@ public class WeldJoint : Joint
     public BallSocket BallSocket { get; }
 
     /// <summary>
-    /// Initializes a new weld joint.
+    /// 初始化新的焊接关节。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="center"/> contains a non-finite value, when either body does not belong
-    /// to <paramref name="world"/>, or when both body references are the same.
+    /// 当 <paramref name="center"/> 包含非有限值、任一刚体不属于 <paramref name="world"/>，
+    /// 或两个刚体引用相同时抛出。
     /// </exception>
     public WeldJoint(World world, RigidBody body1, RigidBody body2, JVector center)
     {

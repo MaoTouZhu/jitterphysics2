@@ -2,7 +2,7 @@ using JitterDemo.Renderer.OpenGL;
 
 namespace JitterDemo.Renderer;
 
-/// A screen-space textured quad, handy for overlaying shadow maps or UI previews.
+/// 一个屏幕空间纹理四边形，适合用于叠加显示阴影贴图或 UI 预览。
 public sealed class TexturedQuad
 {
     private readonly Vao vao;
@@ -17,8 +17,8 @@ public sealed class TexturedQuad
         Size = new Vector2(width, height);
 
         vao = new Vao();
-        // Bind the VAO up-front so the index-buffer upload below attaches its
-        // EBO to THIS VAO instead of clobbering whichever one was bound before.
+        // 预先绑定 VAO，这样下面上传索引缓冲区时会把它的
+        // EBO 附加到“这个”VAO 上，而不是覆盖此前绑定的那个。
         vao.Bind();
 
         var vbo = GpuBuffer.Vertex();

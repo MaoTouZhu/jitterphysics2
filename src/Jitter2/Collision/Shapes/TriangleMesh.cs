@@ -14,7 +14,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a triangle mesh defined by a collection of vertices and triangle indices.
+/// 表示由一组顶点和三角形索引定义的三角形网格。
 /// </summary>
 public class TriangleMesh
 {
@@ -52,14 +52,14 @@ public class TriangleMesh
         public override int GetHashCode() => HashCode.Combine(IndexA, IndexB);
     }
 
-    /// <summary>Indices, neighbors, and local-space normal of one mesh triangle.</summary>
+    /// <summary>网格中一个三角形的索引、邻居以及局部空间法线。</summary>
     public struct Triangle(int a, int b, int c)
     {
-        /// <summary>Indices of the triangle's vertices in <see cref="Vertices"/>.</summary>
+        /// <summary>三角形各顶点在 <see cref="Vertices"/> 中的索引。</summary>
         public readonly int IndexA = a, IndexB = b, IndexC = c;
-        /// <summary>Neighbor triangle indices opposite the corresponding vertices, or -1 at a boundary.</summary>
+        /// <summary>与对应顶点相对的邻居三角形索引，位于边界处时为 -1。</summary>
         public int NeighborA = -1, NeighborB = -1, NeighborC = -1;
-        /// <summary>The triangle normal in mesh-local coordinates.</summary>
+        /// <summary>三角形在网格局部坐标中的法线。</summary>
         public JVector Normal = default;
     }
 
@@ -67,22 +67,22 @@ public class TriangleMesh
     private readonly Triangle[] indices = null!;
 
     /// <summary>
-    /// Gets the vertices of the mesh.
+    /// 获取网格的顶点。
     /// </summary>
     public ReadOnlySpan<JVector> Vertices => vertices;
 
     /// <summary>
-    /// Gets the triangle indices of the mesh.
+    /// 获取网格的三角形索引。
     /// </summary>
     public ReadOnlySpan<Triangle> Indices => indices;
 
     /// <summary>
-    /// Creates a mesh from a "soup" of triangles. Vertices are automatically identified and deduplicated.
+    /// 从三角形“汤”创建网格。顶点会被自动识别并去重。
     /// </summary>
-    /// <param name="soup">The triangles used to build the mesh.</param>
-    /// <param name="ignoreDegenerated">If <see langword="true"/>, degenerate triangles are skipped.</param>
+    /// <param name="soup">用于构建网格的三角形。</param>
+    /// <param name="ignoreDegenerated">如果为 <see langword="true"/>，则跳过退化三角形。</param>
     /// <exception cref="DegenerateTriangleException">
-    /// Thrown when a degenerate triangle is found and <paramref name="ignoreDegenerated"/> is <see langword="false"/>.
+    /// 当发现退化三角形且 <paramref name="ignoreDegenerated"/> 为 <see langword="false"/> 时抛出。
     /// </exception>
     public TriangleMesh(ReadOnlySpan<JTriangle> soup, bool ignoreDegenerated = false)
     {
@@ -96,23 +96,22 @@ public class TriangleMesh
     }
 
     /// <summary>
-    /// Creates a mesh from existing vertices and indices.
+    /// 从现有顶点和索引创建网格。
     /// </summary>
-    /// <param name="vertices">The vertex buffer.</param>
-    /// <param name="indices">The index buffer (must be a multiple of 3).</param>
-    /// <param name="ignoreDegenerated">If <see langword="true"/>, degenerate triangles are skipped.</param>
+    /// <param name="vertices">顶点缓冲区。</param>
+    /// <param name="indices">索引缓冲区（长度必须是 3 的倍数）。</param>
+    /// <param name="ignoreDegenerated">如果为 <see langword="true"/>，则跳过退化三角形。</param>
     /// <remarks>
-    /// Vertices with exactly identical positions are canonicalized so adjacency detection also works
-    /// across duplicated seam vertices in indexed meshes.
+    /// 位置完全相同的顶点会被规范化，因此邻接检测在带索引的网格中也能跨重复的接缝顶点生效。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="indices"/> does not contain a multiple of three entries.
+    /// 当 <paramref name="indices"/> 的条目数不是三的倍数时抛出。
     /// </exception>
     /// <exception cref="IndexOutOfRangeException">
-    /// Thrown when an index references an element outside <paramref name="vertices"/>.
+    /// 当某个索引引用了 <paramref name="vertices"/> 之外的元素时抛出。
     /// </exception>
     /// <exception cref="DegenerateTriangleException">
-    /// Thrown when a degenerate triangle is found and <paramref name="ignoreDegenerated"/> is <see langword="false"/>.
+    /// 当发现退化三角形且 <paramref name="ignoreDegenerated"/> 为 <see langword="false"/> 时抛出。
     /// </exception>
     public TriangleMesh(ReadOnlySpan<JVector> vertices, ReadOnlySpan<int> indices, bool ignoreDegenerated = false)
     {
@@ -122,7 +121,7 @@ public class TriangleMesh
     /// <inheritdoc cref="TriangleMesh(ReadOnlySpan{JVector}, ReadOnlySpan{int}, bool)"/>
     public TriangleMesh(ReadOnlySpan<JVector> vertices, ReadOnlySpan<ushort> indices, bool ignoreDegenerated = false)
     {
-        // Convert ushort indices to int on the fly
+        // 将 ushort 索引即时转换为 int
         int[] intIndices = new int[indices.Length];
         for (int i = 0; i < indices.Length; i++) intIndices[i] = indices[i];
 
@@ -139,23 +138,23 @@ public class TriangleMesh
     }
 
     /// <summary>
-    /// Creates a mesh from custom vertices (e.g. System.Numerics.Vector3) and indices.
+    /// 从自定义顶点类型（例如 System.Numerics.Vector3）和索引创建网格。
     /// </summary>
-    /// <typeparam name="TVertex">The unmanaged vertex type. It must have the same size as <see cref="JVector"/>.</typeparam>
-    /// <param name="vertices">The vertex buffer.</param>
-    /// <param name="indices">The index buffer (must be a multiple of 3).</param>
-    /// <param name="ignoreDegenerated">If <see langword="true"/>, degenerate triangles are skipped.</param>
+    /// <typeparam name="TVertex">非托管顶点类型，其大小必须与 <see cref="JVector"/> 相同。</typeparam>
+    /// <param name="vertices">顶点缓冲区。</param>
+    /// <param name="indices">索引缓冲区（长度必须是 3 的倍数）。</param>
+    /// <param name="ignoreDegenerated">如果为 <see langword="true"/>，则跳过退化三角形。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <typeparamref name="TVertex"/> does not have the same size as <see cref="JVector"/>.
+    /// 当 <typeparamref name="TVertex"/> 的大小与 <see cref="JVector"/> 不同时抛出。
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="indices"/> does not contain a multiple of three entries.
+    /// 当 <paramref name="indices"/> 的条目数不是三的倍数时抛出。
     /// </exception>
     /// <exception cref="IndexOutOfRangeException">
-    /// Thrown when an index references an element outside <paramref name="vertices"/>.
+    /// 当某个索引引用了 <paramref name="vertices"/> 之外的元素时抛出。
     /// </exception>
     /// <exception cref="DegenerateTriangleException">
-    /// Thrown when a degenerate triangle is found and <paramref name="ignoreDegenerated"/> is <see langword="false"/>.
+    /// 当发现退化三角形且 <paramref name="ignoreDegenerated"/> 为 <see langword="false"/> 时抛出。
     /// </exception>
     public static TriangleMesh Create<TVertex>(ReadOnlySpan<TVertex> vertices, ReadOnlySpan<int> indices,
         bool ignoreDegenerated = false) where TVertex : unmanaged
@@ -177,7 +176,7 @@ public class TriangleMesh
         return new TriangleMesh(CastVertices(vertices, nameof(vertices)), indices, ignoreDegenerated);
     }
 
-    // Helper to keep the casting logic in one place
+    // 辅助方法：将类型转换逻辑集中在一处
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ReadOnlySpan<JVector> CastVertices<TVertex>(ReadOnlySpan<TVertex> vertices, string paramName)
         where TVertex : unmanaged
@@ -198,7 +197,7 @@ public class TriangleMesh
         var vertexList = new List<JVector>(maxVertexCount);
         var triangleList = new List<Triangle>(triangles.Length);
 
-        // Helper to deduplicate vertices
+        // 辅助方法：对顶点去重
         int GetOrAddVertex(JVector v)
         {
             if (!vertexMap.TryGetValue(v, out int index))
@@ -220,7 +219,7 @@ public class TriangleMesh
                 throw new DegenerateTriangleException(tri);
             }
 
-            // Deduplicate
+            // 去重
             int a = GetOrAddVertex(tri.V0);
             int b = GetOrAddVertex(tri.V1);
             int c = GetOrAddVertex(tri.V2);
@@ -268,7 +267,7 @@ public class TriangleMesh
             int inputI1 = indices[i + 1];
             int inputI2 = indices[i + 2];
 
-            // Safety check for bounds
+            // 边界安全检查
             if ((uint)inputI0 >= vertices.Length || (uint)inputI1 >= vertices.Length || (uint)inputI2 >= vertices.Length)
                 throw new IndexOutOfRangeException($"Indices {inputI0},{inputI1},{inputI2} out of bounds.");
 

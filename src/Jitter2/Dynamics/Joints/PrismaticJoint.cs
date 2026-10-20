@@ -10,9 +10,8 @@ using Jitter2.LinearMath;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constructs a prismatic joint using a <see cref="PointOnLine"/> constraint, either a
-/// <see cref="FixedAngle"/> or <see cref="HingeAngle"/> constraint, and an optional
-/// <see cref="LinearMotor"/> or <see cref="LinearAxisServo"/> drive.
+/// 使用一个 <see cref="PointOnLine"/> 约束、一个 <see cref="FixedAngle"/> 或 <see cref="HingeAngle"/> 约束，
+/// 以及一个可选的 <see cref="LinearMotor"/> 或 <see cref="LinearAxisServo"/> 驱动来构造移动关节。
 /// </summary>
 public class PrismaticJoint : Joint
 {
@@ -75,21 +74,20 @@ public class PrismaticJoint : Joint
     }
 
     /// <summary>
-    /// Initializes a new prismatic joint.
+    /// 初始化一个新的移动关节。
     /// </summary>
-    /// <param name="world">The world containing both bodies.</param>
-    /// <param name="body1">The first body.</param>
-    /// <param name="body2">The second body.</param>
-    /// <param name="center">The joint center in world space.</param>
-    /// <param name="axis">The sliding axis in world space.</param>
-    /// <param name="limit">Allowed displacement along the sliding axis.</param>
-    /// <param name="pinned">If true, lock relative rotation with <see cref="FixedAngle"/>; otherwise constrain it with <see cref="HingeAngle"/>.</param>
-    /// <param name="drive">The optional drive. Motor and servo force default to zero.</param>
-    /// <exception cref="ArgumentOutOfRangeException">The drive selection is invalid.</exception>
+    /// <param name="world">包含两个刚体的世界。</param>
+    /// <param name="body1">第一个刚体。</param>
+    /// <param name="body2">第二个刚体。</param>
+    /// <param name="center">世界空间中的关节中心。</param>
+    /// <param name="axis">世界空间中的滑动轴。</param>
+    /// <param name="limit">沿滑动轴允许的位移。</param>
+    /// <param name="pinned">若为 true，则用 <see cref="FixedAngle"/> 锁定相对旋转；否则用 <see cref="HingeAngle"/> 约束它。</param>
+    /// <param name="drive">可选的驱动。马达和伺服的作用力默认为零。</param>
+    /// <exception cref="ArgumentOutOfRangeException">驱动选择无效。</exception>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="center"/> contains a non-finite value, when <paramref name="axis"/> is zero
-    /// or contains a non-finite value, when either limit value is NaN, when either body does not belong to
-    /// <paramref name="world"/>, or when both body references are the same.
+    /// 当 <paramref name="center"/> 包含非有限值时，当 <paramref name="axis"/> 为零或包含非有限值时，
+    /// 当任一限位值为 NaN 时，当任一刚体不属于 <paramref name="world"/> 时，或当两个刚体引用相同时抛出。
     /// </exception>
     public PrismaticJoint(World world, RigidBody body1, RigidBody body2, JVector center, JVector axis, LinearLimit limit,
         JointDrive drive, bool pinned = true)

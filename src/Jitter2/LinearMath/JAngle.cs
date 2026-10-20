@@ -10,20 +10,20 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// A floating point variable of type <see cref="Real"/> representing an angle. This structure exists to eliminate
-/// ambiguity between radians and degrees in the Jitter API.
+/// 一个表示角度的 <see cref="Real"/> 类型浮点变量。此结构的存在是为了消除
+/// Jitter API 中弧度与角度之间的歧义。
 /// </summary>
 [StructLayout(LayoutKind.Explicit, Size = 1 * sizeof(Real))]
 public struct JAngle : IEquatable<JAngle>
 {
     /// <summary>
-    /// Gets or sets the angle value in radians.
+    /// 获取或设置以弧度为单位的角度值。
     /// </summary>
     [field: FieldOffset(0 * sizeof(Real))]
     public Real Radian { get; set; }
 
     /// <summary>
-    /// Returns a string representation of the <see cref="JAngle"/>.
+    /// 返回 <see cref="JAngle"/> 的字符串表示。
     /// </summary>
     public readonly override string ToString()
     {
@@ -46,7 +46,7 @@ public struct JAngle : IEquatable<JAngle>
     }
 
     /// <summary>
-    /// Gets or sets the angle value in degrees.
+    /// 获取或设置以度为单位的角度值。
     /// </summary>
     public Real Degree
     {
@@ -55,7 +55,7 @@ public struct JAngle : IEquatable<JAngle>
     }
 
     /// <summary>
-    /// Creates a <see cref="JAngle"/> from a value in radians.
+    /// 从以弧度表示的值创建 <see cref="JAngle"/>。
     /// </summary>
     public static JAngle FromRadian(Real rad)
     {
@@ -63,7 +63,7 @@ public struct JAngle : IEquatable<JAngle>
     }
 
     /// <summary>
-    /// Creates a <see cref="JAngle"/> from a value in degrees.
+    /// 从以度表示的值创建 <see cref="JAngle"/>。
     /// </summary>
     public static JAngle FromDegree(Real deg)
     {

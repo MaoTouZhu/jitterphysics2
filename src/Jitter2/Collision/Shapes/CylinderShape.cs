@@ -10,7 +10,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a cylinder shape defined by a height and radius.
+/// 表示由高度和半径定义的圆柱形状。
 /// </summary>
 public class CylinderShape : RigidBodyShape
 {
@@ -24,10 +24,10 @@ public class CylinderShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the radius of the cylinder.
+    /// 获取或设置圆柱的半径。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is less than or equal to zero.
+    /// 当 <paramref name="value"/> 小于或等于零时抛出。
     /// </exception>
     public Real Radius
     {
@@ -40,10 +40,10 @@ public class CylinderShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the height of the cylinder.
+    /// 获取或设置圆柱的高度。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is less than or equal to zero.
+    /// 当 <paramref name="value"/> 小于或等于零时抛出。
     /// </exception>
     public Real Height
     {
@@ -56,13 +56,13 @@ public class CylinderShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CylinderShape"/> class, creating a cylinder shape with the specified
-    /// height and radius. The symmetry axis of the cylinder is aligned along the y-axis.
+    /// 初始化 <see cref="CylinderShape"/> 类的新实例，创建一个具有指定
+    /// 高度和半径的圆柱形状。圆柱的对称轴沿 y 轴对齐。
     /// </summary>
-    /// <param name="height">The height of the cylinder.</param>
-    /// <param name="radius">The radius of the cylinder at its base.</param>
+    /// <param name="height">圆柱的高度。</param>
+    /// <param name="radius">圆柱底面的半径。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="height"/> or <paramref name="radius"/> is less than or equal to zero.
+    /// 当 <paramref name="height"/> 或 <paramref name="radius"/> 小于或等于零时抛出。
     /// </exception>
     public CylinderShape(Real height, Real radius)
     {

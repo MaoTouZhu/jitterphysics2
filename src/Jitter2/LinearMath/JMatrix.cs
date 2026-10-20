@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Represents a 3x3 matrix with components of type <see cref="Real"/>.
+/// 表示一个分量为 <see cref="Real"/> 类型的 3x3 矩阵。
 /// </summary>
 [StructLayout(LayoutKind.Explicit, Size = 9 * sizeof(Real))]
 public struct JMatrix(
@@ -30,12 +30,12 @@ public struct JMatrix(
     [FieldOffset(8 * sizeof(Real))] public Real M33 = m33;
 
     /// <summary>
-    /// The identity matrix.
+    /// 单位矩阵。
     /// </summary>
     public static readonly JMatrix Identity;
 
     /// <summary>
-    /// The zero matrix.
+    /// 零矩阵。
     /// </summary>
     public static readonly JMatrix Zero;
 
@@ -52,11 +52,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a matrix from three column vectors.
+    /// 由三个列向量创建矩阵。
     /// </summary>
-    /// <param name="col1">The first column vector.</param>
-    /// <param name="col2">The second column vector.</param>
-    /// <param name="col3">The third column vector.</param>
+    /// <param name="col1">第一个列向量。</param>
+    /// <param name="col2">第二个列向量。</param>
+    /// <param name="col3">第三个列向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix FromColumns(in JVector col1, in JVector col2, in JVector col3)
     {
@@ -68,9 +68,9 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Gets a reference to a column vector by index using unsafe pointer arithmetic.
+    /// 使用不安全指针运算按索引获取列向量的引用。
     /// </summary>
-    /// <param name="index">The zero-based index of the column (0, 1, or 2).</param>
+    /// <param name="index">列的从零开始的索引（0、1 或 2）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe ref JVector UnsafeGet(int index)
     {
@@ -79,9 +79,9 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Gets a column vector by index.
+    /// 按索引获取列向量。
     /// </summary>
-    /// <param name="index">The zero-based index of the column (0, 1, or 2).</param>
+    /// <param name="index">列的从零开始的索引（0、1 或 2）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe JVector GetColumn(int index)
     {
@@ -93,11 +93,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Multiplies two matrices.
+    /// 将两个矩阵相乘。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <returns>The product of the two matrices.</returns>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <returns>两个矩阵的乘积。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix Multiply(in JMatrix matrix1, in JMatrix matrix2)
     {
@@ -106,11 +106,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Calculates <c>matrix1 * transpose(matrix2)</c>.
+    /// 计算 <c>matrix1 * transpose(matrix2)</c>。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix (which will be transposed during multiplication).</param>
-    /// <returns>The result of the multiplication.</returns>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵（在相乘过程中会被转置）。</param>
+    /// <returns>相乘的结果。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix MultiplyTransposed(in JMatrix matrix1, in JMatrix matrix2)
     {
@@ -119,11 +119,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Calculates <c>transpose(matrix1) * matrix2</c>.
+    /// 计算 <c>transpose(matrix1) * matrix2</c>。
     /// </summary>
-    /// <param name="matrix1">The first matrix (which will be transposed during multiplication).</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <returns>The result of the multiplication.</returns>
+    /// <param name="matrix1">第一个矩阵（在相乘过程中会被转置）。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <returns>相乘的结果。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix TransposedMultiply(in JMatrix matrix1, in JMatrix matrix2)
     {
@@ -132,11 +132,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a rotation matrix from an axis and an angle.
+    /// 根据轴和角度创建旋转矩阵。
     /// </summary>
-    /// <param name="axis">The unit-length axis to rotate around.</param>
-    /// <param name="angle">The angle of rotation in radians.</param>
-    /// <returns>The rotation matrix.</returns>
+    /// <param name="axis">旋转所围绕的单位长度轴。</param>
+    /// <param name="angle">以弧度表示的旋转角度。</param>
+    /// <returns>旋转矩阵。</returns>
     public static JMatrix CreateRotationMatrix(JVector axis, Real angle)
     {
         (Real s, Real c) = StableMath.SinCos(angle / (Real)2.0);
@@ -147,11 +147,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Multiplies two matrices.
+    /// 将两个矩阵相乘。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <param name="result">Output: The product of the two matrices.</param>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <param name="result">输出：两个矩阵的乘积。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Multiply(in JMatrix matrix1, in JMatrix matrix2, out JMatrix result)
     {
@@ -177,11 +177,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Adds two matrices.
+    /// 将两个矩阵相加。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <returns>The sum of the two matrices.</returns>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <returns>两个矩阵之和。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix Add(JMatrix matrix1, JMatrix matrix2)
     {
@@ -190,11 +190,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Calculates <c>matrix1 * matrix2ᵀ</c> (multiplying matrix1 by the transpose of matrix2).
+    /// 计算 <c>matrix1 * matrix2ᵀ</c>（用 matrix1 乘以 matrix2 的转置）。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix (transposed during operation).</param>
-    /// <param name="result">Output: The result of the multiplication.</param>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵（运算过程中会被转置）。</param>
+    /// <param name="result">输出：相乘的结果。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void MultiplyTransposed(in JMatrix matrix1, in JMatrix matrix2, out JMatrix result)
     {
@@ -220,10 +220,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a rotation matrix around the X-axis.
+    /// 创建绕 X 轴旋转的旋转矩阵。
     /// </summary>
-    /// <param name="radians">The angle of rotation in radians.</param>
-    /// <returns>The rotation matrix.</returns>
+    /// <param name="radians">以弧度表示的旋转角度。</param>
+    /// <returns>旋转矩阵。</returns>
     public static JMatrix CreateRotationX(Real radians)
     {
         JMatrix result = Identity;
@@ -242,10 +242,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a rotation matrix around the Y-axis.
+    /// 创建绕 Y 轴旋转的旋转矩阵。
     /// </summary>
-    /// <param name="radians">The angle of rotation in radians.</param>
-    /// <returns>The rotation matrix.</returns>
+    /// <param name="radians">以弧度表示的旋转角度。</param>
+    /// <returns>旋转矩阵。</returns>
     public static JMatrix CreateRotationY(Real radians)
     {
         JMatrix result = Identity;
@@ -264,10 +264,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a rotation matrix around the Z-axis.
+    /// 创建绕 Z 轴旋转的旋转矩阵。
     /// </summary>
-    /// <param name="radians">The angle of rotation in radians.</param>
-    /// <returns>The rotation matrix.</returns>
+    /// <param name="radians">以弧度表示的旋转角度。</param>
+    /// <returns>旋转矩阵。</returns>
     public static JMatrix CreateRotationZ(Real radians)
     {
         JMatrix result = Identity;
@@ -286,10 +286,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a scaling matrix.
+    /// 创建缩放矩阵。
     /// </summary>
-    /// <param name="scale">The scaling vector.</param>
-    /// <returns>The scaling matrix.</returns>
+    /// <param name="scale">缩放向量。</param>
+    /// <returns>缩放矩阵。</returns>
     public static JMatrix CreateScale(in JVector scale)
     {
         JMatrix result = Zero;
@@ -302,23 +302,23 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a scaling matrix.
+    /// 创建缩放矩阵。
     /// </summary>
-    /// <param name="x">Scaling factor on the X-axis.</param>
-    /// <param name="y">Scaling factor on the Y-axis.</param>
-    /// <param name="z">Scaling factor on the Z-axis.</param>
-    /// <returns>The scaling matrix.</returns>
+    /// <param name="x">X 轴上的缩放因子。</param>
+    /// <param name="y">Y 轴上的缩放因子。</param>
+    /// <param name="z">Z 轴上的缩放因子。</param>
+    /// <returns>缩放矩阵。</returns>
     public static JMatrix CreateScale(Real x, Real y, Real z)
     {
         return CreateScale(new JVector(x, y, z));
     }
 
     /// <summary>
-    /// Calculates <c>matrix1ᵀ * matrix2</c> (multiplying the transpose of matrix1 by matrix2).
+    /// 计算 <c>matrix1ᵀ * matrix2</c>（用 matrix1 的转置乘以 matrix2）。
     /// </summary>
-    /// <param name="matrix1">The first matrix (transposed during operation).</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <param name="result">Output: The result of the multiplication.</param>
+    /// <param name="matrix1">第一个矩阵（运算过程中会被转置）。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <param name="result">输出：相乘的结果。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void TransposedMultiply(in JMatrix matrix1, in JMatrix matrix2, out JMatrix result)
     {
@@ -344,11 +344,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Adds two matrices component-wise.
+    /// 按分量将两个矩阵相加。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <param name="result">Output: The sum of the two matrices.</param>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <param name="result">输出：两个矩阵之和。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Add(in JMatrix matrix1, in JMatrix matrix2, out JMatrix result)
     {
@@ -364,11 +364,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Subtracts the second matrix from the first component-wise.
+    /// 按分量从第一个矩阵中减去第二个矩阵。
     /// </summary>
-    /// <param name="matrix1">The first matrix.</param>
-    /// <param name="matrix2">The second matrix.</param>
-    /// <param name="result">Output: The difference of the two matrices.</param>
+    /// <param name="matrix1">第一个矩阵。</param>
+    /// <param name="matrix2">第二个矩阵。</param>
+    /// <param name="result">输出：两个矩阵之差。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Subtract(in JMatrix matrix1, in JMatrix matrix2, out JMatrix result)
     {
@@ -384,9 +384,9 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Calculates the determinant of the matrix.
+    /// 计算矩阵的行列式。
     /// </summary>
-    /// <returns>The determinant.</returns>
+    /// <returns>行列式。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real Determinant()
     {
@@ -395,11 +395,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Calculates the inverse of the matrix.
+    /// 计算矩阵的逆矩阵。
     /// </summary>
-    /// <param name="matrix">The matrix to invert.</param>
-    /// <param name="result">Output: The inverted matrix, or zero if a finite inverse cannot be computed.</param>
-    /// <returns><c>true</c> if the matrix can be inverted; otherwise, <c>false</c>.</returns>
+    /// <param name="matrix">要求逆的矩阵。</param>
+    /// <param name="result">输出：逆矩阵；若无法计算有限逆矩阵则为零矩阵。</param>
+    /// <returns>若矩阵可逆则为 <c>true</c>；否则为 <c>false</c>。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Inverse(in JMatrix matrix, out JMatrix result)
     {
@@ -409,8 +409,8 @@ public struct JMatrix(
             return true;
         }
 
-        // Uniformly tiny or large matrices can overflow the determinant even when
-        // their inverse is representable. Keep the ordinary path for common scales.
+        // 整体过小或过大的矩阵即使在逆矩阵可表示时也可能使行列式溢出。
+        // 对常见量级保留常规路径。
         Real scale = MathR.Max(MathR.Abs(matrix.M11), MathR.Max(MathR.Abs(matrix.M12), MathR.Abs(matrix.M13)));
         scale = MathR.Max(scale, MathR.Max(MathR.Abs(matrix.M21), MathR.Max(MathR.Abs(matrix.M22), MathR.Abs(matrix.M23))));
         scale = MathR.Max(scale, MathR.Max(MathR.Abs(matrix.M31), MathR.Max(MathR.Abs(matrix.M32), MathR.Abs(matrix.M33))));
@@ -481,11 +481,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Multiplies a matrix by a scalar factor.
+    /// 将矩阵乘以标量因子。
     /// </summary>
-    /// <param name="matrix1">The matrix.</param>
-    /// <param name="scaleFactor">The scalar factor.</param>
-    /// <returns>The scaled matrix.</returns>
+    /// <param name="matrix1">矩阵。</param>
+    /// <param name="scaleFactor">标量因子。</param>
+    /// <returns>缩放后的矩阵。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix Multiply(JMatrix matrix1, Real scaleFactor)
     {
@@ -494,11 +494,11 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Multiplies a matrix by a scalar factor.
+    /// 将矩阵乘以标量因子。
     /// </summary>
-    /// <param name="matrix1">The matrix.</param>
-    /// <param name="scaleFactor">The scalar factor.</param>
-    /// <param name="result">Output: The scaled matrix.</param>
+    /// <param name="matrix1">矩阵。</param>
+    /// <param name="scaleFactor">标量因子。</param>
+    /// <param name="result">输出：缩放后的矩阵。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Multiply(in JMatrix matrix1, Real scaleFactor, out JMatrix result)
     {
@@ -514,10 +514,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a rotation matrix from a quaternion.
+    /// 根据四元数创建旋转矩阵。
     /// </summary>
-    /// <param name="quaternion">The unit quaternion representing the rotation.</param>
-    /// <returns>The rotation matrix.</returns>
+    /// <param name="quaternion">表示旋转的单位四元数。</param>
+    /// <returns>旋转矩阵。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix CreateFromQuaternion(JQuaternion quaternion)
     {
@@ -526,10 +526,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a matrix where each component is the absolute value of the input matrix component.
+    /// 创建一个矩阵，其每个分量均为输入矩阵对应分量的绝对值。
     /// </summary>
-    /// <param name="matrix">The input matrix.</param>
-    /// <param name="result">Output: The absolute matrix.</param>
+    /// <param name="matrix">输入矩阵。</param>
+    /// <param name="result">输出：绝对值矩阵。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Absolute(in JMatrix matrix, out JMatrix result)
     {
@@ -545,10 +545,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a rotation matrix from a quaternion.
+    /// 根据四元数创建旋转矩阵。
     /// </summary>
-    /// <param name="quaternion">The unit quaternion representing the rotation.</param>
-    /// <param name="result">Output: The rotation matrix.</param>
+    /// <param name="quaternion">表示旋转的单位四元数。</param>
+    /// <param name="result">输出：旋转矩阵。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void CreateFromQuaternion(in JQuaternion quaternion, out JMatrix result)
     {
@@ -569,10 +569,10 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Transposes a matrix.
+    /// 转置矩阵。
     /// </summary>
-    /// <param name="matrix">The matrix to transpose.</param>
-    /// <returns>The transposed matrix.</returns>
+    /// <param name="matrix">要转置的矩阵。</param>
+    /// <returns>转置后的矩阵。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix Transpose(in JMatrix matrix)
     {
@@ -581,18 +581,18 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Creates a skew-symmetric matrix from a vector, representing the cross product operation.
+    /// 根据向量创建反对称矩阵，表示叉积运算。
     /// </summary>
     /// <remarks>
-    /// Result is equivalent to:
+    /// 结果等价于：
     /// <code>
     /// [  0  -z   y ]
     /// [  z   0  -x ]
     /// [ -y   x   0 ]
     /// </code>
     /// </remarks>
-    /// <param name="vec">The vector.</param>
-    /// <returns>The skew-symmetric matrix.</returns>
+    /// <param name="vec">向量。</param>
+    /// <returns>反对称矩阵。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix CreateCrossProduct(in JVector vec)
     {
@@ -614,7 +614,7 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Multiplies two matrices.
+    /// 将两个矩阵相乘。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix operator *(in JMatrix matrix1, in JMatrix matrix2)
@@ -633,9 +633,9 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Calculates the trace (sum of diagonal elements) of the matrix.
+    /// 计算矩阵的迹（对角线元素之和）。
     /// </summary>
-    /// <returns>The trace of the matrix.</returns>
+    /// <returns>矩阵的迹。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real Trace()
     {
@@ -643,7 +643,7 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Scales a matrix by a factor.
+    /// 按因子缩放矩阵。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix operator *(Real factor, in JMatrix matrix)
@@ -653,7 +653,7 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Scales a matrix by a factor.
+    /// 按因子缩放矩阵。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix operator *(in JMatrix matrix, Real factor)
@@ -663,7 +663,7 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Adds two matrices.
+    /// 将两个矩阵相加。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix operator +(in JMatrix value1, in JMatrix value2)
@@ -673,7 +673,7 @@ public struct JMatrix(
     }
 
     /// <summary>
-    /// Subtracts the second matrix from the first.
+    /// 从第一个矩阵中减去第二个矩阵。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix operator -(in JMatrix value1, in JMatrix value2)

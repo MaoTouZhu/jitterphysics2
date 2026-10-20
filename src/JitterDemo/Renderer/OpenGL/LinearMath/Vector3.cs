@@ -120,7 +120,7 @@ public struct Vector3
 
     public static Vector3 Transform(in Vector3 position, in Matrix4 matrix)
     {
-        // equivalent to matrix * (position, 1) = (result, *)
+        // 等价于 matrix * (position, 1) = (result, *)
         return new Vector3(
             position.X * matrix.M11 + position.Y * matrix.M12 + position.Z * matrix.M13 + matrix.M14,
             position.X * matrix.M21 + position.Y * matrix.M22 + position.Z * matrix.M23 + matrix.M24,

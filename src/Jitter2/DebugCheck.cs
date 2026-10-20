@@ -10,12 +10,12 @@ using Jitter2.LinearMath;
 namespace Jitter2;
 
 /// <summary>
-/// Runs additional input sanity checks in Debug builds.
+/// 在 Debug 构建中运行额外的输入健全性检查。
 /// </summary>
 /// <remarks>
-/// Calls to this helper are compiled only when the <c>DEBUG</c> symbol is defined. It is used for
-/// runtime state mutation paths where invalid values should be caught during development without
-/// adding Release-build overhead.
+/// 仅当定义了 <c>DEBUG</c> 符号时，才会编译对此辅助类的调用。它用于
+/// 运行时状态变更路径，这些路径中的无效值应在开发期间被捕获，而不会
+/// 增加 Release 构建的开销。
 /// </remarks>
 internal static class DebugCheck
 {

@@ -63,7 +63,7 @@ public static class Rlights
 
     public static void UpdateLightValues(Shader shader, Light light)
     {
-        // Send to shader light enabled state and type
+        // 将光源的启用状态和类型发送到着色器
         Raylib.SetShaderValue(
             shader,
             light.EnabledLoc,
@@ -72,13 +72,13 @@ public static class Rlights
         );
         Raylib.SetShaderValue(shader, light.TypeLoc, (int)light.Type, ShaderUniformDataType.Int);
 
-        // Send to shader light target position values
+        // 将光源的位置值发送到着色器
         Raylib.SetShaderValue(shader, light.PosLoc, light.Position, ShaderUniformDataType.Vec3);
 
-        // Send to shader light target position values
+        // 将光源的目标位置值发送到着色器
         Raylib.SetShaderValue(shader, light.TargetLoc, light.Target, ShaderUniformDataType.Vec3);
 
-        // Send to shader light color values
+        // 将光源的颜色值发送到着色器
         colors[0] = (float)light.Color.R / 255.0f;
         colors[1] = (float)light.Color.G / 255.0f;
         colors[2] = (float)light.Color.B / 255.0f;

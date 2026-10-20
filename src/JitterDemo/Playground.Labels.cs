@@ -12,7 +12,7 @@ public partial class Playground
     private readonly record struct WorldLabel(JVector Position, string Title, string Description);
     private readonly List<WorldLabel> worldLabels = [];
 
-    /// <summary>Queues a world-anchored, noninteractive label for this frame's Vellum overlay.</summary>
+    /// <summary>为本帧的 Vellum 覆盖层排队一个锚定在世界坐标、不可交互的标签。</summary>
     public void DrawWorldLabel(JVector position, string title, string description) =>
         worldLabels.Add(new WorldLabel(position, title, description));
 
@@ -34,8 +34,8 @@ public partial class Playground
             foreach (WorldLabel label in worldLabels)
             {
                 Vector4 clip = viewProjection * new Vector4(Conversion.FromJitter(label.Position), 1);
-                // The camera uses a zero-to-one depth projection. Cull instead of clamping
-                // offscreen anchors, which would stack unrelated labels along the window edge.
+                // 相机使用零到一的深度投影。对于屏幕外的锚点直接剔除，而不是钳制，
+                // 否则无关的标签会堆叠在窗口边缘。
                 if (!(clip.W > 0) || !float.IsFinite(clip.W) || clip.Z < 0 || clip.Z > clip.W ||
                     MathF.Abs(clip.X) > clip.W || MathF.Abs(clip.Y) > clip.W) continue;
 
@@ -51,10 +51,9 @@ public partial class Playground
                 if (left < margin || left + cardWidth > logicalWidth - margin) continue;
                 float x = left - canvas.X;
                 float y = screenY - cardHeight - 10 - canvas.Y;
-                // Keep the attachment visible: a label above the viewport is simply hidden.
+                // 保证附着点可见：位于视口上方的标签直接隐藏。
                 if (y < 0 || y + cardHeight > canvas.Height) continue;
-                // Keep labels out of the translucent statistics window, where the two
-                // text layers would otherwise be visible on top of each other.
+                // 让标签避开半透明的统计窗口，否则两层文字会重叠显示在一起。
                 float statsWidth = statsWindowState.Size.X > 0 ? statsWindowState.Size.X : 260;
                 float statsHeight = statsWindowState.Collapsed ? 30 : statsWindowState.Size.Y;
                 if (statsWindowState.Open && left < statsWindowState.Position.X + statsWidth &&

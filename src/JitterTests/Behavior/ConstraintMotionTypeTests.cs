@@ -40,7 +40,7 @@ public class ConstraintMotionTypeTests
             int previousPrepareCount = constraint.Data.PrepareCount;
             int previousIterateCount = constraint.Data.IterateCount;
 
-            // Several steps let static bodies leave the active body partition.
+            // 经过若干步后，静态刚体会离开活动刚体分区。
             for (int i = 0; i < 10; i++) world.Step(Dt, multiThread);
 
             Assert.That(constraint.IsValid, Is.True);
@@ -127,7 +127,7 @@ public class ConstraintMotionTypeTests
         Assert.That(constraint.Data.PrepareCount, Is.Zero);
         Assert.That(constraint.Data.IterateCount, Is.Zero);
 
-        // Already-awake bodies must restore the constraint immediately.
+        // 已经处于唤醒状态的刚体必须立即恢复该约束。
         bodyB.MotionType = MotionType.Dynamic;
         AssertBufferCounts(world, small, 1, 0);
         world.Step(Dt, multiThread);

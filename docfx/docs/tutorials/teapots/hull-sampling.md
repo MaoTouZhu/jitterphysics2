@@ -1,23 +1,23 @@
-# Hull Sampling
+# 凸包采样
 
-The teapot is a concave shape, which we will approximate using its convex hull ([Wikipedia](https://en.wikipedia.org/wiki/Convex_hull)).
-As a first step, we will reduce the number of vertices used to construct the convex hull.
+茶壶是一个凹形状，我们将用它的凸包来近似（[Wikipedia](https://en.wikipedia.org/wiki/Convex_hull)）。
+第一步，我们将减少用于构造凸包的顶点数量。
 
 > [!NOTE]
-> **Sampling**
+> **采样**
 >
-> We could work with the entire set of vertices, but this comes with two main disadvantages:
+> 我们当然可以使用完整的顶点集合，但这会带来两个主要缺点：
 >
-> 1. The set may include vertices that lie inside the hull. While these do not affect the simulation outcome, they are still briefly considered during collision detection in each frame.
+> 1. 集合中可能包含位于凸包内部的顶点。虽然它们不影响模拟结果，但在每一帧的碰撞检测中仍会被短暂考虑。
 >
-> 2. We typically don't need an exact convex hull. Omitting a few vertices often has little effect on accuracy while significantly improving performance.
+> 2. 我们通常不需要精确的凸包。省略少量顶点往往对精度影响很小，却能显著提升性能。
 >
-> Reducing the number of vertices can help speed up the simulation without sacrificing collision fidelity.
+> 减少顶点数量有助于在不牺牲碰撞保真度的前提下加快模拟速度。
 
-Jitter provides a built-in method to simplify the vertex set: `ShapeHelper.SampleHull`.
-This function samples directions uniformly across the unit sphere and returns the vertices that are furthest away in those directions. These vertices, by definition, lie on the convex hull of the original shape.
+Jitter 提供了内置方法来简化顶点集合：`ShapeHelper.SampleHull`。
+该函数在单位球面上均匀采样方向，并返回这些方向上最远的顶点。根据定义，这些顶点位于原始形状的凸包上。
 
-Replace the content of `Program.cs` with the following code:
+将 `Program.cs` 的内容替换为以下代码：
 
 ```cs
 using System.Numerics;
@@ -26,16 +26,16 @@ using Jitter2.LinearMath;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
-// set a hint for anti-aliasing
+// 设置抗锯齿提示
 SetConfigFlags(ConfigFlags.Msaa4xHint);
 
-// initialize a 1200x800 px window with a title
+// 初始化一个 1200x800 像素的窗口并设置标题
 InitWindow(1200, 800, "TeaDrop example");
 
-// load the teapot model from a file
+// 从文件加载茶壶模型
 Model teapotModel = LoadModel("teapot.obj");
 
-// load the mesh vertices
+// 加载网格顶点
 if (teapotModel.MeshCount == 0)
     throw new Exception("Model could not be loaded!");
 
@@ -45,11 +45,11 @@ unsafe { mesh = teapotModel.Meshes[0]; }
 var allVertices = mesh.VerticesAs<JVector>();
 var vertices = ShapeHelper.SampleHull(allVertices, 4);
 
-// just for visualization -
-// we will not need to construct the explicit hull for the simulation!
+// 仅用于可视化——
+// 模拟中并不需要构造显式的凸包！
 var debugHull = ShapeHelper.Tessellate(vertices, 4);
 
-// create a camera
+// 创建相机
 Camera3D camera = new ()
 {
     Position = new Vector3(-5.0f, 2.0f, 3.0f),
@@ -59,30 +59,30 @@ Camera3D camera = new ()
     Projection = CameraProjection.Perspective
 };
 
-// 100 fps target
+// 目标 100 fps
 SetTargetFPS(100);
 
-// simple render loop
+// 简单的渲染循环
 while (!WindowShouldClose())
 {
     BeginDrawing();
     ClearBackground(Color.Blue);
 
-    // make the scene rotate
+    // 让场景旋转
     UpdateCamera(ref camera, CameraMode.Orbital);
 
     BeginMode3D(camera);
 
-    // draw the teapot model
+    // 绘制茶壶模型
     DrawModelWires(teapotModel, Vector3.Zero, 1.0f, Color.White);
 
-    // draw the sample vertices of the convex hull
+    // 绘制凸包的采样顶点
     foreach (var vertex in vertices)
     {
         DrawSphere(vertex, 0.02f, Color.Red);
     }
 
-    // for debugging: draw the explicit hull
+    // 用于调试：绘制显式凸包
     foreach (var vertex in debugHull)
     {
         DrawLine3D(vertex.V0, vertex.V1, Color.Green);
@@ -99,6 +99,6 @@ while (!WindowShouldClose())
 CloseWindow();
 ```
 
-![plane](images/teapot.png)
+![平面](images/teapot.png)
 
-The teapot's wireframe is drawn in white, the green wireframe shows the convex hull, and the sampled hull vertices are depicted as red dots.
+茶壶的线框绘制为白色，绿色线框显示凸包，采样得到的凸包顶点绘制为红点。

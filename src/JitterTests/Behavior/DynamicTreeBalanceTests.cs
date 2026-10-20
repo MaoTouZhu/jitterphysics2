@@ -11,7 +11,7 @@ public class DynamicTreeBalanceTests
         List<RigidBody> bodies = [];
         List<SphereShape> shapes = [];
 
-        // Sorted insertion is deliberately hostile to an ordinary binary tree.
+        // 顺序插入对普通二叉树而言故意构成不利情形。
         for (int i = 0; i < 512; i++)
         {
             RigidBody body = world.CreateRigidBody();
@@ -161,7 +161,7 @@ public class DynamicTreeBalanceTests
             SphereShape shape = new((Real)0.75);
             body.AddShape(shape);
 
-            // Force one regular update so the leaf receives a fat bounding box.
+            // 强制进行一次常规更新，使叶子获得一个膨胀包围盒。
             tree.DeactivateProxy(shape);
             tree.ActivateProxy(shape);
             shapes.Add(shape);

@@ -1,5 +1,5 @@
-// NOTE: The ray cast car demo is a copied and slightly modified version
-//       of the vehicle example from the great JigLib. License follows.
+// NOTE: 射线投射汽车演示是从优秀的 JigLib 的载具示例复制并稍作修改的版本。
+//       许可证如下。
 
 /*
 Copyright (c) 2007 Danny Chapman
@@ -36,8 +36,8 @@ using JitterDemo.Renderer;
 namespace JitterDemo;
 
 /// <summary>
-/// A wheel which adds drive forces to a body.
-/// Can be used to create a vehicle.
+/// 一个为刚体施加驱动力矩的车轮。
+/// 可用于创建载具。
 /// </summary>
 public class Wheel
 {
@@ -51,7 +51,7 @@ public class Wheel
 
     private float angVel;
 
-    /// used to estimate the friction
+    /// 用于估算摩擦力
     private float angVelForGrip;
 
     private float torque;
@@ -59,68 +59,68 @@ public class Wheel
     private readonly DynamicTree.RayCastFilterPre rayCast;
 
     /// <summary>
-    /// Sets or gets the current steering angle of
-    /// the wheel in degrees.
+    /// 设置或获取车轮当前的转向角，
+    /// 以度为单位。
     /// </summary>
     public float SteerAngle { get; set; }
 
     /// <summary>
-    /// Gets the current rotation of the wheel in degrees.
+    /// 获取车轮当前的旋转角度，以度为单位。
     /// </summary>
     public float WheelRotation { get; private set; }
 
     /// <summary>
-    /// The damping factor of the supension spring.
+    /// 悬架弹簧的阻尼系数。
     /// </summary>
     public float Damping { get; set; }
 
     /// <summary>
-    /// The supension spring.
+    /// 悬架弹簧。
     /// </summary>
     public float Spring { get; set; }
 
     /// <summary>
-    /// Inertia of the wheel.
+    /// 车轮的惯性。
     /// </summary>
     public float Inertia { get; set; }
 
     /// <summary>
-    /// The wheel radius.
+    /// 车轮的半径。
     /// </summary>
     public float Radius { get; set; }
 
     /// <summary>
-    /// The friction of the car in the side direction.
+    /// 汽车在侧向的摩擦力。
     /// </summary>
     public float SideFriction { get; set; }
 
     /// <summary>
-    /// Friction of the car in forward direction.
+    /// 汽车在前进方向的摩擦力。
     /// </summary>
     public float ForwardFriction { get; set; }
 
     /// <summary>
-    /// The length of the suspension spring.
+    /// 悬架弹簧的长度。
     /// </summary>
     public float WheelTravel { get; set; }
 
     /// <summary>
-    /// If set to true the wheel blocks.
+    /// 如果设为 true，车轮会锁死。
     /// </summary>
     public bool Locked { get; set; }
 
     /// <summary>
-    /// The highest possible velocity of the wheel.
+    /// 车轮可能达到的最高速度。
     /// </summary>
     public float MaximumAngularVelocity { get; set; }
 
     /// <summary>
-    /// The number of rays used for this wheel.
+    /// 用于此车轮的射线数量。
     /// </summary>
     public int NumberOfRays { get; set; }
 
     /// <summary>
-    /// The position of the wheel in body space.
+    /// 车轮在刚体空间中的位置。
     /// </summary>
     public JVector Position { get; set; }
 
@@ -129,12 +129,12 @@ public class Wheel
     public readonly JVector Up = JVector.UnitY;
 
     /// <summary>
-    /// Creates a new instance of the Wheel class.
+    /// 创建 Wheel 类的新实例。
     /// </summary>
-    /// <param name="world">The world.</param>
-    /// <param name="car">The RigidBody on which to apply the wheel forces.</param>
-    /// <param name="position">The position of the wheel on the body (in body space).</param>
-    /// <param name="radius">The wheel radius.</param>
+    /// <param name="world">世界。</param>
+    /// <param name="car">施加车轮力的 RigidBody。</param>
+    /// <param name="position">车轮在刚体上的位置（刚体空间中）。</param>
+    /// <param name="radius">车轮半径。</param>
     public Wheel(World world, RigidBody car, JVector position, float radius)
     {
         this.world = world;
@@ -143,7 +143,7 @@ public class Wheel
 
         rayCast = RayCastCallback;
 
-        // set some default values.
+        // 设置一些默认值。
         SideFriction = 3.0f;
         ForwardFriction = 5.0f;
         Radius = radius;
@@ -154,18 +154,18 @@ public class Wheel
     }
 
     /// <summary>
-    /// Gets the position of the wheel in world space.
+    /// 获取车轮在世界空间中的位置。
     /// </summary>
-    /// <returns>The position of the wheel in world space.</returns>
+    /// <returns>车轮在世界空间中的位置。</returns>
     public JVector GetWheelCenter()
     {
         return Position + JVector.Transform(Up, car.Orientation) * displacement;
     }
 
     /// <summary>
-    /// Adds drivetorque.
+    /// 添加驱动力矩。
     /// </summary>
-    /// <param name="torque">The amount of torque applied to this wheel.</param>
+    /// <param name="torque">施加到此车轮的力矩大小。</param>
     public void AddTorque(float torque)
     {
         driveTorque += torque;
@@ -190,8 +190,8 @@ public class Wheel
 
             if (!onFloor) driveTorque *= 0.1f;
 
-            // prevent friction from reversing dir - todo do this better
-            // by limiting the torque
+            // 防止摩擦力使方向反转 - todo 通过限
+            // 制力矩来更好地实现
             if ((origAngVel > angVelForGrip && angVel < angVelForGrip) ||
                 (origAngVel < angVelForGrip && angVel > angVelForGrip))
                 angVel = angVelForGrip;
@@ -253,7 +253,7 @@ public class Wheel
 
             if (result && frac <= 1.0f)
             {
-                // shape must be RigidBodyShape since we filter out other ray tests
+                // 由于我们过滤掉了其他射线检测，形状必然是 RigidBodyShape
                 RigidBody body = (shape as RigidBodyShape)!.RigidBody;
 
                 if (frac < deepestFrac)
@@ -277,10 +277,10 @@ public class Wheel
 
         float displacementForceMag = displacement * Spring;
 
-        // reduce force when suspension is par to ground
+        // 当悬架与地面平行时减小力
         displacementForceMag *= JVector.Dot(groundNormal, worldAxis);
 
-        // apply damping
+        // 施加阻尼
         float dampingForceMag = upSpeed * Damping;
 
         float totalForceMag = displacementForceMag + dampingForceMag;
@@ -291,7 +291,7 @@ public class Wheel
 
         force += extraForce;
 
-        // side-slip friction and drive force. Work out wheel- and floor-relative coordinate frame
+        // 侧滑摩擦力和驱动力。计算车轮和地面相对的坐标系
         JVector groundUp = groundNormal;
         JVector groundLeft = JVector.Cross(groundNormal, wheelFwd);
         if (groundLeft.LengthSquared() > 0.0f) JVector.NormalizeInPlace(ref groundLeft);
@@ -312,7 +312,7 @@ public class Wheel
 
         wheelPointVel -= worldVel;
 
-        // sideways forces
+        // 侧向力
         float noslipVel = 0.2f;
         float slipVel = 0.4f;
         float slipFactor = 0.7f;
@@ -342,7 +342,7 @@ public class Wheel
         extraForce = sideForce * groundLeft;
         force += extraForce;
 
-        // fwd/back forces
+        // 前/后方向力
         friction = ForwardFriction;
         float fwdVel = JVector.Dot(wheelPointVel, groundFwd);
 
@@ -366,19 +366,19 @@ public class Wheel
         extraForce = fwdForce * groundFwd;
         force += extraForce;
 
-        // fwd force also spins the wheel
+        // 前向力也会使车轮旋转
         JVector wheelCentreVel = car.Velocity +
                                  JVector.Cross(car.AngularVelocity, JVector.Transform(Position, car.Orientation));
 
         angVelForGrip = JVector.Dot(wheelCentreVel, groundFwd) / Radius;
         torque += -fwdForce * Radius;
 
-        // add force to car
+        // 向汽车施加力
         car.AddForce(force, groundPos);
 
         RenderWindow.Instance.DebugRenderer.PushPoint(DebugRenderer.Color.White, Conversion.FromJitter(groundPos), 0.2f);
 
-        // add force to the world
+        // 向世界施加力
         if (worldBody.MotionType == MotionType.Dynamic)
         {
             const float maxOtherBodyAcc = 500.0f;

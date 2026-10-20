@@ -33,9 +33,9 @@ public class GuiRenderer : IRenderer
         ebo = GpuBuffer.Index();
 
         int stride = Unsafe.SizeOf<DrawVertex>();
-        vao.Attrib(0, vbo, 2, AttribType.Float, stride, 0);  // pos
+        vao.Attrib(0, vbo, 2, AttribType.Float, stride, 0);  // 位置
         vao.Attrib(1, vbo, 2, AttribType.Float, stride, 2 * sizeof(float)); // uv
-        vao.Attrib(2, vbo, 4, AttribType.UnsignedByte, stride, 4 * sizeof(float), normalized: true); // color
+        vao.Attrib(2, vbo, 4, AttribType.UnsignedByte, stride, 4 * sizeof(float), normalized: true); // 颜色
         vao.AttachIndexBuffer(ebo);
 
         textures.Add(CreateSolidTexture());

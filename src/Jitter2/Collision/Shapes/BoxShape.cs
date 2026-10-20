@@ -10,7 +10,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a three-dimensional box shape.
+/// 表示三维盒体形状。
 /// </summary>
 public class BoxShape : RigidBodyShape
 {
@@ -23,11 +23,11 @@ public class BoxShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Creates a box shape with specified dimensions.
+    /// 创建具有指定尺寸的盒体形状。
     /// </summary>
-    /// <param name="size">The full extents of the box in the local x-, y-, and z-directions.</param>
+    /// <param name="size">盒体在局部 x、y、z 方向上的完整尺寸。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when any component of <paramref name="size"/> is less than or equal to zero.
+    /// 当 <paramref name="size"/> 的任一分量小于或等于零时引发。
     /// </exception>
     public BoxShape(JVector size)
     {
@@ -36,10 +36,10 @@ public class BoxShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the full extents of the box in the local x-, y-, and z-directions.
+    /// 获取或设置盒体在局部 x、y、z 方向上的完整尺寸。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when any component of <paramref name="value"/> is less than or equal to zero.
+    /// 当 <paramref name="value"/> 的任一分量小于或等于零时引发。
     /// </exception>
     public JVector Size
     {
@@ -52,11 +52,11 @@ public class BoxShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Creates a cube shape with sides of equal length.
+    /// 创建边长相等的立方体形状。
     /// </summary>
-    /// <param name="size">The length of each side.</param>
+    /// <param name="size">每条边的长度。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="size"/> is less than or equal to zero.
+    /// 当 <paramref name="size"/> 小于或等于零时引发。
     /// </exception>
     public BoxShape(Real size)
     {
@@ -65,14 +65,14 @@ public class BoxShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Creates a box shape with the specified extents in the local x-, y-, and z-directions.
+    /// 创建在局部 x、y、z 方向上具有指定尺寸的盒体形状。
     /// </summary>
-    /// <param name="sizeX">The full extent of the box in the local x-direction.</param>
-    /// <param name="sizeY">The full extent of the box in the local y-direction.</param>
-    /// <param name="sizeZ">The full extent of the box in the local z-direction.</param>
+    /// <param name="sizeX">盒体在局部 x 方向上的完整尺寸。</param>
+    /// <param name="sizeY">盒体在局部 y 方向上的完整尺寸。</param>
+    /// <param name="sizeZ">盒体在局部 z 方向上的完整尺寸。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="sizeX"/>, <paramref name="sizeY"/>, or <paramref name="sizeZ"/> is less than
-    /// or equal to zero.
+    /// 当 <paramref name="sizeX"/>、<paramref name="sizeY"/> 或 <paramref name="sizeZ"/> 小于
+    /// 或等于零时引发。
     /// </exception>
     public BoxShape(Real sizeX, Real sizeY, Real sizeZ)
     {

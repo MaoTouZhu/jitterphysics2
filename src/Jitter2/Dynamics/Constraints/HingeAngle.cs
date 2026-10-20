@@ -13,8 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constrains two bodies to rotate relative to each other around a single axis,
-/// removing two angular degrees of freedom. Optionally enforces angular limits.
+/// 约束两个刚体绕单一轴相对旋转，消除两个角度自由度。
+/// 可选择地施加角度限位。
 /// </summary>
 public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
 {
@@ -67,19 +67,19 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = JVector.Zero;
 
     /// <summary>
-    /// Initializes the constraint with a rotation axis and angular limits.
+    /// 使用旋转轴和角度限位初始化约束。
     /// </summary>
-    /// <param name="axis">The hinge axis in world space around which rotation is allowed.</param>
-    /// <param name="limit">The angular limits defining the allowed rotation range.</param>
+    /// <param name="axis">世界空间中的铰链轴，允许绕其旋转。</param>
+    /// <param name="limit">定义允许旋转范围的角度限位。</param>
     /// <remarks>
-    /// Stores the axis in the local frame of body 2 and records the initial relative orientation.
-    /// Equal or reversed limits fix the hinge at their midpoint.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>, <see cref="LimitSoftness"/> = <see cref="Constraint.DefaultAngularLimitSoftness"/>,
-    /// <see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>, <see cref="LimitBias"/> = <see cref="Constraint.DefaultAngularLimitBias"/>.
+    /// 将轴存储到刚体 2 的局部坐标系中，并记录初始相对朝向。
+    /// 限位相等或反向时将铰链固定在其中点。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>，<see cref="LimitSoftness"/> = <see cref="Constraint.DefaultAngularLimitSoftness"/>，
+    /// <see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>，<see cref="LimitBias"/> = <see cref="Constraint.DefaultAngularLimitBias"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis"/> is zero or contains a non-finite value, or when
-    /// either value in <paramref name="limit"/> is not finite.
+    /// 当 <paramref name="axis"/> 为零或包含非有限值，或
+    /// <paramref name="limit"/> 中的任一值不是有限值时抛出。
     /// </exception>
     public void Initialize(JVector axis, AngularLimit limit)
     {
@@ -111,10 +111,10 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Sets the angular limits for the hinge rotation.
+    /// 设置铰链旋转的角度限位。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when either assigned limit value is not finite.
+    /// 当所赋限值中的任一值不是有限值时抛出。
     /// </exception>
     public AngularLimit Limit
     {
@@ -220,11 +220,11 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Gets the current angle of rotation around the hinge axis relative to the initial pose.
+    /// 获取相对于初始姿态绕铰链轴的当前旋转角。
     /// </summary>
     /// <remarks>
-    /// When the hinge axes are misaligned, this is the projection of the shortest
-    /// relative rotation vector onto the hinge axis, matching the limit coordinate.
+    /// 当铰链轴未对齐时，该值是最近相对旋转向量在铰链轴上的投影，
+    /// 与限位坐标保持一致。
     /// </remarks>
     public JAngle Angle
     {
@@ -242,10 +242,10 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the angular constraint.
+    /// 获取或设置角度约束的柔软度（柔顺度）。
     /// </summary>
     /// <value>
-    /// Default is 0.001. Higher values allow more angular error but improve stability.
+    /// 默认值为 0.001。值越大允许的角度误差越大，但稳定性更好。
     /// </value>
     public Real Softness
     {
@@ -258,10 +258,10 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) applied when angular limits are active.
+    /// 获取或设置角度限位生效时应用的柔软度（柔顺度）。
     /// </summary>
     /// <value>
-    /// Default is 0.001. Higher values allow more limit violation but improve stability.
+    /// 默认值为 0.001。值越大允许的限位违反量越大，但稳定性更好。
     /// </value>
     public Real LimitSoftness
     {
@@ -274,10 +274,10 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively angular error is corrected.
+    /// 获取或设置偏置因子，控制角度误差被修正的积极程度。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct errors faster but may cause instability.
+    /// 默认值为 0.2。值越大误差修正越快，但可能导致不稳定。
     /// </value>
     public Real Bias
     {
@@ -290,10 +290,10 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor for angular limit correction.
+    /// 获取或设置角度限位修正的偏置因子。
     /// </summary>
     /// <value>
-    /// Default is 0.1. Higher values correct limit violations faster.
+    /// 默认值为 0.1。值越大限位违反修正越快。
     /// </value>
     public Real LimitBias
     {
@@ -306,7 +306,7 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上次求解子步累积的求解器冲量。
     /// </summary>
     public JVector Impulse => Data.AccumulatedImpulse;
 
@@ -333,9 +333,9 @@ public unsafe class HingeAngle : Constraint<HingeAngle.HingeAngleData>
         if ((data.Clamp == 1 && data.AccumulatedImpulse.Z > 0) ||
             (data.Clamp == 2 && data.AccumulatedImpulse.Z < 0))
         {
-            // The coupled block assumed its limit impulse would be applied.
-            // At the unilateral bound, solve the bilateral rows again with that
-            // impulse fixed, including any removal of the cached limit impulse.
+            // 耦合块假定其限位冲量会被施加。
+            // 在单边边界处，固定该冲量（包括移除任何缓存的限位冲量）
+            // 后重新求解双边行。
             lambda.Z = -origAcc.Z;
             Real x = residual.X + data.CouplingX * lambda.Z;
             Real y = residual.Y + data.CouplingY * lambda.Z;

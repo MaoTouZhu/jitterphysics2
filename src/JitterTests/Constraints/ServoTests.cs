@@ -256,7 +256,7 @@ public class ServoTests
             case LinearServo linear: linear.TargetPosition = JVector.UnitX; break;
             case LinearAxisServo axis: axis.TargetPosition = 1; break;
         }
-        // Target setters should wake the body even while the actuator is disabled.
+        // 即使执行器处于禁用状态，目标设置器也应唤醒刚体。
         world.Step((Real)0.01, false);
         Assert.That(body.IsActive, Is.True);
         SetMaximum(servo, 2);

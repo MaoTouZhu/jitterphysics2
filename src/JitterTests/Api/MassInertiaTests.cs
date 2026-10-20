@@ -3,7 +3,7 @@ namespace JitterTests.Api;
 public class MassInertiaTests
 {
     // -------------------------------------------------------------------------
-    // SetMassInertia() — auto-compute from shapes
+    // SetMassInertia() —— 根据形状自动计算
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -32,7 +32,7 @@ public class MassInertiaTests
     }
 
     // -------------------------------------------------------------------------
-    // SetMassInertia(Real mass) — scale inertia to a specific mass
+    // SetMassInertia(Real mass) —— 将惯性缩放到指定质量
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -47,7 +47,7 @@ public class MassInertiaTests
     }
 
     // -------------------------------------------------------------------------
-    // SetMassInertia(JSymmetricMatrix, Real, bool) — fully manual
+    // SetMassInertia(JSymmetricMatrix, Real, bool) —— 完全手动设置
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -58,7 +58,7 @@ public class MassInertiaTests
         var inertia = JSymmetricMatrix.Identity * 2f;
         body.SetMassInertia(inertia, 10f);
         Assert.That(body.Mass, Is.EqualTo((Real)10.0).Within((Real)1e-5));
-        // InverseInertia should be inverse of 2*I = 0.5*I
+        // InverseInertia 应当是 2*I 的逆，即 0.5*I
         Assert.That(body.InverseInertia.M11, Is.EqualTo((Real)0.5).Within((Real)1e-5));
         Assert.That(body.InverseInertia.M22, Is.EqualTo((Real)0.5).Within((Real)1e-5));
         Assert.That(body.InverseInertia.M33, Is.EqualTo((Real)0.5).Within((Real)1e-5));
@@ -160,7 +160,7 @@ public class MassInertiaTests
     }
 
     // -------------------------------------------------------------------------
-    // Throws
+    // 抛出异常
     // -------------------------------------------------------------------------
 
     [TestCase]

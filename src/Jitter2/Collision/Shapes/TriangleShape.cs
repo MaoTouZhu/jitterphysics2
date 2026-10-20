@@ -12,17 +12,17 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a triangle shape defined by a reference to a <see cref="TriangleMesh"/> and an index.
+/// 表示一个三角形形状，由对 <see cref="TriangleMesh"/> 的引用和一个索引定义。
 /// </summary>
 public class TriangleShape : RigidBodyShape
 {
     /// <summary>
-    /// The triangle mesh to which this triangle belongs.
+    /// 该三角形所属的三角形网格。
     /// </summary>
     public readonly TriangleMesh Mesh;
 
     /// <summary>
-    /// The index representing the position of the triangle within the mesh.
+    /// 表示该三角形在网格中位置的索引。
     /// </summary>
     public readonly int Index;
 
@@ -35,15 +35,15 @@ public class TriangleShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Initializes a new instance of the TriangleShape class.
+    /// 初始化 TriangleShape 类的新实例。
     /// </summary>
-    /// <param name="mesh">The triangle mesh to which this triangle belongs.</param>
-    /// <param name="index">The index representing the position of the triangle within the mesh.</param>
+    /// <param name="mesh">该三角形所属的三角形网格。</param>
+    /// <param name="index">表示该三角形在网格中位置的索引。</param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="mesh"/> is <c>null</c>.
+    /// 当 <paramref name="mesh"/> 为 <c>null</c> 时抛出。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="index"/> is negative or greater than or equal to the number of triangles in the mesh.
+    /// 当 <paramref name="index"/> 为负数，或大于等于网格中的三角形数量时抛出。
     /// </exception>
     public TriangleShape(TriangleMesh mesh, int index)
     {
@@ -58,8 +58,7 @@ public class TriangleShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Creates and returns all instances of type <see cref="TriangleShape"/>
-    /// for as given <see cref="TriangleMesh"/>.
+    /// 为给定的 <see cref="TriangleMesh"/> 创建并返回所有 <see cref="TriangleShape"/> 类型的实例。
     /// </summary>
     public static IEnumerable<TriangleShape> CreateAllShapes(TriangleMesh mesh)
     {
@@ -70,7 +69,7 @@ public class TriangleShape : RigidBodyShape
     }
 
     /// <exception cref="NotSupportedException">
-    /// Always thrown because a triangle has no volume and therefore no mass properties.
+    /// 总是抛出，因为三角形没有体积，因此没有质量属性。
     /// </exception>
     public override void CalculateMassInertia(out JSymmetricMatrix inertia, out JVector com, out Real mass)
     {
@@ -80,12 +79,12 @@ public class TriangleShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets the vertices transformed by the attached rigid body. If the shape is unattached,
-    /// returns the mesh vertices without a world transform.
+    /// 获取经过所附刚体变换后的顶点。如果该形状未附着到刚体，
+    /// 则返回未经世界变换的网格顶点。
     /// </summary>
-    /// <param name="a">The transformed coordinate of the first vertex.</param>
-    /// <param name="b">The transformed coordinate of the second vertex.</param>
-    /// <param name="c">The transformed coordinate of the third vertex.</param>
+    /// <param name="a">第一个顶点变换后的坐标。</param>
+    /// <param name="b">第二个顶点变换后的坐标。</param>
+    /// <param name="c">第三个顶点变换后的坐标。</param>
     public void GetWorldVertices(out JVector a, out JVector b, out JVector c)
     {
         ref readonly var triangle = ref Mesh.Indices[Index];
@@ -127,14 +126,14 @@ public class TriangleShape : RigidBodyShape
         JBoundingBox.AddPointInPlace(ref box, b);
         JBoundingBox.AddPointInPlace(ref box, c);
 
-        // prevent a degenerate bounding box
+        // 防止生成退化的包围盒
         JVector extra = new JVector(extraMargin);
         box.Min += position - extra;
         box.Max += position + extra;
     }
 
     /// <inheritdoc/>
-    /// <remarks>Back-facing triangles are culled.</remarks>
+    /// <remarks>背面三角形会被剔除。</remarks>
     public override bool LocalRayCast(in JVector origin, in JVector direction, out JVector normal, out Real lambda)
     {
         ref readonly var meshTriangle = ref Mesh.Indices[Index];
@@ -145,7 +144,7 @@ public class TriangleShape : RigidBodyShape
         if (triangle.RayIntersect(origin, direction, JTriangle.CullMode.BackFacing, out normal, out lambda) &&
             lambda >= (Real)0.0) return true;
 
-        // RayIntersect tests the whole line, so a hit behind the origin is a miss for a ray.
+        // RayIntersect 检测的是整条直线，因此位于原点后方的命中对射线而言应视为未命中。
         normal = JVector.Zero;
         lambda = Real.MaxValue;
         return false;

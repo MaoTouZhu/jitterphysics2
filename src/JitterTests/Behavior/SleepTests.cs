@@ -7,7 +7,7 @@ public class SleepTests
     {
         var world = new World();
 
-        // Create a static body
+        // 创建一个静态刚体
         var body = world.CreateRigidBody();
         body.AddShape(new BoxShape(1));
         body.MotionType = MotionType.Static;
@@ -44,39 +44,39 @@ public class SleepTests
         var body = world.CreateRigidBody();
         body.DeactivationTime = TimeSpan.FromSeconds(3);
 
-        // Initially, a newly created body is always active.
+        // 刚体刚创建时总是处于活动状态。
         Assert.That(body.IsActive);
 
-        // Advance simulation by 1 second — should still be active,
-        // because the deactivation timeout (3s) hasn’t elapsed yet.
+        // 将模拟推进 1 秒——此时仍应处于活动状态，
+        // 因为停用超时（3 秒）尚未结束。
         Helper.AdvanceWorld(world, 1, (Real)(1.0 / 100.0), false);
         Assert.That(body.IsActive);
 
-        // After 3 more seconds (total 4s), the body should deactivate,
-        // since it hasn’t moved and its timeout was 3s.
+        // 再过 3 秒（共 4 秒），刚体应停用，
+        // 因为它没有移动，且其超时为 3 秒。
         Helper.AdvanceWorld(world, 3, (Real)(1.0 / 100.0), false);
         Assert.That(!body.IsActive);
 
-        // Change the deactivation timeout to 5 seconds and try to
-        // manually reactivate the body. The activation request
-        // takes effect only after the next simulation step.
+        // 将停用超时改为 5 秒，并尝试
+        // 手动重新激活刚体。激活请求
+        // 只会在下一个模拟步之后生效。
         body.DeactivationTime = TimeSpan.FromSeconds(5);
         body.SetActivationState(true);
 
-        // Until the next step, the body remains inactive.
+        // 在下一步之前，刚体保持停用状态。
         Assert.That(!body.IsActive);
 
-        // Step the world once — now the activation flag is processed,
-        // and the body should become active again.
+        // 将世界步进一次——现在激活标志被处理，
+        // 刚体应重新变为活动状态。
         Helper.AdvanceWorld(world, 1, (Real)(1.0 / 100.0), false);
         Assert.That(body.IsActive);
 
-        // Advance 3 seconds — still within the 5-second timeout, so active.
+        // 推进 3 秒——仍在 5 秒超时之内，因此保持活动。
         Helper.AdvanceWorld(world, 3, (Real)(1.0 / 100.0), false);
         Assert.That(body.IsActive);
 
-        // Advance 2 more seconds (total 6s) — exceeds the timeout,
-        // so the body should deactivate again.
+        // 再推进 2 秒（共 6 秒）——超过超时时间，
+        // 因此刚体应再次停用。
         Helper.AdvanceWorld(world, 2, (Real)(1.0 / 100.0), false);
         Assert.That(!body.IsActive);
 
@@ -89,33 +89,33 @@ public class SleepTests
         var world = new World();
         world.Gravity = JVector.Zero;
 
-        // Static (infinite mass) body acting as a moving platform.
+        // 静态（无限质量）刚体，充当移动平台。
         var platform = world.CreateRigidBody();
         platform.AddShape(new BoxShape(2));
         platform.MotionType = MotionType.Kinematic;
         platform.Position = new JVector(0, 0, 0);
         platform.DeactivationTime = TimeSpan.FromSeconds(1);
 
-        // Dynamic body resting slightly above the platform.
+        // 略微静止在平台上方的动态刚体。
         var box = world.CreateRigidBody();
         box.AddShape(new BoxShape(1));
         box.Position = new JVector(0, 2, 0);
         box.DeactivationTime = TimeSpan.FromSeconds(1);
 
-        // Let the dynamic body settle and go to sleep.
+        // 让动态刚体稳定下来并进入休眠。
         Helper.AdvanceWorld(world, 3, (Real)(1.0 / 100.0), false);
         Assert.That(!box.IsActive, "Box should be inactive after settling.");
 
-        // Give the static body an upward velocity — simulating a moving platform.
+        // 给静态刚体一个向上的速度——模拟移动平台。
         platform.Velocity = new JVector(0, 1, 0);
 
-        // Advance one step to process motion and new contact generation.
+        // 推进一个步，以处理运动并生成新的接触。
         Helper.AdvanceWorld(world, 1, (Real)(1.0 / 100.0), false);
 
-        // The sleeping box should wake up due to contact with the moving platform.
+        // 休眠的盒子应因与移动平台接触而醒来。
         Assert.That(box.IsActive, "Box should wake up after being touched by moving static body.");
 
-        // Optionally verify that the platform can still move even though it is static (infinite mass).
+        // 可选地验证平台即使为静态（无限质量）也仍能移动。
         Assert.That(platform.Position.Y > 0, "Platform should have moved due to integration.");
 
         world.Dispose();
@@ -141,26 +141,26 @@ public class SleepTests
         bodies[0].MotionType = MotionType.Static;
         Helper.AdvanceWorld(world, 3, (Real)(1.0 / 100.0), false);
 
-        // Make sure all bodies are inactive
+        // 确保所有刚体都处于停用状态
         foreach (var body in bodies)
         {
             Assert.That(!body.IsActive, $"Body at {body.Position} should be inactive.");
         }
 
-        // Request reactivation of the middle body
+        // 请求重新激活中间的刚体
         bodies[1].SetActivationState(true);
 
-        // Process activation in the next step
+        // 在下一步中处理激活
         Helper.AdvanceWorld(world, 1, (Real)(1.0 / 100.0), false);
 
-        // Now both the middle and top bodies should be active
+        // 现在中间和顶部的刚体都应处于活动状态
         Assert.That(bodies[1].IsActive, "Middle body should be reactivated.");
         Assert.That(bodies[2].IsActive, "Top body should be reactivated due to contact propagation.");
 
-        // Advance world to allow them to fall asleep again
+        // 推进世界，让它们再次进入休眠
         Helper.AdvanceWorld(world, 2, (Real)(1.0 / 100.0), false);
 
-        // Verify that both dynamic bodies went inactive again
+        // 验证两个动态刚体再次变为停用状态
         Assert.That(!bodies[1].IsActive, "Middle body should be inactive again.");
         Assert.That(!bodies[2].IsActive, "Top body should be inactive again.");
 
@@ -174,7 +174,7 @@ public class SleepTests
 
         List<RigidBody> bodies = new();
 
-        // Create a vertical stack of three boxes
+        // 创建一个由三个盒子组成的竖直堆叠
         for (int i = 0; i < 3; i++)
         {
             var body = world.CreateRigidBody();
@@ -184,25 +184,25 @@ public class SleepTests
             bodies.Add(body);
         }
 
-        // The bottom box is static (acts as the floor)
+        // 底部的盒子为静态（充当底板）
         bodies[0].MotionType = MotionType.Static;
 
-        // Let them settle and go to sleep
+        // 让它们稳定下来并进入休眠
         Helper.AdvanceWorld(world, 3, (Real)(1.0 / 100.0), false);
 
-        // Ensure all non-static bodies are inactive
+        // 确保所有非静态刚体都处于停用状态
         foreach (var body in bodies)
         {
             Assert.That(!body.IsActive, $"Body at {body.Position} should be inactive.");
         }
 
-        // Remove the middle body — this breaks contact between bottom and top
+        // 移除中间的刚体——这会断开底部与顶部之间的接触
         world.Remove(bodies[1]);
 
-        // After removing it, the island should update on the next step
+        // 移除之后，岛应在下一步中更新
         Helper.AdvanceWorld(world, 1, (Real)(1.0 / 100.0), false);
 
-        // The top body should now be awake because its supporting contact vanished
+        // 顶部刚体现在应处于活动状态，因为其支撑接触已消失
         Assert.That(bodies[2].IsActive, "Top body should wake up after its support is removed.");
 
         world.Dispose();
@@ -213,31 +213,31 @@ public class SleepTests
     {
         var world = new World();
 
-        // Bottom body: static (infinite mass) base
+        // 底部刚体：静态（无限质量）底座
         var bottom = world.CreateRigidBody();
         bottom.AddShape(new BoxShape(2));
         bottom.Position = new JVector(0, 0, 0);
         bottom.MotionType = MotionType.Static;
         bottom.DeactivationTime = TimeSpan.FromSeconds(1);
 
-        // Top body: dynamic box resting on the static base
+        // 顶部刚体：静止在静态底座上的动态盒子
         var top = world.CreateRigidBody();
         top.AddShape(new BoxShape(1));
         top.Position = new JVector(0, 2, 0);
         top.DeactivationTime = TimeSpan.FromSeconds(1);
 
-        // Let them settle — both should go to sleep
+        // 让它们稳定下来——两者都应进入休眠
         Helper.AdvanceWorld(world, 3, (Real)(1.0 / 100.0), false);
         Assert.That(!bottom.IsActive, "Bottom (static) body should be inactive after settling.");
         Assert.That(!top.IsActive, "Top body should be inactive after settling.");
 
-        // Move the static body downward slightly
+        // 将静态刚体略微向下移动
         bottom.Position -= new JVector(0, 0.5f, 0);
 
-        // Process one step so the contact system updates
+        // 处理一步，使接触系统更新
         Helper.AdvanceWorld(world, 1, (Real)(1.0 / 100.0), false);
 
-        // The top body should now wake up because its contact was disturbed
+        // 顶部刚体现在应醒来，因为其接触受到了扰动
         Assert.That(top.IsActive, "Top body should wake up after its static support moves.");
 
         world.Dispose();

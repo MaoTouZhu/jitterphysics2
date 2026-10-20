@@ -26,7 +26,7 @@ public class ParallelTests
         int[] test = new int[40];
         List<Task> tasks = new();
 
-        // 4 readers
+        // 4 个读取者
         for (int i = 0; i < 4; i++)
         {
             tasks.Add(Task.Run(() =>
@@ -42,7 +42,7 @@ public class ParallelTests
             }));
         }
 
-        // 1 writer
+        // 1 个写入者
         tasks.Add(Task.Run(() =>
         {
             Stopwatch sw = Stopwatch.StartNew();

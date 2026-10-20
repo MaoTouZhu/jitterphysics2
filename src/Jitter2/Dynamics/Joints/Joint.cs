@@ -9,21 +9,21 @@ using Jitter2.DataStructures;
 
 namespace Jitter2.Dynamics.Constraints;
 
-/// <summary>Selects the optional drive created with a joint.</summary>
+/// <summary>选择创建关节时附带的可选驱动。</summary>
 public enum JointDrive
 {
-    /// <summary>Creates the mechanical joint without a drive.</summary>
+    /// <summary>创建不带驱动的机械关节。</summary>
     None,
 
-    /// <summary>Adds a motor that drives relative velocity.</summary>
+    /// <summary>添加驱动相对速度的马达。</summary>
     Motor,
 
-    /// <summary>Adds a servo that drives toward a target position or angle.</summary>
+    /// <summary>添加驱动至目标位置或目标角度的伺服。</summary>
     Servo
 }
 
 /// <summary>
-/// Base class for joints, which are composite constraints built from multiple <see cref="Constraint"/> instances.
+/// 关节的基类，关节是由多个 <see cref="Constraint"/> 实例组合而成的复合约束。
 /// </summary>
 public class Joint : IDebugDrawable
 {
@@ -31,17 +31,17 @@ public class Joint : IDebugDrawable
     public ReadOnlyList<Constraint> Constraints => new(constraints);
 
     /// <summary>
-    /// Adds a constraint to the internal bookkeeping.
+    /// 将约束加入内部记录。
     /// </summary>
     protected void Register(Constraint constraint) => constraints.Add(constraint);
 
     /// <summary>
-    /// Removes a constraint from the internal bookkeeping.
+    /// 从内部记录中移除约束。
     /// </summary>
     protected void Deregister(Constraint constraint) => constraints.Remove(constraint);
 
     /// <summary>
-    /// Enables all constraints that this joint is composed of.
+    /// 启用构成该关节的所有约束。
     /// </summary>
     public void Enable()
     {
@@ -53,8 +53,8 @@ public class Joint : IDebugDrawable
     }
 
     /// <summary>
-    /// Disables all constraints that this joint is composed of temporarily.
-    /// For a complete removal use <see cref="Joint.Remove()"/>.
+    /// 临时禁用构成该关节的所有约束。
+    /// 若要彻底移除，请使用 <see cref="Joint.Remove()"/>。
     /// </summary>
     public void Disable()
     {
@@ -66,7 +66,7 @@ public class Joint : IDebugDrawable
     }
 
     /// <summary>
-    /// Removes all constraints that this joint is composed of from the physics world.
+    /// 从物理世界中移除构成该关节的所有约束。
     /// </summary>
     public void Remove()
     {
@@ -82,7 +82,7 @@ public class Joint : IDebugDrawable
     public virtual void DebugDraw(IDebugDrawer drawer)
         => DebugDraw(drawer, DebugDrawSettings.Default);
 
-    /// <summary>Draws the constituent constraints, placing angular guides at the joint anchor when available.</summary>
+    /// <summary>绘制各组成约束；在可用时把角度引导绘制在关节锚点处。</summary>
     public virtual void DebugDraw(IDebugDrawer drawer, in DebugDrawSettings settings)
     {
         foreach (var constraint in constraints)

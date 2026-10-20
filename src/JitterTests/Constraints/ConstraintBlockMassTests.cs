@@ -28,7 +28,7 @@ public class ConstraintBlockMassTests
         BallSocket.PrepareForIterationBallSocket(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
         BallSocket.IterateBallSocket(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
 
-        // With no translation response, only rotation about the anchor direction is free.
+        // 没有平移响应时，只有绕锚点方向的旋转是自由的。
         JVector expected = anchor * (anchor * initial);
         Assert.That(JVector.MaxAbs(body.AngularVelocity - expected), Is.LessThan(Tolerance));
         Assert.That((body.AngularVelocity % anchor).Length(), Is.LessThan(Tolerance));
@@ -53,7 +53,7 @@ public class ConstraintBlockMassTests
         FixedAngle.PrepareForIterationFixedAngle(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
         FixedAngle.IterateFixedAngle(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
 
-        // Y rotation is responsive even where a quaternion-vector row for X is singular.
+        // 即使 X 的四元数-向量行奇异，Y 旋转仍有响应。
         Assert.That(JVector.MaxAbs(body.AngularVelocity), Is.LessThan(Tolerance));
         Assert.That(Real.IsFinite(joint.Impulse.LengthSquared()), Is.True);
     }
@@ -74,7 +74,7 @@ public class ConstraintBlockMassTests
         BallSocket.PrepareForIterationBallSocket(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
         BallSocket.IterateBallSocket(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
 
-        // Both transverse rows are independently solvable, despite their different response scales.
+        // 两个横向行都可独立求解，尽管它们的响应量级不同。
         Assert.That(JVector.MaxAbs(body.AngularVelocity), Is.LessThan(Tolerance));
         Assert.That(Real.IsFinite(JVector.MaxAbs(joint.Impulse)), Is.True);
     }
@@ -94,7 +94,7 @@ public class ConstraintBlockMassTests
         FixedAngle.PrepareForIterationFixedAngle(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
         FixedAngle.IterateFixedAngle(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
 
-        // Infinite inertia about X cannot respond, but must not disable the Y/Z rows.
+        // 绕 X 的无限惯性无法响应，但不得禁用 Y/Z 行。
         Assert.That(JVector.MaxAbs(body.AngularVelocity - new JVector(3, 0, 0)), Is.LessThan(Tolerance));
         Assert.That(Real.IsFinite(JVector.MaxAbs(joint.Impulse)), Is.True);
     }
@@ -117,7 +117,7 @@ public class ConstraintBlockMassTests
         BallSocket.IterateBallSocket(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
 
         Assert.That(JVector.MaxAbs(body.Velocity), Is.LessThan(Tolerance));
-        // Multiplying back by inverse mass avoids overflow when checking the tiny-mass impulse.
+        // 再乘回逆质量可避免在检查极小质量冲量时发生溢出。
         Assert.That(Real.IsFinite(JVector.MaxAbs(joint.Impulse)), Is.True);
         Assert.That(JVector.MaxAbs(joint.Impulse * inverseMass + new JVector(1, -2, 3)),
             Is.LessThan(Tolerance));
@@ -160,7 +160,7 @@ public class ConstraintBlockMassTests
         FixedAngle.PrepareForIterationFixedAngle(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
         FixedAngle.IterateFixedAngle(ref joint.Handle.Data, new TimeStep((Real)1.0 / 100));
 
-        // The determinant is finite even when an unscaled inverse's cofactors overflow.
+        // 即使未缩放逆矩阵的余子式溢出，行列式仍是有限的。
         Assert.That(Real.IsFinite(JVector.MaxAbs(body.AngularVelocity)), Is.True);
         Assert.That(JVector.MaxAbs(body.AngularVelocity), Is.LessThan(Tolerance));
         Assert.That(Real.IsFinite(JVector.MaxAbs(joint.Impulse)), Is.True);

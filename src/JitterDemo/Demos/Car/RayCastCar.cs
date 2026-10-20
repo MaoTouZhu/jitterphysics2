@@ -1,5 +1,5 @@
-// NOTE: The ray cast car demo is a copied and slightly modified version
-//       of the vehicle example from the great JigLib. License follows.
+// NOTE: 射线投射汽车演示是从优秀的 JigLib 的载具示例复制并稍作修改的版本。
+//       许可证如下。
 
 /*
 Copyright (c) 2007 Danny Chapman
@@ -34,12 +34,12 @@ using Jitter2.LinearMath;
 namespace JitterDemo;
 
 /// <summary>
-/// Creates the Jitter default car with 4 wheels. To create a custom car
-/// use the Wheel class and add it to a body.
+/// 创建带有 4 个车轮的 Jitter 默认汽车。要创建自定义汽车，
+/// 请使用 Wheel 类并将其添加到一个刚体上。
 /// </summary>
 public class RayCastCar
 {
-    // the default car has 4 wheels
+    // 默认汽车有 4 个车轮
     private readonly World world;
 
     public RigidBody Body { get; }
@@ -50,41 +50,39 @@ public class RayCastCar
     private float accelerate;
 
     /// <summary>
-    /// The maximum steering angle in degrees
-    /// for both front wheels
+    /// 两个前轮的最大转向角，以度为单位。
     /// </summary>
     public float SteerAngle { get; set; }
 
     /// <summary>
-    /// The maximum torque which is applied to the
-    /// car when accelerating.
+    /// 汽车加速时施加的最大力矩。
     /// </summary>
     public float DriveTorque { get; set; }
 
     /// <summary>
-    /// Lower/Higher the acceleration of the car.
+    /// 调低/调高汽车的加速度。
     /// </summary>
     public float AccelerationRate { get; set; }
 
     /// <summary>
-    /// Lower/Higher the steering rate of the car.
+    /// 调低/调高汽车的转向速率。
     /// </summary>
     public float SteerRate { get; set; }
 
-    // don't damp perfect, allow some bounciness.
+    // 不要把阻尼调到完美，保留一些弹性。
     private const float dampingFrac = 0.8f;
     private const float springFrac = 0.45f;
 
     /// <summary>
-    /// Initializes a new instance of the DefaultCar class.
+    /// 初始化 DefaultCar 类的新实例。
     /// </summary>
-    /// <param name="world">The world the car should be in.</param>
-    /// <param name="shape">The shape of the car. Recommend is a box shape.</param>
+    /// <param name="world">汽车所在的世界。</param>
+    /// <param name="shape">汽车的形状。推荐使用盒形。</param>
     public RayCastCar(World world)
     {
         this.world = world;
 
-        // set some default values
+        // 设置一些默认值
         AccelerationRate = 10f;
         SteerAngle = (float)JAngle.FromDegree(40.0f);
         DriveTorque = 340.0f;
@@ -112,7 +110,7 @@ public class RayCastCar
 
         Body.Damping = (0.0001f, 0.0001f);
 
-        // create default wheels
+        // 创建默认车轮
         Wheels[0] = new Wheel(world, Body, new JVector(-1.3f, -0.1f, -2.5f), 0.60f);
         Wheels[1] = new Wheel(world, Body, new JVector(+1.3f, -0.1f, -2.5f), 0.60f);
         Wheels[2] = new Wheel(world, Body, new JVector(-1.3f, -0.1f, +2.4f), 0.60f);
@@ -122,9 +120,8 @@ public class RayCastCar
     }
 
     /// <summary>
-    /// This recalculates the inertia, damping and spring of all wheels based
-    /// on the car mass, the wheel radius and the gravity. Should be called
-    /// after manipulating wheel data.
+    /// 根据汽车质量、车轮半径和重力，重新计算所有车轮的
+    /// 惯性、阻尼和弹簧。在修改车轮数据后应调用此方法。
     /// </summary>
     public void AdjustWheelValues()
     {
@@ -140,22 +137,20 @@ public class RayCastCar
     }
 
     /// <summary>
-    /// Access the wheels.
+    /// 访问车轮。
     /// </summary>
     public Wheel[] Wheels { get; } = new Wheel[4];
 
     /// <summary>
-    /// Set input values for the car.
+    /// 设置汽车的控制输入值。
     /// </summary>
     /// <param name="accelerate">
-    /// A value between -1 and 1 (other values get clamped). Adjust
-    /// the maximum speed of the car by setting <see cref="DriveTorque" />. The maximum acceleration is adjusted
-    /// by setting <see cref="AccelerationRate" />.
+    /// 取值在 -1 到 1 之间（其他值会被钳制）。通过设置 <see cref="DriveTorque" /> 来调整
+    /// 汽车的最大速度。通过设置 <see cref="AccelerationRate" /> 来调整最大加速度。
     /// </param>
     /// <param name="steer">
-    /// A value between -1 and 1 (other values get clamped). Adjust
-    /// the maximum steer angle by setting <see cref="SteerAngle" />. The speed of steering
-    /// change is adjusted by <see cref="SteerRate" />.
+    /// 取值在 -1 到 1 之间（其他值会被钳制）。通过设置 <see cref="SteerAngle" /> 来调整
+    /// 最大转向角。转向变化的速度通过 <see cref="SteerRate" /> 调整。
     /// </param>
     public void SetInput(float accelerate, float steer)
     {
@@ -188,9 +183,9 @@ public class RayCastCar
 
             if (destAccelerate == 0.0f && w.AngularVelocity < 0.8f)
             {
-                // if the car is slow enough and destAccelerate is zero
-                // apply torque in the opposite direction of the angular velocity
-                // to make the car come to a complete halt.
+                // 如果汽车足够慢且 destAccelerate 为零，
+                // 则沿角速度的反方向施加力矩，
+                // 使汽车完全停止。
                 w.AddTorque(-w.AngularVelocity);
             }
         }

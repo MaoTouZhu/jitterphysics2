@@ -7,7 +7,7 @@ using Jitter2.LinearMath;
 
 namespace JitterDemo;
 
-// Shows one way to implement a character controller.
+// 展示实现角色控制器的一种方式。
 public class Player
 {
     public RigidBody Body { get; }
@@ -21,31 +21,31 @@ public class Player
         Body.AddShape(new CapsuleShape());
         Body.Position = position;
 
-        // disable velocity damping
+        // 禁用速度阻尼
         Body.Damping = (0, 0);
 
         this.world = world;
 
-        // Disable deactivation
+        // 禁用自动休眠
         Body.DeactivationTime = TimeSpan.MaxValue;
 
-        // Add two arms - to be able to visually tell how the player is orientated
+        // 添加两条手臂——以便在视觉上分辨玩家的朝向
         var arm1 = new TransformedShape(new BoxShape(0.2f, 0.8f, 0.2f), new JVector(+0.5f, 0.3f, 0));
         var arm2 = new TransformedShape(new BoxShape(0.2f, 0.8f, 0.2f), new JVector(-0.5f, 0.3f, 0));
 
-        // Add the shapes without recalculating mass and inertia, we take mass and inertia from the capsule
-        // shape we added before.
+        // 添加形状时不重新计算质量和惯性，我们沿用此前添加的胶囊体
+        // 形状的质量和惯性。
         Body.AddShape(arm1, MassInertiaUpdateMode.Preserve);
         Body.AddShape(arm2, MassInertiaUpdateMode.Preserve);
 
-        // Make the capsule stand upright, but able to rotate 360 degrees.
+        // 让胶囊体保持直立，但能够旋转 360 度。
         var ur = world.CreateConstraint<HingeAngle>(Body, world.NullBody);
         ur.Initialize(JVector.UnitY, AngularLimit.Full);
 
-        // Add some friction
+        // 添加一些摩擦
         Body.Friction = 0.8f;
 
-        // An angular motor for turning.
+        // 用于转向的角度马达。
         AngularMovement = world.CreateConstraint<AngularMotor>(Body, world.NullBody);
         AngularMovement.Initialize(JVector.UnitY, JVector.UnitY);
         AngularMovement.MaximumTorque = 1000;
@@ -60,14 +60,14 @@ public class Player
     {
         foreach (var contact in Body.Contacts)
         {
-            // go through all contacts of the capsule (player)
+            // 遍历胶囊体（玩家）的所有接触
 
             var cd = contact.Handle.Data;
             int numContacts = 0;
             hitPoint = JVector.Zero;
 
-            // a contact may contain up to four contact points,
-            // see which ones were used during the last step.
+            // 一个接触最多可包含四个接触点，
+            // 看看上一步使用了其中哪些。
             uint mask = cd.UsageMask >> 4;
 
             bool isBody1 = contact.Body1 == Body;
@@ -80,10 +80,10 @@ public class Player
 
             if (numContacts == 0) continue;
 
-            // divide the result by the number of contact points to get the "center" of the contact
+            // 将结果除以接触点数量，得到接触的“中心”
             hitPoint *= (1.0f / numContacts);
 
-            // check if the hitpoint is on the players base
+            // 检查命中点是否位于玩家底部
             if (hitPoint.Y <= -0.8f) return true;
         }
 
@@ -141,8 +141,8 @@ public class Player
 
                 Body.AddForce(force);
 
-                // follow Newton's law (for once) and add a force
-                // with equal magnitude in the opposite direction.
+                // 遵循牛顿定律（就这一次），并沿相反方向
+                // 施加大小相等的力。
                 floor!.AddForce(-force, Body.Position + hitpoint);
             }
         }

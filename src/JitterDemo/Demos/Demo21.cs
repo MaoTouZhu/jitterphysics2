@@ -12,18 +12,18 @@ using JitterDemo.Renderer.OpenGL;
 namespace JitterDemo;
 
 /*
- * Infinite Voxel World Demo
- * Code generated and optimized with Google Gemini
- * * Features:
- * - Infinite procedural terrain using 3D Perlin Noise
- * - Multi-threaded Chunk Generation
- * - Frustum Culling & Face Culling for high performance
- * - Object Pooling to minimize Garbage Collection
- * - Custom Voxel Collision system for Jitter2
+ * 无限体素世界演示
+ * 代码由 Google Gemini 生成并优化
+ * * 特性：
+ * - 使用 3D Perlin 噪声的无限程序化地形
+ * - 多线程区块生成
+ * - 视锥剔除与面剔除，以实现高性能
+ * - 对象池化，以尽量减少垃圾回收
+ * - 为 Jitter2 定制的体素碰撞系统
  */
 
 // -------------------------------------------------------------------------
-// 1. DATA STRUCTURES (Optimized for Memory)
+// 1. 数据结构（针对内存优化）
 // -------------------------------------------------------------------------
 
 public enum VoxelType : byte
@@ -33,15 +33,15 @@ public enum VoxelType : byte
     Snow = 2
 }
 
-// Lightweight struct for rendering data.
-// We use simple ints/bytes to keep memory footprint low in large lists.
+// 用于渲染数据的轻量级结构体。
+// 我们使用简单的 int/byte 来在大型列表中保持较低的内存占用。
 public readonly struct VoxelRenderData(int x, int y, int z, VoxelType type)
 {
     public readonly int X = x, Y = y, Z = z;
     public readonly VoxelType Type = type;
 }
 
-// Key for the Chunk Dictionary (Spatial Hashing)
+// 区块字典的键（空间哈希）
 public readonly struct ChunkKey(int x, int z) : IEquatable<ChunkKey>
 {
     public readonly int X = x;
@@ -55,7 +55,7 @@ public readonly struct ChunkKey(int x, int z) : IEquatable<ChunkKey>
     public static bool operator !=(ChunkKey left, ChunkKey right) => !(left == right);
 }
 
-// Temporary struct passed to the Physics Engine (NarrowPhase)
+// 传递给物理引擎（窄相）的临时结构体。
 public readonly struct CollisionVoxel(JVector position) : ISupportMappable
 {
     private const float HalfSize = 0.5f;
@@ -71,7 +71,7 @@ public readonly struct CollisionVoxel(JVector position) : ISupportMappable
 }
 
 // -------------------------------------------------------------------------
-// 2. NOISE GENERATOR (Standard Perlin Implementation)
+// 2. 噪声生成器（标准 Perlin 实现）
 // -------------------------------------------------------------------------
 public static class Noise
 {
@@ -134,32 +134,32 @@ public static class Noise
 }
 
 // -------------------------------------------------------------------------
-// 3. WORLD LOGIC (Procedural Generation)
+// 3. 世界逻辑（程序化生成）
 // -------------------------------------------------------------------------
 public class VoxelWorld : IDynamicTreeProxy, IRayCastable
 {
-    // Global minimum height for optimizing loops
+    // 用于优化循环的全局最小高度
     public const int MinHeight = -40;
 
     public static float GetHeight(int x, int z)
     {
         float h = 0;
-        h += Noise.Calc(x * 0.01f, z * 0.01f) * 30.0f; // Mountains
-        h += Noise.Calc(x * 0.05f, z * 0.05f) * 5.0f;  // Hills
+        h += Noise.Calc(x * 0.01f, z * 0.01f) * 30.0f; // 山脉
+        h += Noise.Calc(x * 0.05f, z * 0.05f) * 5.0f;  // 丘陵
         return h;
     }
 
     public static bool IsSolid(int x, int y, int z, float terrainHeight)
     {
-        // 1. Bedrock Layer
+        // 1. 基岩层
         if (y < MinHeight) return true;
 
-        // 2. 3D Noise for Caves
-        // Returns true if solid, false if air (cave)
+        // 2. 用于洞穴的 3D 噪声
+        // 若为固体则返回 true，若为空气（洞穴）则返回 false
         float density = Noise.Calc3D(x * 0.05f, y * 0.08f, z * 0.05f);
 
-        // 3. Ground Logic
-        // If below terrain height, solid UNLESS noise creates a cave (density > 0.3)
+        // 3. 地面逻辑
+        // 若低于地形高度，则为固体，除非噪声形成了洞穴（density > 0.3）
         if (y < terrainHeight) return density <= 0.3f;
 
         return false;
@@ -167,7 +167,7 @@ public class VoxelWorld : IDynamicTreeProxy, IRayCastable
 
     public static bool IsSolid(int x, int y, int z) => IsSolid(x, y, z, GetHeight(x, z));
 
-    // IBroadPhaseProxy implementation
+    // IBroadPhaseProxy 实现
     public JVector Velocity => JVector.Zero;
     public JBoundingBox WorldBoundingBox => new (new JVector(-1e6f), new JVector(1e6f));
     public int NodePtr { get; set; }
@@ -178,7 +178,7 @@ public class VoxelWorld : IDynamicTreeProxy, IRayCastable
 }
 
 // -------------------------------------------------------------------------
-// 4. COLLISION FILTER (Physics Integration)
+// 4. 碰撞过滤器（物理集成）
 // -------------------------------------------------------------------------
 public class VoxelCollisionFilter : IBroadPhaseFilter
 {
@@ -193,19 +193,19 @@ public class VoxelCollisionFilter : IBroadPhaseFilter
     {
         this.world = world;
         this.voxelProxy = voxelProxy;
-        // Reserve a range of IDs for voxel contacts
+        // 为体素接触预留一段 ID 范围
         (minIndex, _) = World.RequestId(1_000_000);
     }
 
     public bool Filter(IDynamicTreeProxy shapeA, IDynamicTreeProxy shapeB)
     {
-        // Only process collisions involving the VoxelWorld proxy
+        // 只处理涉及 VoxelWorld 代理的碰撞
         if (shapeA != voxelProxy && shapeB != voxelProxy) return true;
 
         var bodyShape = shapeA == voxelProxy ? shapeB : shapeA;
         if (bodyShape is not RigidBodyShape rbs || !rbs.RigidBody.IsActive) return false;
 
-        // Iterate through all integer coordinates intersecting the body's AABB
+        // 遍历与刚体轴对齐包围盒相交的所有整数坐标
         JBoundingBox box = bodyShape.WorldBoundingBox;
         int minX = (int)MathF.Floor(box.Min.X);
         int minY = (int)MathF.Floor(box.Min.Y);
@@ -224,21 +224,21 @@ public class VoxelCollisionFilter : IBroadPhaseFilter
                 {
                     if (VoxelWorld.IsSolid(x, y, z))
                     {
-                        // Generate a unique ID based on coordinates
+                        // 根据坐标生成唯一 ID
                         ulong voxelId = (ulong)((x * 73856093) ^ (y * 19349663) ^ (z * 83492791));
 
                         JVector voxelPos = new JVector(x + 0.5f, y + 0.5f, z + 0.5f);
                         CollisionVoxel voxel = new CollisionVoxel(voxelPos);
 
-                        // NarrowPhase: Box vs Voxel
+                        // 窄相：盒体对体素
                         bool hit = NarrowPhase.MprEpa(voxel, rbs,
                             rbs.RigidBody!.Orientation, rbs.RigidBody!.Position,
                             out JVector pointA, out JVector pointB, out JVector normal, out float penetration);
 
                         if (hit)
                         {
-                            // "Internal Edge" Smoothing
-                            // Discard contacts that push against internal edges of the mesh
+                            // “内部边”平滑
+                            // 丢弃那些会推向网格内部边的接触
                             JVector relPos = pointA - voxelPos;
                             if (relPos.X > closeToEdge && normal.X > NormalThreshold && VoxelWorld.IsSolid(x + 1, y, z)) continue;
                             if (relPos.X < -closeToEdge && normal.X < -NormalThreshold &&  VoxelWorld.IsSolid(x - 1, y, z)) continue;
@@ -259,7 +259,7 @@ public class VoxelCollisionFilter : IBroadPhaseFilter
 }
 
 // -------------------------------------------------------------------------
-// 5. THE DEMO (Chunk Management & Rendering)
+// 5. 演示（区块管理与渲染）
 // -------------------------------------------------------------------------
 public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
 {
@@ -270,11 +270,11 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
     private World world = null!;
     private VoxelWorld voxelProxy = null!;
 
-    // Config
+    // 配置
     private const int ChunkSize = 16;
-    private const int RenderRadius = 8; // Chunks to render in each direction
+    private const int RenderRadius = 8; // 每个方向上渲染的区块数
 
-    // Cache
+    // 缓存
     private readonly ConcurrentDictionary<ChunkKey, List<VoxelRenderData>> chunkCache = new();
     private readonly ConcurrentStack<List<VoxelRenderData>> listPool = new();
 
@@ -282,9 +282,9 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
 
     private readonly Vector3[] palette =
     [
-        new Vector3(0.1f, 0.5f, 0.1f), // Grass
-        new Vector3(0.3f, 0.3f, 0.3f), // Rock (Darker)
-        new Vector3(0.9f, 0.9f, 0.9f)  // Snow
+        new Vector3(0.1f, 0.5f, 0.1f), // 草地
+        new Vector3(0.3f, 0.3f, 0.3f), // 岩石（较暗）
+        new Vector3(0.9f, 0.9f, 0.9f)  // 雪
     ];
 
     public void Build(Playground pg, World world)
@@ -302,12 +302,12 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
         Vector3 camPos = cam.Position;
         Vector3 camDir = cam.Direction;
 
-        // Current chunk coordinates
+        // 当前区块坐标
         int camChunkX = (int)MathF.Floor(camPos.X / ChunkSize);
         int camChunkZ = (int)MathF.Floor(camPos.Z / ChunkSize);
 
-        // 1. GENERATION PHASE (Parallel)
-        // Identify which chunks are missing and generate them on threads
+        // 1. 生成阶段（并行）
+        // 找出缺失的区块，并在各线程上生成它们
         var chunksNeeded = new List<ChunkKey>();
         for (int x = -RenderRadius; x <= RenderRadius; x++)
         {
@@ -327,8 +327,8 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
             });
         }
 
-        // 2. RENDER PHASE (Main Thread)
-        // Submit geometry to the GPU using Instancing
+        // 2. 渲染阶段（主线程）
+        // 使用实例化将几何体提交到 GPU
         var cr = pg.Cubes;
 
         for (int x = -RenderRadius; x <= RenderRadius; x++)
@@ -339,10 +339,10 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
 
                 ChunkKey key = new ChunkKey(camChunkX + x, camChunkZ + z);
 
-                // Frustum Culling (Approximate using Dot Product)
+                // 视锥剔除（使用点积近似判断）
                 Vector3 chunkCenter = new Vector3(
                     key.X * ChunkSize + (ChunkSize * 0.5f),
-                    camPos.Y, // Ignore Y for horizontal FOV check
+                    camPos.Y, // 水平视场检查时忽略 Y
                     key.Z * ChunkSize + (ChunkSize * 0.5f)
                 );
 
@@ -359,8 +359,8 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
             }
         }
 
-        // 3. MAINTENANCE (Cleanup)
-        // Every 60 frames, remove far-away chunks to free memory
+        // 3. 维护（清理）
+        // 每 60 帧移除远处的区块以释放内存
         frameCount++;
         if (frameCount > 60)
         {
@@ -372,15 +372,15 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
     private bool IsChunkInView(Vector3 chunkCenter, Vector3 camPos, Vector3 camDir)
     {
         Vector3 toChunk = chunkCenter - camPos;
-        // Always draw chunks very close to camera to avoid clipping issues
+        // 总是绘制非常靠近相机的区块，以避免裁剪问题
         if (toChunk.LengthSquared() < 32 * 32) return true;
-        // Simple Cone Check (>60 degrees)
+        // 简单的锥体检查（>60 度）
         return Vector3.Dot(camDir, Vector3.Normalize(toChunk)) > 0.5f;
     }
 
     private List<VoxelRenderData> BuildChunk(int cx, int cz)
     {
-        // Object Pooling: Reuse list from pool if available
+        // 对象池化：如果可用，从池中复用列表
         if (!listPool.TryPop(out var list)) list = new List<VoxelRenderData>(512);
         else list.Clear();
 
@@ -395,7 +395,7 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
             {
                 float h = VoxelWorld.GetHeight(x, z);
 
-                // Loop Optimization: Scan from just below bedrock up to surface
+                // 循环优化：从基岩下方略低处扫描到地表
                 int maxY = (int)h + 2;
                 int minY = VoxelWorld.MinHeight - 2;
 
@@ -403,7 +403,7 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
                 {
                     if (VoxelWorld.IsSolid(x, y, z, h))
                     {
-                        // Face Culling: Only draw blocks adjacent to Air
+                        // 面剔除：只绘制与空气相邻的方块
                         bool topAir = !VoxelWorld.IsSolid(x, y + 1, z, h);
                         bool bottomAir = !VoxelWorld.IsSolid(x, y - 1, z, h);
                         bool exposed = topAir || bottomAir;
@@ -421,7 +421,7 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
                         {
                             VoxelType type = VoxelType.Rock;
 
-                            if (topAir) // Surface blocks get snow/grass
+                            if (topAir) // 表层方块获得雪/草
                             {
                                 if (y > 10) type = VoxelType.Snow;
                                 else if (y < -5) type = VoxelType.Rock;
@@ -452,7 +452,7 @@ public class Demo21 : IDemo, ICleanDemo, IDrawUpdate
 
         foreach (var key in toRemove)
         {
-            // Return old lists to the pool instead of garbage collecting them
+            // 将旧列表归还到池中，而不是让它们被垃圾回收
             if (chunkCache.TryRemove(key, out var list)) listPool.Push(list);
         }
     }

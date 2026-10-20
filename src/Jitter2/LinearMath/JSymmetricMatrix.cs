@@ -11,10 +11,10 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Represents a symmetric 3x3 matrix using six components of type <see cref="Real"/>.
+/// 使用六个 <see cref="Real"/> 类型分量表示对称 3x3 矩阵。
 /// </summary>
 /// <remarks>
-/// Only the upper triangle is stored. The lower-triangle properties access the same components.
+/// 仅存储上三角部分。下三角属性访问的是相同的分量。
 /// </remarks>
 [StructLayout(LayoutKind.Explicit, Size = 6 * sizeof(Real))]
 public struct JSymmetricMatrix(
@@ -29,7 +29,7 @@ public struct JSymmetricMatrix(
     [FieldOffset(4 * sizeof(Real))] public Real M23 = m23;
     [FieldOffset(5 * sizeof(Real))] public Real M33 = m33;
 
-    /// <summary>The component shared with <see cref="M12"/>.</summary>
+    /// <summary>与 <see cref="M12"/> 共享的分量。</summary>
     public Real M21
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -38,7 +38,7 @@ public struct JSymmetricMatrix(
         set => M12 = value;
     }
 
-    /// <summary>The component shared with <see cref="M13"/>.</summary>
+    /// <summary>与 <see cref="M13"/> 共享的分量。</summary>
     public Real M31
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -47,7 +47,7 @@ public struct JSymmetricMatrix(
         set => M13 = value;
     }
 
-    /// <summary>The component shared with <see cref="M23"/>.</summary>
+    /// <summary>与 <see cref="M23"/> 共享的分量。</summary>
     public Real M32
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -57,34 +57,34 @@ public struct JSymmetricMatrix(
     }
 
 
-    /// <summary>The identity matrix.</summary>
+    /// <summary>单位矩阵。</summary>
     public static readonly JSymmetricMatrix Identity = new(1, 0, 0, 1, 0, 1);
 
-    /// <summary>The zero matrix.</summary>
+    /// <summary>零矩阵。</summary>
     public static readonly JSymmetricMatrix Zero;
 
-    /// <summary>Expands the matrix into a full 3x3 matrix.</summary>
+    /// <summary>将矩阵展开为完整的 3x3 矩阵。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly JMatrix ToMatrix()
     {
         return new JMatrix(M11, M12, M13, M12, M22, M23, M13, M23, M33);
     }
 
-    /// <summary>Creates a diagonal scaling matrix.</summary>
+    /// <summary>创建对角缩放矩阵。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix CreateScale(in JVector scale)
     {
         return new JSymmetricMatrix(scale.X, 0, 0, scale.Y, 0, scale.Z);
     }
 
-    /// <summary>Creates a diagonal scaling matrix.</summary>
+    /// <summary>创建对角缩放矩阵。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix CreateScale(Real x, Real y, Real z)
     {
         return new JSymmetricMatrix(x, 0, 0, y, 0, z);
     }
 
-    /// <summary>Calculates the symmetric outer product <c>vector * vectorᵀ</c>.</summary>
+    /// <summary>计算对称外积 <c>vector * vectorᵀ</c>。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix Outer(in JVector vector)
     {
@@ -92,14 +92,14 @@ public struct JSymmetricMatrix(
             vector.Y * vector.Y, vector.Y * vector.Z, vector.Z * vector.Z);
     }
 
-    /// <summary>Calculates the trace (sum of diagonal components).</summary>
+    /// <summary>计算迹（对角分量之和）。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real Trace()
     {
         return M11 + M22 + M33;
     }
 
-    /// <summary>Calculates the determinant of the matrix.</summary>
+    /// <summary>计算矩阵的行列式。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real Determinant()
     {
@@ -108,12 +108,12 @@ public struct JSymmetricMatrix(
                M13 * (M12 * M23 - M22 * M13);
     }
 
-    /// <summary>Calculates the inverse of a symmetric matrix.</summary>
-    /// <param name="matrix">The matrix to invert.</param>
-    /// <param name="result">Output: The inverse, or zero if inversion fails.</param>
+    /// <summary>计算对称矩阵的逆。</summary>
+    /// <param name="matrix">要求逆的矩阵。</param>
+    /// <param name="result">输出：逆矩阵，若求逆失败则为零。</param>
     /// <returns>
-    /// <c>true</c> if a finite inverse can be computed; otherwise, <c>false</c>,
-    /// matching <see cref="JMatrix.Inverse"/>.
+    /// 若可计算出有限的逆则为 <c>true</c>；否则为 <c>false</c>，
+    /// 与 <see cref="JMatrix.Inverse"/> 的行为一致。
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Inverse(in JSymmetricMatrix matrix, out JSymmetricMatrix result)
@@ -164,7 +164,7 @@ public struct JSymmetricMatrix(
             return false;
         }
 
-        // Read every input before writing the result, allowing in-place inversion.
+        // 在写入结果之前读取所有输入，从而支持就地求逆。
         Real m11 = matrix.M22 * matrix.M33 - matrix.M23 * matrix.M23;
         Real m12 = matrix.M13 * matrix.M23 - matrix.M12 * matrix.M33;
         Real m13 = matrix.M12 * matrix.M23 - matrix.M22 * matrix.M13;
@@ -177,7 +177,7 @@ public struct JSymmetricMatrix(
         return IsFinite(result);
     }
 
-    /// <summary>Adds two matrices component-wise.</summary>
+    /// <summary>将两个矩阵逐分量相加。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix Add(in JSymmetricMatrix matrix1, in JSymmetricMatrix matrix2)
     {
@@ -185,7 +185,7 @@ public struct JSymmetricMatrix(
         return result;
     }
 
-    /// <summary>Adds two matrices component-wise.</summary>
+    /// <summary>将两个矩阵逐分量相加。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Add(in JSymmetricMatrix matrix1, in JSymmetricMatrix matrix2,
         out JSymmetricMatrix result)
@@ -195,7 +195,7 @@ public struct JSymmetricMatrix(
             matrix1.M23 + matrix2.M23, matrix1.M33 + matrix2.M33);
     }
 
-    /// <summary>Subtracts the second matrix from the first component-wise.</summary>
+    /// <summary>将第二个矩阵从第一个中逐分量减去。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix Subtract(in JSymmetricMatrix matrix1, in JSymmetricMatrix matrix2)
     {
@@ -203,7 +203,7 @@ public struct JSymmetricMatrix(
         return result;
     }
 
-    /// <summary>Subtracts the second matrix from the first component-wise.</summary>
+    /// <summary>将第二个矩阵从第一个中逐分量减去。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Subtract(in JSymmetricMatrix matrix1, in JSymmetricMatrix matrix2,
         out JSymmetricMatrix result)
@@ -213,7 +213,7 @@ public struct JSymmetricMatrix(
             matrix1.M23 - matrix2.M23, matrix1.M33 - matrix2.M33);
     }
 
-    /// <summary>Multiplies a matrix by a scalar factor.</summary>
+    /// <summary>将矩阵乘以标量因子。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix Multiply(in JSymmetricMatrix matrix, Real scaleFactor)
     {
@@ -221,7 +221,7 @@ public struct JSymmetricMatrix(
         return result;
     }
 
-    /// <summary>Multiplies a matrix by a scalar factor.</summary>
+    /// <summary>将矩阵乘以标量因子。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Multiply(in JSymmetricMatrix matrix, Real scaleFactor, out JSymmetricMatrix result)
     {
@@ -230,10 +230,10 @@ public struct JSymmetricMatrix(
             matrix.M23 * scaleFactor, matrix.M33 * scaleFactor);
     }
 
-    /// <summary>Calculates <c>transform * matrix * transformᵀ</c>.</summary>
+    /// <summary>计算 <c>transform * matrix * transformᵀ</c>。</summary>
     /// <remarks>
-    /// Computes only the six independent components. A rotation transforms an inertia tensor
-    /// into the rotated frame; general transforms are supported as well.
+    /// 仅计算六个独立分量。旋转可将惯性张量变换
+    /// 到旋转后的坐标系；也支持一般变换。
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix Transform(in JSymmetricMatrix matrix, in JMatrix transform)
@@ -242,7 +242,7 @@ public struct JSymmetricMatrix(
         return result;
     }
 
-    /// <summary>Calculates <c>transform * matrix * transformᵀ</c>.</summary>
+    /// <summary>计算 <c>transform * matrix * transformᵀ</c>。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Transform(in JSymmetricMatrix matrix, in JMatrix transform,
         out JSymmetricMatrix result)
@@ -259,26 +259,26 @@ public struct JSymmetricMatrix(
             product2 * row2, product2 * row3, product3 * row3);
     }
 
-    /// <summary>Expands the symmetric matrix into a full matrix.</summary>
+    /// <summary>将对称矩阵展开为完整矩阵。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator JMatrix(in JSymmetricMatrix matrix) => matrix.ToMatrix();
 
-    /// <summary>Adds two matrices.</summary>
+    /// <summary>将两个矩阵相加。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix operator +(in JSymmetricMatrix matrix1, in JSymmetricMatrix matrix2)
         => Add(matrix1, matrix2);
 
-    /// <summary>Subtracts the second matrix from the first.</summary>
+    /// <summary>将第二个矩阵从第一个中减去。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix operator -(in JSymmetricMatrix matrix1, in JSymmetricMatrix matrix2)
         => Subtract(matrix1, matrix2);
 
-    /// <summary>Scales a matrix by a factor.</summary>
+    /// <summary>按因子缩放矩阵。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix operator *(in JSymmetricMatrix matrix, Real factor)
         => Multiply(matrix, factor);
 
-    /// <summary>Scales a matrix by a factor.</summary>
+    /// <summary>按因子缩放矩阵。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSymmetricMatrix operator *(Real factor, in JSymmetricMatrix matrix)
         => Multiply(matrix, factor);

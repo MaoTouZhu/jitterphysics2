@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: MIT
  */
 
-// Uncomment here to build Jitter using double precision
+// 在此取消注释即可使用双精度构建 Jitter
 // --------------------------------------------------------
 // #define USE_DOUBLE_PRECISION
 // --------------------------------------------------------
-// Or use command line option, e.g.,
+// 或使用命令行选项，例如，
 // dotnet build -c Release -p:DoublePrecision=true
 
 #if USE_DOUBLE_PRECISION
@@ -30,46 +30,46 @@ global using VectorReal = System.Runtime.Intrinsics.Vector128<System.Single>;
 namespace Jitter2;
 
 /// <summary>
-/// Provides constants and utilities related to floating-point precision configuration.
-/// The library can be compiled with single-precision (float) or double-precision (double)
-/// by defining the <c>USE_DOUBLE_PRECISION</c> symbol.
+/// 提供与浮点精度配置相关的常量和工具。
+/// 通过定义 <c>USE_DOUBLE_PRECISION</c> 符号，可以将该库编译为
+/// 单精度（float）或双精度（double）。
 /// </summary>
 public static class Precision
 {
 #if USE_DOUBLE_PRECISION
     /// <summary>
-    /// The size in bytes of a full constraint data structure.
+    /// 完整约束数据结构的字节大小。
     /// </summary>
     public const int ConstraintSizeFull = 512;
 
     /// <summary>
-    /// The size in bytes of a small constraint data structure.
+    /// 小型约束数据结构的字节大小。
     /// </summary>
     public const int ConstraintSizeSmall = 256;
 
     /// <summary>
-    /// The size in bytes of the <see cref="Dynamics.RigidBodyData"/> structure.
+    /// <see cref="Dynamics.RigidBodyData"/> 结构的字节大小。
     /// </summary>
     public const int RigidBodyDataSize = 256;
 #else
     /// <summary>
-    /// The size in bytes of a full constraint data structure.
+    /// 完整约束数据结构的字节大小。
     /// </summary>
     public const int ConstraintSizeFull = 256;
 
     /// <summary>
-    /// The size in bytes of a small constraint data structure.
+    /// 小型约束数据结构的字节大小。
     /// </summary>
     public const int ConstraintSizeSmall = 128;
 
     /// <summary>
-    /// The size in bytes of the <see cref="Dynamics.RigidBodyData"/> structure.
+    /// <see cref="Dynamics.RigidBodyData"/> 结构的字节大小。
     /// </summary>
     public const int RigidBodyDataSize = 128;
 #endif
 
     /// <summary>
-    /// Gets a value indicating whether the engine is configured to use double-precision floating-point numbers.
+    /// 获取一个值，指示引擎是否配置为使用双精度浮点数。
     /// </summary>
     public static bool IsDoublePrecision => sizeof(Real) == sizeof(double);
 }

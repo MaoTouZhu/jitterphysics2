@@ -19,8 +19,8 @@ public class ExactPredicateTests
             var c = Vector(i % 7 == 0 ? random.Next(-exponentRange, exponentRange) : exponent);
             var point = i % 4 == 0 ? a + b - c : i % 4 == 1 ? a : Vector(exponent);
             if (i % 8 == 0) point.X = MathR.BitIncrement(point.X);
-            // Cancellation or BitIncrement(0) can produce a coordinate below
-            // the supported range; the polytope rejects those inputs.
+            // 相消或 BitIncrement(0) 可能产生低于支持范围的坐标；
+            // 多面体会拒绝这些输入。
             if (!(PlaneFilter.IsSafe(a) && PlaneFilter.IsSafe(b) && PlaneFilter.IsSafe(c) && PlaneFilter.IsSafe(point))) continue;
             tested++;
 

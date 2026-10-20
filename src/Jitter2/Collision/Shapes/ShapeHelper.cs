@@ -12,7 +12,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Provides helper methods for calculating the properties of implicitly defined shapes.
+/// 提供用于计算隐式定义形状属性的辅助方法。
 /// </summary>
 public static class ShapeHelper
 {
@@ -49,9 +49,9 @@ public static class ShapeHelper
     }
 
     /// <inheritdoc cref="Tessellate{TSupport}(in TSupport, int)"/>
-    /// <param name="support">The support map interface implemented by the shape.</param>
-    /// <param name="hullCollection">A collection to which the triangles are added.</param>
-    /// <param name="subdivisions">The recursion depth, including the final emission level.</param>
+    /// <param name="support">形状实现的支撑映射接口。</param>
+    /// <param name="hullCollection">用于添加三角形的集合。</param>
+    /// <param name="subdivisions">递归深度，包含最终输出层级。</param>
     public static void Tessellate<TSupport, TCollection>(in TSupport support, TCollection hullCollection, int subdivisions = 3)
         where TSupport : ISupportMappable
         where TCollection : class, ICollection<JTriangle>
@@ -61,25 +61,25 @@ public static class ShapeHelper
     }
 
     /// <summary>
-    /// Creates a tessellation of a shape defined by its support map and appends all generated triangles to the specified sink.
+    /// 创建由支撑映射定义的形状的细分网格，并将所有生成的三角形追加到指定的接收器。
     /// </summary>
-    /// <typeparam name="TSupport">The support shape type.</typeparam>
-    /// <typeparam name="TSink">The sink type receiving the generated triangles.</typeparam>
-    /// <param name="support">The support map interface implemented by the shape.</param>
-    /// <param name="hullSink">The sink receiving the generated triangles.</param>
-    /// <param name="subdivisions">The recursion depth, including the final emission level.
-    /// A value of 1 emits the initial faces; the default of 3 splits each face twice.</param>
+    /// <typeparam name="TSupport">支撑形状类型。</typeparam>
+    /// <typeparam name="TSink">接收生成三角形的接收器类型。</typeparam>
+    /// <param name="support">形状实现的支撑映射接口。</param>
+    /// <param name="hullSink">接收生成三角形的接收器。</param>
+    /// <param name="subdivisions">递归深度，包含最终输出层级。
+    /// 值为 1 时输出初始面；默认值 3 会将每个面分割两次。</param>
     /// <remarks>
     /// <para>
-    /// <b>Warning:</b> The tessellated hull may not be perfectly convex. It is therefore not suited to be used with
-    /// <see cref="ConvexHullShape"/>.
+    /// <b>警告：</b>细分后的凸包可能并非完全凸。因此不适用于
+    /// <see cref="ConvexHullShape"/>。
     /// </para>
     /// <para>
-    /// <b>Warning:</b> The tessellation may contain overlapping triangles and folds, with geometric normals
-    /// pointing inward even for smooth convex shapes.
+    /// <b>警告：</b>细分网格可能包含重叠的三角形和折痕，几何法线
+    /// 甚至对于光滑凸形状也可能朝内。
     /// </para>
     /// <para>
-    /// The time complexity is O(4^n), where n is the number of subdivisions.
+    /// 时间复杂度为 O(4^n)，其中 n 为细分次数。
     /// </para>
     /// </remarks>
     public static void Tessellate<TSupport, TSink>(in TSupport support, ref TSink hullSink, int subdivisions = 3)
@@ -116,9 +116,9 @@ public static class ShapeHelper
             return;
         }
 
-        // Deliberately skip re-projecting the midpoint directions onto the sphere.
-        // The resulting samples are still good enough for this approximation, and
-        // avoiding those normalization calls keeps tessellation inexpensive.
+        // 有意跳过将中点方向重新投影到球面上的步骤。
+        // 由此得到的采样点对本次近似而言已足够好，且
+        // 避免这些归一化调用可使细分保持低开销。
         JVector h1 = (v1 + v2) * (Real)0.5;
         JVector h2 = (v2 + v3) * (Real)0.5;
         JVector h3 = (v3 + v1) * (Real)0.5;
@@ -136,22 +136,22 @@ public static class ShapeHelper
     }
 
     /// <summary>
-    /// Creates a tessellation of a shape defined by its support map.
+    /// 创建由支撑映射定义的形状的细分网格。
     /// </summary>
-    /// <param name="support">The support map interface implemented by the shape.</param>
-    /// <param name="subdivisions">The recursion depth, including the final emission level.
-    /// A value of 1 emits the initial faces; the default of 3 splits each face twice.</param>
+    /// <param name="support">形状实现的支撑映射接口。</param>
+    /// <param name="subdivisions">递归深度，包含最终输出层级。
+    /// 值为 1 时输出初始面；默认值 3 会将每个面分割两次。</param>
     /// <remarks>
     /// <para>
-    /// The tessellated hull may not be perfectly convex. It is therefore not suited to be used with
-    /// <see cref="ConvexHullShape"/>.
+    /// 细分后的凸包可能并非完全凸。因此不适用于
+    /// <see cref="ConvexHullShape"/>。
     /// </para>
     /// <para>
-    /// <b>Warning:</b> The tessellation may contain overlapping triangles and folds, with geometric normals
-    /// pointing inward even for smooth convex shapes.
+    /// <b>警告：</b>细分网格可能包含重叠的三角形和折痕，几何法线
+    /// 甚至对于光滑凸形状也可能朝内。
     /// </para>
     /// <para>
-    /// The time complexity is O(4^n), where n is the number of subdivisions.
+    /// 时间复杂度为 O(4^n)，其中 n 为细分次数。
     /// </para>
     /// </remarks>
     public static List<JTriangle> Tessellate<TSupport>(in TSupport support, int subdivisions = 3)
@@ -163,26 +163,26 @@ public static class ShapeHelper
     }
 
     /// <summary>
-    /// Creates a tessellation of the convex hull of a given set of 3D vertices.
+    /// 创建给定 3D 顶点集凸包的细分网格。
     /// </summary>
-    /// <param name="vertices">The vertices used to approximate the hull.</param>
-    /// <param name="subdivisions">The number of subdivisions used for hull generation.</param>
-    /// <returns>A list of triangles representing the convex hull.</returns>
+    /// <param name="vertices">用于近似凸包的顶点。</param>
+    /// <param name="subdivisions">用于生成凸包的细分次数。</param>
+    /// <returns>表示凸包的三角形列表。</returns>
     /// <remarks>
     /// <para>
-    /// The tessellated hull may not be perfectly convex. It is therefore not suited to be used with
-    /// <see cref="ConvexHullShape"/>.
+    /// 细分后的凸包可能并非完全凸。因此不适用于
+    /// <see cref="ConvexHullShape"/>。
     /// </para>
     /// <para>
-    /// <b>Warning:</b> The tessellation may contain overlapping triangles and folds, with geometric normals
-    /// pointing inward even for smooth convex shapes.
+    /// <b>警告：</b>细分网格可能包含重叠的三角形和折痕，几何法线
+    /// 甚至对于光滑凸形状也可能朝内。
     /// </para>
     /// <para>
-    /// The time complexity is O(4^n), where n is the number of subdivisions.
+    /// 时间复杂度为 O(4^n)，其中 n 为细分次数。
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="vertices"/> is empty.
+    /// 当 <paramref name="vertices"/> 为空时抛出。
     /// </exception>
     public static List<JTriangle> Tessellate(ReadOnlySpan<JVector> vertices, int subdivisions = 3)
     {
@@ -219,12 +219,12 @@ public static class ShapeHelper
     #endregion
 
     /// <summary>
-    /// Calculates the axis-aligned bounding box of a shape given its orientation and position.
+    /// 计算给定朝向和位置的形状的轴对齐包围盒。
     /// </summary>
-    /// <param name="support">The support map interface implemented by the shape.</param>
-    /// <param name="orientation">The orientation of the shape.</param>
-    /// <param name="position">The position of the shape.</param>
-    /// <param name="box">The resulting bounding box.</param>
+    /// <param name="support">形状实现的支撑映射接口。</param>
+    /// <param name="orientation">形状的朝向。</param>
+    /// <param name="position">形状的位置。</param>
+    /// <param name="box">得到的包围盒。</param>
     public static void CalculateBoundingBox<TSupport>(in TSupport support,
         in JQuaternion orientation, in JVector position, out JBoundingBox box)
         where TSupport : ISupportMappable
@@ -258,26 +258,25 @@ public static class ShapeHelper
     }
 
     /// <summary>
-    /// Approximates the convex hull of a given set of 3D vertices by sampling support points
-    /// generated through recursive subdivision of an icosahedron.
+    /// 通过对二十面体递归细分生成的支撑点进行采样，近似给定 3D 顶点集的凸包。
     /// </summary>
-    /// <param name="vertices">The vertices used to approximate the hull.</param>
+    /// <param name="vertices">用于近似凸包的顶点。</param>
     /// <param name="subdivisions">
-    /// The number of recursive subdivisions applied to each icosahedron triangle.
-    /// Higher values produce more sampling directions and better coverage,
-    /// but increase computation. Default is 3.
+    /// 对每个二十面体三角形施加的递归细分次数。
+    /// 值越大，采样方向越多、覆盖越好，
+    /// 但计算量也越大。默认为 3。
     /// </param>
     /// <returns>
-    /// A list of <see cref="JVector"/> points on the convex hull, sampled using directional support mapping from a
-    /// refined spherical distribution.
+    /// 凸包上的 <see cref="JVector"/> 点列表，这些点通过从
+    /// 精细化的球面分布进行方向性支撑映射采样得到。
     /// </returns>
     /// <remarks>
-    /// This method begins with a regular icosahedron and recursively subdivides each triangular face into smaller
-    /// triangles, projecting new vertices onto the unit sphere. Each final vertex direction is passed to the support
-    /// mapper to generate a hull point. The time complexity is O(4^n), where n is the number of subdivisions.
+    /// 此方法从正二十面体开始，递归地将每个三角面细分为更小的
+    /// 三角形，并将新顶点投影到单位球面上。每个最终的顶点方向都会传给支撑
+    /// 映射器以生成凸包点。时间复杂度为 O(4^n)，其中 n 为细分次数。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="vertices"/> is empty.
+    /// 当 <paramref name="vertices"/> 为空时抛出。
     /// </exception>
     public static List<JVector> SampleHull(ReadOnlySpan<JVector> vertices, int subdivisions = 3)
     {
@@ -291,25 +290,24 @@ public static class ShapeHelper
     }
 
     /// <summary>
-    /// Samples a convex shape's hull by evaluating support directions generated through recursive subdivision of
-    /// an icosahedron.
+    /// 通过对二十面体递归细分生成的支撑方向求值，采样凸形状的凸包。
     /// </summary>
     /// <param name="support">
-    /// An object implementing <see cref="ISupportMappable"/>, representing a convex shape that can be queried
-    /// with directional support mapping.
+    /// 实现 <see cref="ISupportMappable"/> 的对象，表示一个可用方向性支撑映射
+    /// 查询的凸形状。
     /// </param>
     /// <param name="subdivisions">
-    /// The number of recursive subdivisions applied to each icosahedron triangle. Higher values produce more sampling
-    /// directions and better coverage, but increase computation. Default is 3.
+    /// 对每个二十面体三角形施加的递归细分次数。值越大，采样
+    /// 方向越多、覆盖越好，但计算量也越大。默认为 3。
     /// </param>
     /// <returns>
-    /// A list of <see cref="JVector"/> points on the convex hull, sampled using directional support mapping from a
-    /// refined spherical distribution.
+    /// 凸包上的 <see cref="JVector"/> 点列表，这些点通过从
+    /// 精细化的球面分布进行方向性支撑映射采样得到。
     /// </returns>
     /// <remarks>
-    /// This method begins with a regular icosahedron and recursively subdivides each triangular face into smaller
-    /// triangles, projecting new vertices onto the unit sphere. Each final vertex direction is passed to the support
-    /// mapper to generate a hull point. The time complexity is O(4^n), where n is the number of subdivisions.
+    /// 此方法从正二十面体开始，递归地将每个三角面细分为更小的
+    /// 三角形，并将新顶点投影到单位球面上。每个最终的顶点方向都会传给支撑
+    /// 映射器以生成凸包点。时间复杂度为 O(4^n)，其中 n 为细分次数。
     /// </remarks>
     public static List<JVector> SampleHull<TSupport>(in TSupport support, int subdivisions = 3)
         where TSupport : ISupportMappable
@@ -377,32 +375,32 @@ public static class ShapeHelper
     }
 
     /// <summary>
-    /// Calculates the mass properties of an implicitly defined shape, assuming unit mass density.
+    /// 计算隐式定义形状的质量属性，假定单位质量密度。
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The shape is approximated via surface tessellation using the specified number of <paramref name="subdivisions"/>.
+    /// 形状通过表面细分进行近似，细分次数由 <paramref name="subdivisions"/> 指定。
     /// </para>
     /// <para>
-    /// <b>Note on Reference Frame:</b>
-    /// The calculated <paramref name="inertia"/> tensor is expressed relative to the <b>coordinate system origin (0,0,0)</b>,
-    /// <em>not</em> the calculated <paramref name="centerOfMass"/>.
+    /// <b>关于参考系的说明：</b>
+    /// 计算得到的 <paramref name="inertia"/> 张量是相对于 <b>坐标系原点 (0,0,0)</b> 表示的，
+    /// <em>而非</em>计算得到的 <paramref name="centerOfMass"/>。
     /// </para>
     /// </remarks>
-    /// <param name="support">The support map interface implemented by the shape.</param>
+    /// <param name="support">形状实现的支撑映射接口。</param>
     /// <param name="inertia">
-    /// Output parameter for the inertia tensor calculated relative to the <b>Origin (0,0,0)</b>.
+    /// 相对于 <b>原点 (0,0,0)</b> 计算的惯性张量的输出参数。
     /// </param>
-    /// <param name="centerOfMass">Output parameter for the calculated center of mass vector (relative to the Origin).</param>
-    /// <param name="mass">Output parameter for the calculated mass (Volume * density 1.0).</param>
-    /// <param name="subdivisions">The recursion depth for the surface tessellation (default 4).</param>
+    /// <param name="centerOfMass">计算得到的质心向量的输出参数（相对于原点）。</param>
+    /// <param name="mass">计算得到的质量的输出参数（体积 * 密度 1.0）。</param>
+    /// <param name="subdivisions">表面细分的递归深度（默认 4）。</param>
     public static void CalculateMassInertia<TSupport>(in TSupport support, out JSymmetricMatrix inertia, out JVector centerOfMass,
         out Real mass, int subdivisions = 4)
         where TSupport : ISupportMappable
     {
         MassInertiaSink sink = default;
-        // Preserve the generated winding, including inward-facing triangles. Signed tetrahedral
-        // contributions cancel overlapping coplanar patches; flipping triangles would break that cancellation.
+        // 保留生成的绕序，包括朝内的三角形。带符号的四面体
+        // 贡献会抵消重叠的共面片；翻转三角形会破坏这种抵消。
         Tessellate(in support, ref sink, subdivisions);
 
         inertia = JSymmetricMatrix.Identity * sink.Inertia.Trace() - sink.Inertia;

@@ -17,7 +17,7 @@ public class Demo13 : IDemo
         pg.AddFloor();
 
         {
-            // Motor
+            // 马达
             var b0 = world.CreateRigidBody();
             b0.AddShape(new BoxShape(2, 0.1f, 0.1f));
             b0.Position = new JVector(-1.1f, 4, 0);
@@ -45,7 +45,7 @@ public class Demo13 : IDemo
         }
 
         {
-            // Hinge Joint with -120 <-> + 120 Limit
+            // 带 -120 <-> +120 限位的铰链关节
             var b0 = world.CreateRigidBody();
             b0.AddShape(new BoxShape(2, 0.1f, 3));
             b0.AddShape(new BoxShape(0.1f, 2, 2.9f));
@@ -65,7 +65,7 @@ public class Demo13 : IDemo
             float angle = (float)JAngle.FromDegree(90);
             JVector rot1Axis = JVector.Transform(JVector.UnitZ, JQuaternion.CreateRotationY(angle));
 
-            // two free rotating wheels
+            // 两个自由旋转的车轮
             var b0 = world.CreateRigidBody();
             b0.Position = new JVector(5, 4, 0);
             b0.Orientation = JQuaternion.CreateRotationX(MathF.PI / 2);
@@ -81,7 +81,7 @@ public class Demo13 : IDemo
             hj1.HingeAngle.Softness = 0;
             hj2.HingeAngle.Softness = 0;
 
-            // constraint them to have the same rotation
+            // 约束它们具有相同的旋转
             var relative = world.CreateConstraint<TwistAngle>(b0, b1);
             relative.Initialize(JVector.UnitZ, rot1Axis);
         }

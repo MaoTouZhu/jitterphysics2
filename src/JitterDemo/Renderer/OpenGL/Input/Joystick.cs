@@ -17,7 +17,7 @@ public class JoystickConnectEventArgs : EventArgs
     }
 }
 
-// TODO: add gamepad states
+// TODO: 添加游戏手柄状态
 
 public static class Joystick
 {

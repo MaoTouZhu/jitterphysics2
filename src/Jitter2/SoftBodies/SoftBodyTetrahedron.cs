@@ -10,18 +10,18 @@ using Jitter2.LinearMath;
 namespace Jitter2.SoftBodies;
 
 /// <summary>
-/// Represents a tetrahedral shape in a soft body simulation.
+/// 表示软体模拟中的四面体形状。
 /// </summary>
 public sealed class SoftBodyTetrahedron : SoftBodyShape
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SoftBodyTetrahedron"/> class.
+    /// 初始化 <see cref="SoftBodyTetrahedron"/> 类的新实例。
     /// </summary>
-    /// <param name="body">The soft body this shape belongs to.</param>
-    /// <param name="v1">The first vertex.</param>
-    /// <param name="v2">The second vertex.</param>
-    /// <param name="v3">The third vertex.</param>
-    /// <param name="v4">The fourth vertex.</param>
+    /// <param name="body">此形状所属的软体。</param>
+    /// <param name="v1">第一个顶点。</param>
+    /// <param name="v2">第二个顶点。</param>
+    /// <param name="v3">第三个顶点。</param>
+    /// <param name="v4">第四个顶点。</param>
     public SoftBodyTetrahedron(SoftBody body, RigidBody v1, RigidBody v2, RigidBody v3, RigidBody v4)
     {
         Vertices[0] = v1;
@@ -35,7 +35,7 @@ public sealed class SoftBodyTetrahedron : SoftBodyShape
     }
 
     /// <summary>
-    /// Gets the four vertices (rigid bodies) of the tetrahedron.
+    /// 获取四面体的四个顶点（刚体）。
     /// </summary>
     public RigidBody[] Vertices { get; } = new RigidBody[4];
 

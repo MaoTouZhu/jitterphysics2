@@ -6,8 +6,8 @@ using JitterDemo.Renderer.OpenGL;
 
 namespace JitterDemo.Renderer;
 
-/// Scene-level host for the engine. Owns the shadow caster, lit shader, debug
-/// renderer, GUI backend, skybox, camera, and the registry of instanced drawables.
+/// 引擎的场景级宿主。持有阴影投射器、光照着色器、调试
+/// 渲染器、GUI 后端、天空盒、相机，以及实例化可绘制对象的注册表。
 public class RenderWindow : GLFWWindow
 {
     public static RenderWindow Instance { get; private set; } = null!;
@@ -33,7 +33,7 @@ public class RenderWindow : GLFWWindow
         Camera = new FreeCamera();
     }
 
-    /// Registers a drawable the first time it is requested, caching it by its runtime type.
+    /// 首次请求某个可绘制对象时注册它，并按运行时类型缓存。
     public T GetDrawable<T>() where T : InstancedDrawable, new()
     {
         if (!drawables.TryGetValue(typeof(T), out var d))
@@ -44,7 +44,7 @@ public class RenderWindow : GLFWWindow
         return (T)d;
     }
 
-    /// Registers an externally-constructed drawable. Useful when construction needs arguments.
+    /// 注册一个由外部构造的可绘制对象。当构造需要参数时很有用。
     public T RegisterDrawable<T>(T drawable) where T : InstancedDrawable
     {
         drawables[typeof(T)] = drawable;
@@ -100,7 +100,7 @@ public class RenderWindow : GLFWWindow
         float dt = (float)(Time - lastTime);
         lastTime = Time;
 
-        // --- Render setup -------------------------------------------------
+        // --- 渲染设置 -------------------------------------------------
         GLDevice.Enable(Capability.DepthTest);
         GLDevice.Enable(Capability.Blend);
         GLDevice.Blend(BlendFunc.SrcAlpha, BlendFunc.OneMinusSrcAlpha);
@@ -110,16 +110,16 @@ public class RenderWindow : GLFWWindow
 
         skybox.Draw(Camera);
 
-        // --- Upload all drawable instance buffers once --------------------
+        // --- 一次性上传所有可绘制对象的实例缓冲区 --------------------
         foreach (var d in drawables.Values) d.UploadInstances();
 
-        // --- Shadow pass --------------------------------------------------
+        // --- 阴影通道 --------------------------------------------------
         Shadow.Render(Camera, Width, Math.Max(1, Height), _ =>
         {
             foreach (var d in drawables.Values) d.DrawShadow();
         });
 
-        // --- Lit pass -----------------------------------------------------
+        // --- 光照通道 -----------------------------------------------------
         (int fbw, int fbh) = FramebufferSize;
         GLDevice.Viewport(0, 0, fbw, fbh);
 
@@ -131,7 +131,7 @@ public class RenderWindow : GLFWWindow
 
         foreach (var d in drawables.Values) d.DrawLit(litShader);
 
-        // --- Debug lines --------------------------------------------------
+        // --- 调试线条 --------------------------------------------------
         DebugRenderer.Draw(Camera);
 
         if (ShowShadowDebug)
@@ -149,10 +149,10 @@ public class RenderWindow : GLFWWindow
         WantsCaptureKeyboard = Gui.WantsCaptureKeyboard;
         WantsCaptureMouse = Gui.WantsCaptureMouse;
 
-        // --- Clear per-frame instance data after we've used it ------------
+        // --- 使用完毕后清除每帧的实例数据 ------------
         foreach (var d in drawables.Values) d.Clear();
 
-        // --- Camera update ------------------------------------------------
+        // --- 相机更新 ------------------------------------------------
         Camera.IgnoreKeyboardInput = WantsCaptureKeyboard;
         Camera.IgnoreMouseInput = WantsCaptureMouse;
         float aspect = Width > 0 ? (float)Width / Math.Max(1, Height) : 1f;

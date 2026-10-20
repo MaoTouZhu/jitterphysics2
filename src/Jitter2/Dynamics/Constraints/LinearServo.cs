@@ -13,8 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Drives an anchor on body 2 toward a target position attached to body 1 using limited force.
-/// Controls three translational degrees of freedom; relative orientation remains free.
+/// 使用受限的力将刚体 2 上的锚点驱向附着于刚体 1 的目标位置。
+/// 控制三个平动自由度；相对朝向保持自由。
 /// </summary>
 public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
 {
@@ -52,11 +52,11 @@ public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
     /// <inheritdoc />
     public override void ResetWarmStart() => Data.AccumulatedImpulse = JVector.Zero;
 
-    /// <summary>Initializes both body anchors at the same world-space point.</summary>
+    /// <summary>将两个刚体的锚点初始化到同一世界空间点。</summary>
     public void Initialize(JVector anchor) => Initialize(anchor, anchor);
 
-    /// <summary>Initializes separate world-space anchors that the servo drives toward coincidence.</summary>
-    /// <remarks>Target position and maximum force default to zero. The anchors may start apart.</remarks>
+    /// <summary>初始化两个独立的世界空间锚点，伺服将驱动它们趋向重合。</summary>
+    /// <remarks>目标位置和最大力默认为零。锚点可以起始于分离状态。</remarks>
     public void Initialize(JVector anchor1, JVector anchor2)
     {
         VerifyNotZero();
@@ -72,7 +72,7 @@ public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
         ResetWarmStart();
     }
 
-    /// <summary>Gets or sets the world-space anchor attached to body 1.</summary>
+    /// <summary>获取或设置附着于刚体 1 的世界空间锚点。</summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor1
     {
@@ -86,7 +86,7 @@ public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
         }
     }
 
-    /// <summary>Gets or sets the world-space anchor attached to body 2.</summary>
+    /// <summary>获取或设置附着于刚体 2 的世界空间锚点。</summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor2
     {
@@ -101,8 +101,8 @@ public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
     }
 
     /// <summary>
-    /// Gets or sets the desired offset from anchor 1 to anchor 2, expressed in body 1's local frame.
-    /// Zero drives the anchors toward coincidence. Changing it does not move either body.
+    /// 获取或设置从锚点 1 指向锚点 2 的期望偏移量，以刚体 1 的局部坐标系表示。
+    /// 零值驱动两个锚点趋向重合。修改它不会移动任一刚体。
     /// </summary>
     public JVector TargetPosition
     {
@@ -115,8 +115,8 @@ public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
         }
     }
 
-    /// <summary>Gets or sets the maximum total force the servo can apply.</summary>
-    /// <value>Default is zero. Positive infinity allows unlimited force.</value>
+    /// <summary>获取或设置伺服可施加的最大总力。</summary>
+    /// <value>默认为零。正无穷表示不限制力。</value>
     public Real MaximumForce
     {
         get => Data.MaximumForce;
@@ -127,23 +127,23 @@ public unsafe class LinearServo : Constraint<LinearServo.LinearServoData>
         }
     }
 
-    /// <summary>Gets or sets the softness (compliance) of the servo.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultLinearSoftness"/>.</value>
+    /// <summary>获取或设置伺服的柔软度（柔顺度）。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultLinearSoftness"/>。</value>
     public Real Softness
     {
         get => Data.Softness;
         set => Data.Softness = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets or sets how aggressively the servo corrects its position error.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultLinearBias"/>.</value>
+    /// <summary>获取或设置伺服修正其位置误差的强度。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultLinearBias"/>。</value>
     public Real Bias
     {
         get => Data.BiasFactor;
         set => Data.BiasFactor = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets the world-space impulse applied to body 2 in the last solved substep.</summary>
+    /// <summary>获取上一个已求解子步中施加到刚体 2 的世界空间冲量。</summary>
     public JVector Impulse => Data.AccumulatedImpulse;
 
     public static void PrepareForIterationLinearServo(ref ConstraintData constraint, in TimeStep timeStep)

@@ -1,1 +1,1 @@
-Fast, simple, and dependency-free physics engine written in C# with a clear and user-friendly API. 
+用 C# 编写的快速、简单且无依赖的物理引擎，具有清晰且用户友好的 API。

@@ -13,12 +13,12 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Drives relative twist toward a target angle using limited torque.
-/// Controls one angular degree of freedom; translation and swing remain free.
+/// 使用受限的力矩驱动相对扭转朝向目标角度。
+/// 控制一个角度自由度；平移和摆动保持自由。
 /// </summary>
 /// <remarks>
-/// Uses signed joint angles in [-pi, pi], without tracking revolutions.
-/// Combine with mechanical limits that keep motion inside this angular interval.
+/// 使用 [-pi, pi] 范围内的有符号关节角，不追踪圈数。
+/// 应与将运动限制在此角度区间内的机械限位配合使用。
 /// </remarks>
 public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
 {
@@ -57,15 +57,15 @@ public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
     /// <inheritdoc />
     public override void ResetWarmStart() => Data.AccumulatedImpulse = 0;
 
-    /// <summary>Initializes both twist axes from the same world-space direction.</summary>
+    /// <summary>以同一世界空间方向初始化两个扭转轴。</summary>
     public void Initialize(JVector axis, JAngle targetAngle = default) => Initialize(axis, axis, targetAngle);
 
-    /// <summary>Initializes separate world-space twist axes and a target relative to the initial pose.</summary>
+    /// <summary>初始化两个独立的世界空间扭转轴，以及相对于初始位姿的目标。</summary>
     /// <remarks>
-    /// The shortest rotation aligning the two axes defines zero twist. Maximum torque defaults to zero.
-    /// A nonzero target angle starts the servo outside its target configuration.
+    /// 使两个轴对齐的最短旋转定义零扭转。最大力矩默认为零。
+    /// 非零目标角会使伺服起始于其目标构型之外。
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">The target angle is not finite or is outside [-pi, pi].</exception>
+    /// <exception cref="ArgumentOutOfRangeException">目标角不是有限值，或超出 [-pi, pi]。</exception>
     public void Initialize(JVector axis1, JVector axis2, JAngle targetAngle = default)
     {
         VerifyNotZero();
@@ -87,12 +87,12 @@ public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
         ResetWarmStart();
     }
 
-    /// <summary>Gets or sets the desired twist angle relative to the initial zero-twist pose.</summary>
+    /// <summary>获取或设置相对于初始零扭转位姿的期望扭转角。</summary>
     /// <remarks>
-    /// The target must be in [-pi, pi]. The signed angle error is not wrapped: moving from
-    /// -170 to +170 degrees travels through zero. Revolution counts are not supported.
+    /// 目标必须位于 [-pi, pi] 内。有符号角度误差不会被回绕：从
+    /// -170 度移动到 +170 度会经过零。不支持圈数计数。
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">The value is not finite or is outside [-pi, pi].</exception>
+    /// <exception cref="ArgumentOutOfRangeException">该值不是有限值，或超出 [-pi, pi]。</exception>
     public JAngle TargetAngle
     {
         get => (JAngle)Data.TargetAngle;
@@ -104,7 +104,7 @@ public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
         }
     }
 
-    /// <summary>Gets the current relative twist angle in [-pi, pi]. Revolutions are not tracked.</summary>
+    /// <summary>获取 [-pi, pi] 范围内的当前相对扭转角。不追踪圈数。</summary>
     public JAngle Angle
     {
         get
@@ -116,8 +116,8 @@ public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
         }
     }
 
-    /// <summary>Gets or sets the maximum total torque the servo can apply.</summary>
-    /// <value>Default is zero. Positive infinity allows unlimited torque.</value>
+    /// <summary>获取或设置伺服可施加的最大总力矩。</summary>
+    /// <value>默认为零。正无穷表示不限制力矩。</value>
     public Real MaximumTorque
     {
         get => Data.MaximumTorque;
@@ -128,23 +128,23 @@ public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
         }
     }
 
-    /// <summary>Gets or sets the softness (compliance) of the servo.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultAngularSoftness"/>.</value>
+    /// <summary>获取或设置伺服的柔软度（柔顺度）。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultAngularSoftness"/>。</value>
     public Real Softness
     {
         get => Data.Softness;
         set => Data.Softness = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets or sets how aggressively the servo corrects its position error.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultAngularBias"/>.</value>
+    /// <summary>获取或设置伺服修正其位置误差的强度。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultAngularBias"/>。</value>
     public Real Bias
     {
         get => Data.BiasFactor;
         set => Data.BiasFactor = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets the signed angular impulse in the last solved substep.</summary>
+    /// <summary>获取上一个已求解子步中的有符号角冲量。</summary>
     public Real Impulse => Data.AccumulatedImpulse;
 
     public static void PrepareForIterationTwistServo(ref ConstraintData constraint, in TimeStep timeStep)
@@ -160,8 +160,8 @@ public unsafe class TwistServo : Constraint<TwistServo.TwistServoData>
                     data.Softness * timeStep.InverseSubstepDt;
         data.EffectiveMass = mass > 0 ? (Real)1 / mass : 0;
         if (data.EffectiveMass == 0) data.AccumulatedImpulse = 0;
-        // A joint-angle target must be reached through its angular interval, even when
-        // crossing the -pi/pi boundary would give a shorter rotation.
+        // 关节角目标必须沿其角度区间到达，即使跨越 -pi/pi 边界
+        // 会给出更短的旋转。
         Real error = angle - data.TargetAngle;
         data.Bias = error * data.BiasFactor * timeStep.InverseStepDt;
         Real maximum = ServoMath.MaximumImpulse(data.MaximumTorque, timeStep.SubstepDt);

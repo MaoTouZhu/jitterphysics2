@@ -8,8 +8,8 @@ public class DecomposedTeapot : TriangleMeshDrawable
 {
     public DecomposedTeapot() : base("teapot_hull.obj", 0.03f)
     {
-        // Give every convex hull in the OBJ its own palette entry so the pieces
-        // of each teapot read as distinct against the black instance color.
+        // 为 OBJ 中的每个凸包分配各自的调色板条目，使每个茶壶的各个部件
+        // 在黑色实例颜色下也能清晰区分。
         Groups = new MaterialSlot[Mesh.Groups.Length];
         for (int i = 0; i < Groups.Length; i++)
         {

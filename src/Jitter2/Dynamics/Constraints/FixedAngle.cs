@@ -13,7 +13,7 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constrains the relative orientation between two bodies, eliminating three degrees of rotational freedom.
+/// 约束两个刚体之间的相对朝向，消除三个转动自由度。
 /// </summary>
 public unsafe class FixedAngle : Constraint<FixedAngle.FixedAngleData>
 {
@@ -58,11 +58,11 @@ public unsafe class FixedAngle : Constraint<FixedAngle.FixedAngleData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = JVector.Zero;
 
     /// <summary>
-    /// Initializes the constraint using the current relative orientation of the bodies.
+    /// 使用两个刚体当前的相对朝向初始化约束。
     /// </summary>
     /// <remarks>
-    /// Records the current relative orientation as the target.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>, <see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>.
+    /// 将当前相对朝向记录为目标朝向。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>，<see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>。
     /// </remarks>
     public void Initialize()
     {
@@ -92,8 +92,8 @@ public unsafe class FixedAngle : Constraint<FixedAngle.FixedAngleData>
 
         data.Clamp = 1024;
 
-        // Use small-angle scaling with a nonsingular rotation
-        // coordinate instead of the quaternion vector part at large rotations.
+        // 在大角度旋转时，使用带有非奇异旋转坐标的小角度缩放，
+        // 而不是四元数的向量部分。
         data.Jacobian = -(Real)2 * AngularConstraintMath.CalculateJacobian(
             data.Q0 * q1.Conjugate(), q2, out JVector error, out short hemisphere);
         if (data.Hemisphere != 0 && data.Hemisphere != hemisphere)
@@ -122,10 +122,10 @@ public unsafe class FixedAngle : Constraint<FixedAngle.FixedAngleData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔顺度）。
     /// </summary>
     /// <value>
-    /// Default is 0.001. Higher values allow more angular error but improve stability.
+    /// 默认值为 0.001。值越大允许的角度误差越大，但稳定性更好。
     /// </value>
     public Real Softness
     {
@@ -138,10 +138,10 @@ public unsafe class FixedAngle : Constraint<FixedAngle.FixedAngleData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively angular error is corrected.
+    /// 获取或设置偏置因子，控制角度误差被修正的积极程度。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct errors faster but may cause instability.
+    /// 默认值为 0.2。值越大误差修正越快，但可能导致不稳定。
     /// </value>
     public Real Bias
     {
@@ -154,7 +154,7 @@ public unsafe class FixedAngle : Constraint<FixedAngle.FixedAngleData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上次求解子步累积的求解器冲量。
     /// </summary>
     public JVector Impulse => Data.AccumulatedImpulse;
 

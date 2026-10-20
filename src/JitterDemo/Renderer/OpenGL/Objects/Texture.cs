@@ -76,7 +76,7 @@ public sealed class Texture2D : Texture
 {
     public Texture2D() : base(GLC.TEXTURE_2D) { }
 
-    // Shared 1x1 opaque-black texture. Lazy because we need a live GL context.
+    // 共享的 1x1 不透明黑色纹理。采用延迟创建，因为需要有效的 GL 上下文。
     private static Texture2D? emptyShared;
     public static Texture2D Empty() => emptyShared ??= CreateEmpty();
 

@@ -12,9 +12,9 @@ namespace JitterTests.Robustness
         public void FailedSecondLock_DoesNotWriteToNonDynamicBody(MotionType motionType, bool reverseArguments)
         {
             Span<RigidBodyData> bodies = stackalloc RigidBodyData[2];
-            // Locks are acquired in descending address order, so index 1 is visited first.
+            // 锁按地址降序获取，因此先访问索引 1。
             bodies[1].MotionType = motionType;
-            bodies[1]._lockFlag = 7; // A sentinel makes even an otherwise harmless zero write observable.
+            bodies[1]._lockFlag = 7; // 哨兵值使原本无害的零写入也能被观察到。
             bodies[0].MotionType = MotionType.Dynamic;
             bodies[0]._lockFlag = 1;
             ref RigidBodyData first = ref bodies[reverseArguments ? 0 : 1];
@@ -51,15 +51,15 @@ namespace JitterTests.Robustness
             var bodyA = world.CreateRigidBody();
             var bodyB = world.CreateRigidBody();
 
-            // First TryLock should succeed
+            // 第一次 TryLock 应成功
             bool first = World.TryLockTwoBody(ref bodyA.Data, ref bodyB.Data);
             Assert.That(first, Is.True, "First TryLock should succeed.");
 
-            // Second should fail while locked
+            // 加锁期间第二次应失败
             bool second = World.TryLockTwoBody(ref bodyA.Data, ref bodyB.Data);
             Assert.That(second, Is.False, "Second TryLock should fail while locked.");
 
-            // Unlock, then it should succeed again
+            // 解锁后应再次成功
             World.UnlockTwoBody(ref bodyA.Data, ref bodyB.Data);
 
             bool third = World.TryLockTwoBody(ref bodyA.Data, ref bodyB.Data);

@@ -54,8 +54,8 @@ public sealed class GpuBuffer
         Capacity = bytes;
     }
 
-    // Orphan + subdata: release the old backing store to the driver, write into fresh memory.
-    // Lets the driver keep the previous frame's buffer in flight while we fill the new one.
+    // 孤儿化 + 子数据：把旧的后备存储交还给驱动，再写入新分配的内存。
+    // 这样我们填充新缓冲区时，驱动可以让上一帧的缓冲区仍处于使用中。
     public void Stream<T>(ReadOnlySpan<T> data) where T : unmanaged
     {
         Bind();

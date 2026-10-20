@@ -10,32 +10,32 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// Append-only target for values produced by an algorithm. Designed as a minimal,
-/// struct-friendly alternative to <see cref="ICollection{T}"/> for hot paths.
+/// 算法所产生值的只追加目标。为热路径设计，是
+/// <see cref="ICollection{T}"/> 的极简、对结构体友好的替代方案。
 /// </summary>
-/// <typeparam name="T">The type of value accepted by the sink.</typeparam>
+/// <typeparam name="T">接收器接受的值类型。</typeparam>
 public interface ISink<T>
 {
-    /// <summary>Appends a value to the sink.</summary>
+    /// <summary>向接收器追加一个值。</summary>
     void Add(in T item);
 }
 
 /// <summary>
-/// Adapts an <see cref="ICollection{T}"/> to the <see cref="ISink{T}"/> interface.
+/// 将 <see cref="ICollection{T}"/> 适配为 <see cref="ISink{T}"/> 接口。
 /// </summary>
-/// <typeparam name="T">The element type.</typeparam>
+/// <typeparam name="T">元素类型。</typeparam>
 public readonly struct CollectionSink<T> : ISink<T>
 {
     private readonly ICollection<T> collection;
 
-    /// <summary>Creates a sink that forwards to the specified collection.</summary>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="collection"/> is null.</exception>
+    /// <summary>创建一个转发到指定集合的接收器。</summary>
+    /// <exception cref="ArgumentNullException">当 <paramref name="collection"/> 为 null 时抛出。</exception>
     public CollectionSink(ICollection<T> collection)
     {
         this.collection = collection ?? throw new ArgumentNullException(nameof(collection));
     }
 
-    /// <summary>Appends a value to the wrapped collection.</summary>
+    /// <summary>向所包装的集合追加一个值。</summary>
     public void Add(in T item)
     {
         collection.Add(item);

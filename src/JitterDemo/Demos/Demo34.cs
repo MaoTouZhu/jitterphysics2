@@ -10,8 +10,8 @@ using Vellum;
 namespace JitterDemo;
 
 /*
- * Robot Arm
- * Code generated and optimized with OpenAI Codex
+ * 机械臂
+ * 代码由 OpenAI Codex 生成并优化
  */
 
 public class Demo34 : IDemo, IDemoGui
@@ -21,7 +21,7 @@ public class Demo34 : IDemo, IDemoGui
     public string Controls => "Use the sliders to pose the arm and open or close the gripper.";
 
     private const float Scale = 2f;
-    // With fixed masses, inertia and drive torque scale with length squared.
+    // 在质量固定的情况下，惯性和驱动力矩随长度的平方缩放。
     private const float TorqueScale = Scale * Scale;
     private const float ShoulderHeight = 1f * Scale;
     private const float UpperLength = 2.1f * Scale;
@@ -50,7 +50,7 @@ public class Demo34 : IDemo, IDemoGui
         controlsWindow.Position = new System.Numerics.Vector2(Math.Max(16, pg.Width - 316), 16);
         pg.AddFloor();
         world.SubstepCount = 4;
-        // The stiff arm needs enough solver iterations for its joints and drives to settle together.
+        // 刚性较强的机械臂需要足够的求解器迭代次数，才能让各关节与驱动共同稳定下来。
         world.SolverIterations = (24, 4);
         var filter = new Common.IgnoreCollisionBetweenFilter();
         world.BroadPhaseFilter = filter;
@@ -78,7 +78,7 @@ public class Demo34 : IDemo, IDemoGui
         {
             var joint = new HingeJoint(world, first, second, center, axis,
                 AngularLimit.FromDegree(minAngle, maxAngle), JointDrive.Servo);
-            // Keep the joint anchors and locked axes rigid.
+            // 保持关节锚点和锁定轴为刚性。
             joint.BallSocket.Softness = 0;
             joint.HingeAngle.Softness = 0;
             joint.HingeAngle.LimitSoftness = 0;
@@ -143,7 +143,7 @@ public class Demo34 : IDemo, IDemoGui
         table.Position = new JVector(3.1f, 1, 0) * Scale;
         table.MotionType = MotionType.Static;
         table.Tag = new RigidBodyTag(false) { Color = Dark };
-        // Legs are part of the same static body.
+        // 支腿属于同一个静态刚体。
         foreach (float x in new[] { -0.9f, 0.9f })
         foreach (float z in new[] { -1f, 1f })
             table.AddShape(new TransformedShape(new BoxShape(0.12f * Scale, 0.9f * Scale, 0.12f * Scale),
@@ -215,7 +215,7 @@ public class Demo34 : IDemo, IDemoGui
 
     private JQuaternion WristTarget()
     {
-        // A swing around an axis in the XZ plane leaves the universal joint's Y twist at zero.
+        // 绕 XZ 平面内的轴摆动时，万向节沿 Y 轴的扭转保持为零。
         var rotation = new JVector(wristTilt, 0, wristPitch);
         float angle = rotation.Length();
         return angle > 0 ? JQuaternion.CreateFromAxisAngle(rotation * (1 / angle), JAngle.FromDegree(angle).Radian) : JQuaternion.Identity;
@@ -223,7 +223,7 @@ public class Demo34 : IDemo, IDemoGui
 
     private void PlaceInitialPose()
     {
-        // Pose once at construction. During simulation only the servo targets are changed.
+        // 只在构造时摆放一次姿态。仿真过程中仅改变伺服目标。
         turntable.Orientation = JQuaternion.CreateRotationY(JAngle.FromDegree(azimuth).Radian);
         JVector shoulderPosition = new(0, ShoulderHeight, 0);
         upper.Orientation = turntable.Orientation * JQuaternion.CreateRotationZ(JAngle.FromDegree(shoulder).Radian);

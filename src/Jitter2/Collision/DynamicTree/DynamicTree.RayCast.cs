@@ -13,35 +13,35 @@ namespace Jitter2.Collision;
 public partial class DynamicTree
 {
     /// <summary>
-    /// Represents the result of a ray cast against the dynamic tree.
+    /// 表示对动态树进行射线投射的结果。
     /// </summary>
     public struct RayCastResult
     {
-        /// <summary>The proxy that was hit.</summary>
+        /// <summary>被击中的代理。</summary>
         public IDynamicTreeProxy? Entity;
 
-        /// <summary>The ray parameter at the hit: <c>hitPoint = origin + Lambda * direction</c>.</summary>
+        /// <summary>命中处的射线参数：<c>hitPoint = origin + Lambda * direction</c>。</summary>
         public Real Lambda;
 
         /// <summary>
-        /// The surface normal at the hit point, or <see cref="JVector.Zero"/> when the ray origin
-        /// is inside the hit shape. Do not use this to test whether a hit occurred.
+        /// 命中点处的表面法线；当射线原点位于被击中的形状内部时为 <see cref="JVector.Zero"/>。
+        /// 不要用它来判断是否发生命中。
         /// </summary>
         public JVector Normal;
     }
 
     /// <summary>
-    /// Delegate for filtering ray cast results after the shape intersection test.
+    /// 在形状相交测试之后对射线投射结果进行过滤的委托。
     /// </summary>
-    /// <param name="result">The ray cast result to evaluate.</param>
-    /// <returns><c>false</c> to filter out this hit; <c>true</c> to keep it.</returns>
+    /// <param name="result">要评估的射线投射结果。</param>
+    /// <returns><c>false</c> 表示过滤掉该命中；<c>true</c> 表示保留。</returns>
     public delegate bool RayCastFilterPost(RayCastResult result);
 
     /// <summary>
-    /// Delegate for filtering ray cast candidates before the shape intersection test.
+    /// 在形状相交测试之前对射线投射候选进行过滤的委托。
     /// </summary>
-    /// <param name="proxy">The proxy to evaluate.</param>
-    /// <returns><c>false</c> to skip this proxy; <c>true</c> to test it.</returns>
+    /// <param name="proxy">要评估的代理。</param>
+    /// <returns><c>false</c> 表示跳过该代理；<c>true</c> 表示对其进行测试。</returns>
     public delegate bool RayCastFilterPre(IDynamicTreeProxy proxy);
 
     private struct Ray(in JVector origin, in JVector direction)
@@ -56,20 +56,19 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Ray cast against the world.
+    /// 对世界进行射线投射。
     /// </summary>
-    /// <param name="origin">Origin of the ray.</param>
-    /// <param name="direction">Direction of the ray. Does not have to be normalized.</param>
-    /// <param name="pre">Optional pre-filter that can skip candidate shapes.</param>
-    /// <param name="post">Optional post-filter that can skip candidate results.</param>
-    /// <param name="proxy">The shape which was hit.</param>
+    /// <param name="origin">射线的原点。</param>
+    /// <param name="direction">射线的方向。不必归一化。</param>
+    /// <param name="pre">可选的前置过滤器，可跳过候选形状。</param>
+    /// <param name="post">可选的后置过滤器，可跳过候选结果。</param>
+    /// <param name="proxy">被击中的形状。</param>
     /// <param name="normal">
-    /// <param name="lambda">Distance from the origin to the hit point in units of the ray direction. Zero if the origin is inside the hit shape.</param>
-    /// The surface normal at the hit point. <see cref="JVector.Zero"/> if the ray does not hit,
-    /// or if the ray origin is inside the hit shape. Use the return value to determine whether
-    /// a hit occurred; do not rely on this being non-zero as a hit indicator.
+    /// <param name="lambda">从原点到命中点的距离，以射线方向为单位。若原点位于被击中的形状内部则为零。</param>
+    /// 命中点处的表面法线。若射线未命中，或射线原点位于被击中的形状内部，则为 <see cref="JVector.Zero"/>。
+    /// 请使用返回值判断是否发生命中；不要依赖该值非零来判断是否命中。
     /// </param>
-    /// <returns>True if the ray hits, false otherwise.</returns>
+    /// <returns>若射线命中则返回 true，否则返回 false。</returns>
     public bool RayCast(JVector origin, JVector direction, RayCastFilterPre? pre, RayCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector normal, out Real lambda)
     {
@@ -86,14 +85,14 @@ public partial class DynamicTree
     }
 
     /// <inheritdoc cref="RayCast(JVector, JVector, RayCastFilterPre?, RayCastFilterPost?, out IDynamicTreeProxy?, out JVector, out Real)"/>
-    /// <param name="origin">The ray origin in world space.</param>
-    /// <param name="direction">The ray direction; it need not be normalized.</param>
-    /// <param name="maxLambda">Exclusive upper bound for hit lambda; hits at this value are excluded.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The ray or sweep parameter of the result.</param>
+    /// <param name="origin">世界空间中的射线原点。</param>
+    /// <param name="direction">射线方向；无需归一化。</param>
+    /// <param name="maxLambda">命中 lambda 的不含该值的上界；等于该值的命中会被排除。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">结果的射线或扫掠参数。</param>
     public bool RayCast(JVector origin, JVector direction, Real maxLambda, RayCastFilterPre? pre, RayCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector normal, out Real lambda)
     {
@@ -146,7 +145,7 @@ public partial class DynamicTree
                     bool hit = rayCastable.RayCast(ray.Origin, ray.Direction, out res.Normal, out res.Lambda);
                     res.Entity = proxy;
 
-                    // Keep the closest hit already accepted on ties; maxLambda is an exclusive bound.
+                    // 并列时保留已接受的最近命中；maxLambda 是不含该值的上界。
                     if (hit && res.Lambda < result.Lambda)
                     {
                         if (ray.FilterPost != null && !ray.FilterPost(res)) continue;

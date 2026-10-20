@@ -6,7 +6,7 @@ using Jitter2.LinearMath;
 
 namespace SceneBenchmark;
 
-// These scene definitions are identical for both libraries, including old tags.
+// 这些场景定义对两个库完全相同，包括旧的标签。
 public sealed class Scene : IDisposable
 {
     public World World { get; }
@@ -25,7 +25,7 @@ public sealed class Scene : IDisposable
             case "colosseum": Colosseum.Build(World); break;
             case "ragdolls":
                 BuildContainer();
-                // 10 x 5 x 10: 500 ten-body ragdolls, 10,000 constraints.
+                // 10 x 5 x 10：500 个十刚体布娃娃，10,000 个约束。
                 for (int x = 0; x < 10; x++)
                 for (int y = 0; y < 5; y++)
                 for (int z = 0; z < 10; z++)

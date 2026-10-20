@@ -11,8 +11,8 @@ using JitterDemo.Renderer;
 namespace JitterDemo;
 
 /*
- * Constraints Showcase
- * Code generated and optimized with OpenAI Codex
+ * 约束展示
+ * 代码由 OpenAI Codex 生成并优化
  */
 
 public class Demo33 : IDemo, IDrawUpdate, ICleanDemo
@@ -38,14 +38,14 @@ public class Demo33 : IDemo, IDrawUpdate, ICleanDemo
     private const int GridSize = 4;
     private const float GridSpacing = 16;
     private const float BaseHalfExtent = 3.75f;
-    // Alphabetical constraint exhibits followed by joints, with the final three cells empty.
+    // 按字母顺序排列的约束展品，随后是关节，最后三个单元留空。
     private static readonly (int Row, int Column)[] ExhibitCells =
     [
-        (1, 0), (0, 2),                 // Elliptical and circular swing limits.
-        (0, 1), (0, 3), (2, 1),         // Ball socket, distance limit, spring.
-        (1, 3), (2, 0), (1, 1),         // Line, plane, fixed angle.
-        (0, 0), (1, 2),                 // Angular and linear motors.
-        (2, 2), (2, 3), (3, 0)          // Hinge, universal, weld.
+        (1, 0), (0, 2),                 // 椭圆与圆形摆动限位。
+        (0, 1), (0, 3), (2, 1),         // 球窝、距离限位、弹簧。
+        (1, 3), (2, 0), (1, 1),         // 线、平面、固定角度。
+        (0, 0), (1, 2),                 // 角度马达与线性马达。
+        (2, 2), (2, 3), (3, 0)          // 铰链、万向、焊接。
     ];
 
     private DebugRenderer Draw => playground.DebugRenderer;
@@ -63,7 +63,7 @@ public class Demo33 : IDemo, IDrawUpdate, ICleanDemo
         };
         var (row, column) = ExhibitCells[index];
         float half = (GridSize - 1) * 0.5f;
-        // Increasing rows move toward the initial camera, reading from top to bottom.
+        // 行号增大时朝向初始相机方向，从上到下阅读。
         return new JVector((column - half) * GridSpacing, 6,
             (row - half) * GridSpacing);
     }
@@ -164,7 +164,7 @@ public class Demo33 : IDemo, IDrawUpdate, ICleanDemo
         JVector centerOfMass = (rodCenter * rodMass + (weightCenter + weightOffset) * weightMass) *
                               (1 / (rodMass + weightMass));
         RigidBody body = world.CreateRigidBody();
-        // Every compound body is centered on its mass-weighted center of mass.
+        // 每个复合刚体都以其质量加权的质心为中心。
         body.AddShapes([
             new TransformedShape(rod, -centerOfMass),
             new TransformedShape(weight, weightOffset - centerOfMass)
@@ -284,7 +284,7 @@ public class Demo33 : IDemo, IDrawUpdate, ICleanDemo
         var plane = world.CreateConstraint<PointOnPlane>(support, planeBody);
         plane.Initialize(JVector.UnitZ, center, center);
         plane.Softness = 0;
-        // Leave room for the rotating cube within the drawn plane.
+        // 在绘制的平面内为旋转的立方体留出空间。
         const float planeRadius = 1.4f;
         var planeDistance = world.CreateConstraint<DistanceLimit>(support, planeBody);
         planeDistance.Initialize(center, center, new LinearLimit(0, planeRadius));

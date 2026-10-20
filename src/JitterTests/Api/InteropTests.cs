@@ -5,7 +5,7 @@ namespace JitterTests.Api;
 [TestFixture]
 public sealed class InteropTests
 {
-    // --- Tuple conversions ----------------------------------------------------
+    // --- 元组转换 ------------------------------------------------------------
 
     [Test]
     public void JVector_TupleConversion_AssignsComponents()
@@ -28,7 +28,7 @@ public sealed class InteropTests
         Assert.That((float)q.W, Is.EqualTo(-4f));
     }
 
-    // --- System.Numerics conversions -----------------------------------------
+    // --- System.Numerics 转换 ------------------------------------------------
 
     [Test]
     public void JVector_SystemNumerics_Vector3_Conversion_Roundtrip()

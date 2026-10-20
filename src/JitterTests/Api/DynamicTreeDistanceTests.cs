@@ -79,9 +79,9 @@ public class DynamicTreeDistanceTests
     [Test]
     public void FindNearestSphere_MaxDistanceIncludesNearbyBody()
     {
-        // Shape is at distance ~3.0; maxDistance of 3.1 comfortably includes it.
-        // Testing the exact boundary (maxDistance == distance) is not meaningful
-        // because GJK has convergence error on the order of 1e-4.
+        // 形状距离约为 3.0；maxDistance 取 3.1 足以包含它。
+        // 测试精确边界（maxDistance == distance）没有意义，
+        // 因为 GJK 的收敛误差约为 1e-4。
         using var world = new World();
 
         var body = CreateStaticBox(world, new JVector((Real)5.0, (Real)0.0, (Real)0.0));
@@ -134,7 +134,7 @@ public class DynamicTreeDistanceTests
         var overlappingBody = CreateStaticBox(world, JVector.Zero);
         var separatedBody = CreateStaticBox(world, new JVector((Real)5.0, (Real)0.0, (Real)0.0));
 
-        // Pre-filter excludes the overlapping body — should fall through to the separated one.
+        // 前置过滤器排除了重叠的刚体——应转而找到那个分离的刚体。
         bool hit = world.DynamicTree.FindNearestSphere((Real)1.0, JVector.Zero,
             proxy => !ReferenceEquals(proxy, overlappingBody.Shapes[0]), null,
             out IDynamicTreeProxy? proxy, out _, out _, out _, out Real distance);
@@ -152,7 +152,7 @@ public class DynamicTreeDistanceTests
         CreateStaticBox(world, JVector.Zero);
         var separatedBody = CreateStaticBox(world, new JVector((Real)5.0, (Real)0.0, (Real)0.0));
 
-        // Post-filter rejects overlap results (distance == 0) — search continues to find separated proxy.
+        // 后置过滤器拒绝重叠结果（distance == 0）——搜索会继续寻找分离的代理。
         bool hit = world.DynamicTree.FindNearestSphere((Real)1.0, JVector.Zero, null,
             result => result.Distance > (Real)0.0,
             out IDynamicTreeProxy? proxy, out _, out _, out _, out Real distance);

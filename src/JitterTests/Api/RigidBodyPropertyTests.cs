@@ -1,12 +1,12 @@
 namespace JitterTests.Api;
 
 /// <summary>
-/// Tests for RigidBody property getters and setters in isolation.
+/// 单独测试 RigidBody 属性 getter 与 setter 的测试。
 /// </summary>
 public class RigidBodyPropertyTests
 {
     // -------------------------------------------------------------------------
-    // Position
+    // 位置
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -43,7 +43,7 @@ public class RigidBodyPropertyTests
     }
 
     // -------------------------------------------------------------------------
-    // Orientation
+    // 朝向
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -72,7 +72,7 @@ public class RigidBodyPropertyTests
     }
 
     // -------------------------------------------------------------------------
-    // Velocity
+    // 速度
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -89,7 +89,7 @@ public class RigidBodyPropertyTests
     [TestCase]
     public void Velocity_SetToZero_IsZero()
     {
-        // Regression: velocity setter must store zero even when value is JVector.Zero.
+        // 回归测试：即使值为 JVector.Zero，速度 setter 也必须存储零值。
         var world = new World();
         var body = world.CreateRigidBody();
         body.Velocity = new JVector(5, 0, 0);
@@ -132,7 +132,7 @@ public class RigidBodyPropertyTests
     }
 
     // -------------------------------------------------------------------------
-    // AngularVelocity
+    // 角速度
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -149,7 +149,7 @@ public class RigidBodyPropertyTests
     [TestCase]
     public void AngularVelocity_SetToZero_IsZero()
     {
-        // Mirrors the velocity-zero regression for angular velocity.
+        // 与速度归零的回归测试相对应，针对角速度。
         var world = new World();
         var body = world.CreateRigidBody();
         body.AngularVelocity = new JVector(0, 1, 0);
@@ -169,7 +169,7 @@ public class RigidBodyPropertyTests
     }
 
     // -------------------------------------------------------------------------
-    // Force / Torque
+    // 力 / 力矩
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -217,7 +217,7 @@ public class RigidBodyPropertyTests
     }
 
     // -------------------------------------------------------------------------
-    // Material / misc
+    // 材质 / 其他
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -378,7 +378,7 @@ public class RigidBodyPropertyTests
     }
 
     // -------------------------------------------------------------------------
-    // Damping — simulation behavior
+    // 阻尼 — 模拟行为
     // -------------------------------------------------------------------------
 
     [TestCase]

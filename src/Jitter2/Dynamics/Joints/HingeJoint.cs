@@ -10,8 +10,8 @@ using Jitter2.LinearMath;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constructs a hinge using a <see cref="HingeAngle"/> and a <see cref="BallSocket"/>,
-/// with an optional <see cref="AngularMotor"/> or <see cref="TwistServo"/>.
+/// 使用 <see cref="HingeAngle"/> 和 <see cref="BallSocket"/> 构造一个铰链，
+/// 并可选地附带 <see cref="AngularMotor"/> 或 <see cref="TwistServo"/>。
 /// </summary>
 public class HingeJoint : Joint
 {
@@ -31,14 +31,13 @@ public class HingeJoint : Joint
     }
 
     /// <summary>
-    /// Initializes a new hinge joint.
+    /// 初始化一个新的铰链关节。
     /// </summary>
-    /// <param name="drive">The optional drive. Motor and servo torque default to zero.</param>
-    /// <exception cref="ArgumentOutOfRangeException">The drive selection is invalid.</exception>
+    /// <param name="drive">可选的驱动。马达和伺服的力矩默认为零。</param>
+    /// <exception cref="ArgumentOutOfRangeException">驱动选择无效。</exception>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="hingeCenter"/> contains a non-finite value, when
-    /// <paramref name="hingeAxis"/> is zero or contains a non-finite value, when either body does not belong
-    /// to <paramref name="world"/>, or when both body references are the same.
+    /// 当 <paramref name="hingeCenter"/> 包含非有限值时，当 <paramref name="hingeAxis"/> 为零或包含非有限值时，
+    /// 当任一刚体不属于 <paramref name="world"/> 时，或当两个刚体引用相同时抛出。
     /// </exception>
     public HingeJoint(World world, RigidBody body1, RigidBody body2, JVector hingeCenter, JVector hingeAxis,
         AngularLimit angle, JointDrive drive = JointDrive.None)

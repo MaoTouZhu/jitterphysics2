@@ -19,176 +19,176 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics;
 
 /// <summary>
-/// Permitted translations and rotations about world-space axes.
-/// Used by <see cref="RigidBody.AllowedMotion"/>.
+/// 允许的平移与绕世界空间坐标轴的旋转。
+/// 由 <see cref="RigidBody.AllowedMotion"/> 使用。
 /// </summary>
 [Flags]
 public enum MotionAxes
 {
-    /// <summary>No simulated translation or rotation.</summary>
+    /// <summary>无模拟平移或旋转。</summary>
     None = 0,
-    /// <summary>Translation along the world X axis.</summary>
+    /// <summary>沿世界 X 轴的平移。</summary>
     LinearX = 1 << 0,
-    /// <summary>Translation along the world Y axis.</summary>
+    /// <summary>沿世界 Y 轴的平移。</summary>
     LinearY = 1 << 1,
-    /// <summary>Translation along the world Z axis.</summary>
+    /// <summary>沿世界 Z 轴的平移。</summary>
     LinearZ = 1 << 2,
-    /// <summary>Rotation about the world X axis.</summary>
+    /// <summary>绕世界 X 轴的旋转。</summary>
     AngularX = 1 << 3,
-    /// <summary>Rotation about the world Y axis.</summary>
+    /// <summary>绕世界 Y 轴的旋转。</summary>
     AngularY = 1 << 4,
-    /// <summary>Rotation about the world Z axis.</summary>
+    /// <summary>绕世界 Z 轴的旋转。</summary>
     AngularZ = 1 << 5,
-    /// <summary>Translation along all world axes.</summary>
+    /// <summary>沿所有世界轴的平移。</summary>
     Linear = LinearX | LinearY | LinearZ,
-    /// <summary>Rotation about all world axes.</summary>
+    /// <summary>绕所有世界轴的旋转。</summary>
     Angular = AngularX | AngularY | AngularZ,
-    /// <summary>Translation in XY and rotation about Z.</summary>
+    /// <summary>在 XY 平面内平移并绕 Z 轴旋转。</summary>
     PlaneXY = LinearX | LinearY | AngularZ,
-    /// <summary>Translation in XZ and rotation about Y.</summary>
+    /// <summary>在 XZ 平面内平移并绕 Y 轴旋转。</summary>
     PlaneXZ = LinearX | LinearZ | AngularY,
-    /// <summary>Translation in YZ and rotation about X.</summary>
+    /// <summary>在 YZ 平面内平移并绕 X 轴旋转。</summary>
     PlaneYZ = LinearY | LinearZ | AngularX,
-    /// <summary>Unrestricted translation and rotation (the default).</summary>
+    /// <summary>无限制的平移与旋转（默认值）。</summary>
     All = Linear | Angular
 }
 
 /// <summary>
-/// Specifies whether a shape add/remove operation recomputes the body's mass and inertia.
+/// 指定添加/移除形状的操作是否重新计算刚体的质量和惯性。
 /// </summary>
 public enum MassInertiaUpdateMode
 {
     /// <summary>
-    /// Recompute mass and inertia from the currently attached shapes.
+    /// 根据当前附加的形状重新计算质量和惯性。
     /// </summary>
     Update = 0,
 
     /// <summary>
-    /// Keep the current mass and inertia unchanged.
+    /// 保持当前质量和惯性不变。
     /// </summary>
     Preserve = 1
 }
 
 /// <summary>
-/// Specifies how a rigid body participates in the simulation.
+/// 指定刚体参与模拟的方式。
 /// </summary>
 public enum MotionType
 {
     /// <summary>
-    /// Fully simulated; responds to forces, impulses, contacts and constraints.
+    /// 完全参与模拟；响应力、冲量、接触和约束。
     /// </summary>
     Dynamic = 0,
 
     /// <summary>
-    /// User-controlled body that is not affected by forces or collisions, but can affect dynamic bodies.
-    /// Treated as having infinite mass in the solver. May have a non-zero velocity set by user code.
-    /// Takes part in collision island building.
+    /// 由用户控制的刚体，不受力或碰撞影响，但可以影响动态刚体。
+    /// 在求解器中视为具有无限质量。可由用户代码设置非零速度。
+    /// 参与碰撞岛的构建。
     /// </summary>
     Kinematic = 1,
 
     /// <summary>
-    /// Immovable body (zero velocity) treated as having infinite mass by the solver.
-    /// The position and orientation may be changed directly by user code, which will update the
-    /// broadphase and may affect contacts on the next step.
+    /// 不可移动的刚体（速度为零），在求解器中视为具有无限质量。
+    /// 位置和朝向可由用户代码直接修改，这会更新宽相，
+    /// 并可能影响下一步的接触。
     /// </summary>
     Static = 2
 }
 
 /// <summary>
-/// Low-level simulation state for a <see cref="RigidBody"/>, stored in unmanaged memory.
+/// <see cref="RigidBody"/> 的底层模拟状态，存储在非托管内存中。
 /// </summary>
 /// <remarks>
-/// This structure is layout-sensitive and intended for internal engine use. Prefer using
-/// <see cref="RigidBody"/> properties instead of accessing fields directly.
-/// All spatial values (position, velocity, orientation, inertia) are in world space.
-/// The <see cref="Flags"/> field is a bitfield: bits 0–1 encode <see cref="MotionType"/>,
-/// bit 2 indicates active state, bit 3 enables gyroscopic forces, and bits 4–9 encode motion locks.
+/// 此结构对布局敏感，仅供引擎内部使用。请优先使用
+/// <see cref="RigidBody"/> 的属性，而不是直接访问字段。
+/// 所有空间值（位置、速度、朝向、惯性）均在世界空间中。
+/// <see cref="Flags"/> 字段是一个位域：位 0–1 编码 <see cref="MotionType"/>，
+/// 位 2 表示活动状态，位 3 启用陀螺力，位 4–9 编码运动锁定。
 /// </remarks>
 [StructLayout(LayoutKind.Explicit, Size = Precision.RigidBodyDataSize)]
 public struct RigidBodyData
 {
     /// <summary>
-    /// Internal index used by the engine for handle management. Not stable across frames.
+    /// 引擎用于句柄管理的内部索引。在不同帧之间不稳定。
     /// </summary>
     [FieldOffset(0)]
     public int _index;
 
     /// <summary>
-    /// Internal synchronization flag used by the engine. Do not modify.
+    /// 引擎使用的内部同步标志。请勿修改。
     /// </summary>
     [FieldOffset(4)]
     public int _lockFlag;
 
     /// <summary>
-    /// World-space position of the rigid body (center of mass).
+    /// 刚体的世界空间位置（质心）。
     /// </summary>
     [FieldOffset(8 + 0 * sizeof(Real))]
     public JVector Position;
 
     /// <summary>
-    /// Linear velocity in world space, measured in units per second.
+    /// 世界空间中的线性速度，单位为每秒长度单位。
     /// </summary>
     [FieldOffset(8 + 3 * sizeof(Real))]
     public JVector Velocity;
 
     /// <summary>
-    /// Angular velocity in world space, measured in radians per second. The vector direction
-    /// is the rotation axis, and its magnitude is the rotation speed.
+    /// 世界空间中的角速度，单位为弧度每秒。向量方向
+    /// 为旋转轴，其模长为旋转速率。
     /// </summary>
     [FieldOffset(8 + 6 * sizeof(Real))]
     public JVector AngularVelocity;
 
     /// <summary>
-    /// Linear velocity change applied each substep (from forces and gravity), prepared at the end of the previous step.
-    /// Internal use only.
+    /// 每个子步施加的线性速度变化（来自力和重力），在上一步结束时准备好。
+    /// 仅供内部使用。
     /// </summary>
     [FieldOffset(8 + 9 * sizeof(Real))]
     public JVector DeltaVelocity;
 
     /// <summary>
-    /// Angular velocity change applied each substep (from torques), prepared at the end of the previous step.
-    /// Internal use only.
+    /// 每个子步施加的角速度变化（来自力矩），在上一步结束时准备好。
+    /// 仅供内部使用。
     /// </summary>
     [FieldOffset(8 + 12 * sizeof(Real))]
     public JVector DeltaAngularVelocity;
 
     /// <summary>
-    /// World-space orientation of the rigid body.
+    /// 刚体的世界空间朝向。
     /// </summary>
     [FieldOffset(8 + 15 * sizeof(Real))]
     public JQuaternion Orientation;
 
     /// <summary>
-    /// Inverse inertia tensor in world space. For dynamic bodies, this is recomputed each step
-    /// from the body-space inverse inertia and current orientation. Locked angular axes
-    /// are eliminated with Schur complements to preserve the remaining inertia response.
-    /// For static and kinematic bodies, this is zero (representing infinite inertia).
+    /// 世界空间中的逆惯性张量。对于动态刚体，每步都会根据
+    /// 刚体空间的逆惯性和当前朝向重新计算。被锁定的角度轴
+    /// 通过 Schur 补消除，以保留剩余的惯性响应。
+    /// 对于静态和运动学刚体，此值为零（表示无限惯性）。
     /// </summary>
     [FieldOffset(8 + 19 * sizeof(Real))]
     public JSymmetricMatrix InverseInertiaWorld;
 
     /// <summary>
-    /// World-space diagonal inverse mass, including the body's translation locks.
-    /// Static and kinematic bodies have zero inverse mass on every axis.
+    /// 世界空间中的对角逆质量，包含刚体的平移锁定。
+    /// 静态和运动学刚体在每个轴上的逆质量均为零。
     /// </summary>
     /// <remarks>
-    /// Custom constraints should use
-    /// <see cref="JVector.Multiply(in JVector, in JVector)"/> with <see cref="InverseMassVector"/>
-    /// for impulses. The linear contribution to effective inverse mass along a direction
-    /// is <c>JVector.Multiply(direction, InverseMassVector) * direction</c>.
+    /// 自定义约束应使用
+    /// <see cref="JVector.Multiply(in JVector, in JVector)"/> 配合 <see cref="InverseMassVector"/>
+    /// 来处理冲量。沿某方向的等效逆质量的线性贡献
+    /// 为 <c>JVector.Multiply(direction, InverseMassVector) * direction</c>。
     /// </remarks>
     [FieldOffset(8 + 25 * sizeof(Real))]
     public JVector InverseMassVector;
 
     /// <summary>
-    /// Bitfield encoding motion type (bits 0–1), active state (bit 2), gyroscopic forces (bit 3),
-    /// and locked world-space degrees of freedom (bits 4–9).
-    /// Use the corresponding properties instead of manipulating this directly.
+    /// 编码运动类型（位 0–1）、活动状态（位 2）、陀螺力（位 3）
+    /// 以及被锁定的世界空间自由度（位 4–9）的位域。
+    /// 请使用相应的属性，而不要直接操作此字段。
     /// </summary>
     [FieldOffset(8 + 28 * sizeof(Real))]
     public int Flags;
 
-    /// <summary>Permitted world-space motion. Set through <see cref="RigidBody.AllowedMotion"/>.</summary>
+    /// <summary>允许的世界空间运动。通过 <see cref="RigidBody.AllowedMotion"/> 设置。</summary>
     public MotionAxes AllowedMotion
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -201,8 +201,8 @@ public struct RigidBodyData
     internal readonly bool HasMotionLocks => (Flags & (63 << 4)) != 0;
 
     /// <summary>
-    /// Gets or sets whether the body is active (awake) and participating in simulation.
-    /// Inactive bodies are considered sleeping and skip integration until reactivated.
+    /// 获取或设置刚体是否处于活动（唤醒）状态并参与模拟。
+    /// 非活动刚体被视为休眠，在重新激活之前跳过积分。
     /// </summary>
     public bool IsActive
     {
@@ -216,8 +216,8 @@ public struct RigidBodyData
     }
 
     /// <summary>
-    /// Gets or sets whether the implicit gyroscopic torque solver is enabled.
-    /// See <see cref="RigidBody.EnableGyroscopicForces"/> for details.
+    /// 获取或设置是否启用隐式陀螺力矩求解器。
+    /// 详见 <see cref="RigidBody.EnableGyroscopicForces"/>。
     /// </summary>
     public bool EnableGyroscopicForces
     {
@@ -231,14 +231,14 @@ public struct RigidBodyData
     }
 
     /// <summary>
-    /// Returns true if the body is not dynamic or currently inactive (sleeping).
+    /// 如果刚体不是动态的或当前处于非活动（休眠）状态，则返回 true。
     /// </summary>
     [Obsolete($"Use {nameof(MotionType)} directly.", true)]
     public bool IsStaticOrInactive => MotionType != MotionType.Dynamic || !IsActive;
 
     /// <summary>
-    /// Gets or sets how this body participates in the simulation.
-    /// Encoded in bits 0–1 of <see cref="Flags"/>.
+    /// 获取或设置此刚体如何参与模拟。
+    /// 编码在 <see cref="Flags"/> 的位 0–1 中。
     /// </summary>
     public MotionType MotionType
     {
@@ -250,15 +250,15 @@ public struct RigidBodyData
 }
 
 /// <summary>
-/// Represents the primary entity in the Jitter physics world.
+/// 表示 Jitter 物理世界中的主要实体。
 /// </summary>
 public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
 {
     private JHandle<RigidBodyData> handle;
 
     /// <summary>
-    /// Unique identifier for this rigid body, assigned by the <see cref="World"/> upon creation.
-    /// This ID remains stable for the lifetime of the body.
+    /// 此刚体的唯一标识符，创建时由 <see cref="World"/> 分配。
+    /// 此 ID 在刚体的整个生命周期内保持稳定。
     /// </summary>
     public readonly ulong RigidBodyId;
 
@@ -266,17 +266,17 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     private Real friction = (Real)0.2;
 
     /// <summary>
-    /// Returns a by-ref view of the unmanaged simulation state for this body.
+    /// 返回此刚体非托管模拟状态的按引用视图。
     /// </summary>
     /// <remarks>
-    /// Due to performance considerations, simulation data (position, velocity, etc.) is stored
-    /// in a contiguous block of unmanaged memory. This property provides direct access to that data.
+    /// 出于性能考虑，模拟数据（位置、速度等）存储在一块连续的非托管内存中。
+    /// 此属性提供对该数据的直接访问。
     /// <para>
-    /// <strong>Usage notes:</strong>
+    /// <strong>使用说明：</strong>
     /// <list type="bullet">
-    /// <item><description>Prefer using <see cref="RigidBody"/> properties instead of accessing fields directly.</description></item>
-    /// <item><description>Do not cache the returned reference across simulation steps.</description></item>
-    /// <item><description>Modifying fields directly can break invariants (e.g., world-space inertia) unless you know what you're doing.</description></item>
+    /// <item><description>请优先使用 <see cref="RigidBody"/> 的属性，而不是直接访问字段。</description></item>
+    /// <item><description>不要跨模拟步缓存返回的引用。</description></item>
+    /// <item><description>除非你清楚自己在做什么，否则直接修改字段可能破坏不变量（例如世界空间惯性）。</description></item>
     /// </list>
     /// </para>
     /// </remarks>
@@ -290,7 +290,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets the handle to the rigid body data, see <see cref="Data"/>.
+    /// 获取指向刚体数据的句柄，参见 <see cref="Data"/>。
     /// </summary>
     public JHandle<RigidBodyData> Handle
     {
@@ -298,12 +298,12 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets a value indicating whether the underlying rigid body data is still valid.
+    /// 获取一个值，指示底层的刚体数据是否仍然有效。
     /// </summary>
     public bool IsValid => !handle.IsZero && !World.IsDisposed;
 
-    // There is only one way to create a body: world.CreateRigidBody. There, we add an island
-    // to the new body. This should never be null.
+    // 创建刚体只有一种方式：world.CreateRigidBody。在那里我们会为新刚体添加一个岛。
+    // 它永远不应为 null。
     internal Island InternalIsland = null!;
 
     internal readonly List<RigidBodyShape> InternalShapes = new(capacity: 1);
@@ -315,27 +315,27 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     internal Real InternalSleepTime = (Real)0.0;
 
     /// <summary>
-    /// Gets the collision island associated with this rigid body.
+    /// 获取与此刚体关联的碰撞岛。
     /// </summary>
     public Island Island => InternalIsland;
 
     /// <summary>
-    /// Event triggered when a new arbiter is created, including for a speculative contact before the bodies overlap.
+    /// 当创建新的仲裁器时触发的事件，包括在刚体发生重叠之前的推测接触。
     /// </summary>
     /// <remarks>
-    /// This event provides an <see cref="Arbiter"/> object which contains details about the collision.
-    /// Use this event to handle logic when contact tracking begins between two bodies.
+    /// 此事件提供一个 <see cref="Arbiter"/> 对象，其中包含碰撞的详细信息。
+    /// 使用此事件来处理两个刚体之间开始接触跟踪时的逻辑。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event Action<Arbiter>? BeginCollide;
 
     /// <summary>
-    /// Event triggered when an arbiter expires during a simulation step because contact has ended.
-    /// The reference to this arbiter becomes invalid after this call.
+    /// 当仲裁器在模拟步中因接触结束而过期时触发的事件。
+    /// 在此调用之后，对该仲裁器的引用将失效。
     /// </summary>
     /// <remarks>
-    /// This event provides an <see cref="Arbiter"/> object which contains details about the collision that has ended.
-    /// Explicit arbiter, body, or shape removal does not raise this event.
+    /// 此事件提供一个 <see cref="Arbiter"/> 对象，其中包含已结束碰撞的详细信息。
+    /// 显式移除仲裁器、刚体或形状不会触发此事件。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event Action<Arbiter>? EndCollide;
@@ -359,23 +359,22 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Contains all bodies this body is in contact with or shares a constraint with.
+    /// 包含此刚体接触到的或与之共享约束的所有刚体。
     /// </summary>
     public ReadOnlyList<RigidBody> Connections => new(InternalConnections);
 
     /// <summary>
-    /// Contains all contacts in which this body is involved.
+    /// 包含此刚体参与的所有接触。
     /// </summary>
     public ReadOnlyHashSet<Arbiter> Contacts => new(InternalContacts);
 
     /// <summary>
-    /// Clears the cached contact manifold state for all current contacts of this body.
+    /// 清除此刚体所有当前接触的缓存接触流形状态。
     /// </summary>
     /// <remarks>
-    /// This discards cached contact points and accumulated impulses, forcing contact
-    /// manifolds to be rebuilt on the next simulation step. This is useful after
-    /// discontinuous user-driven transform changes such as teleports.
-    /// Do not call this concurrently with <see cref="World.Step(Real, bool)"/>.
+    /// 这会丢弃缓存的接触点和累积冲量，强制在下一个模拟步重建接触
+    /// 流形。这在用户驱动的非连续变换变更（例如传送）之后非常有用。
+    /// 不要与 <see cref="World.Step(Real, bool)"/> 并发调用此方法。
     /// </remarks>
     public void ClearContactCache()
     {
@@ -386,12 +385,12 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Contains all constraints connected to this body.
+    /// 包含连接到此刚体的所有约束。
     /// </summary>
     public ReadOnlyHashSet<Constraint> Constraints => new(InternalConstraints);
 
     /// <summary>
-    /// Gets the list of shapes added to this rigid body.
+    /// 获取添加到此刚体的形状列表。
     /// </summary>
     public ReadOnlyList<RigidBodyShape> Shapes => new(InternalShapes);
 
@@ -409,15 +408,15 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     private Real inverseMass = (Real)1.0;
 
     /// <summary>
-    /// Gets or sets the coefficient of friction used for contact resolution.
+    /// 获取或设置用于接触求解的摩擦系数。
     /// </summary>
     /// <remarks>
-    /// The friction coefficient determines the resistance to sliding motion.
-    /// Values typically range from 0 (no friction) upwards.
-    /// Higher values represent strong friction or adhesion effects.
-    /// Default value: 0.2.
+    /// 摩擦系数决定对滑动运动的阻力。
+    /// 值通常从 0（无摩擦）开始向上取值。
+    /// 较高的值表示强摩擦或粘附效应。
+    /// 默认值：0.2。
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is negative.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">如果值为负则抛出。</exception>
     public Real Friction
     {
         get => friction;
@@ -428,15 +427,15 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the restitution (bounciness) of this object.
+    /// 获取或设置此对象的恢复系数（弹性）。
     /// </summary>
     /// <remarks>
-    /// The restitution value determines how much energy is retained after a collision,
-    /// with 0 representing an inelastic collision (no bounce) and 1 representing a perfectly elastic collision (full bounce).
-    /// Values between 0 and 1 create a partially elastic collision effect.
-    /// Default value: 0.0.
+    /// 恢复系数决定碰撞后保留多少能量，
+    /// 0 表示非弹性碰撞（无反弹），1 表示完全弹性碰撞（完全反弹）。
+    /// 0 到 1 之间的值产生部分弹性碰撞效果。
+    /// 默认值：0.0。
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is not between 0 and 1.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">如果值不在 0 到 1 之间则抛出。</exception>
     public Real Restitution
     {
         get => restitution;
@@ -447,7 +446,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets the world assigned to this body.
+    /// 获取分配给此刚体的世界。
     /// </summary>
     public World World { get; }
 
@@ -465,13 +464,13 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the deactivation time. Dynamic bodies must remain below the
-    /// <see cref="DeactivationThreshold"/> for this time before their island can be deactivated.
-    /// Kinematic bodies must have zero linear and angular velocity for this time.
-    /// Default value: 1 second.
+    /// 获取或设置失活时间。动态刚体必须在此时间内保持在
+    /// <see cref="DeactivationThreshold"/> 以下，其所在的岛才能被停用。
+    /// 运动学刚体必须在此时间内保持线速度和角速度为零。
+    /// 默认值：1 秒。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the assigned value is negative.
+    /// 当赋值为负数时抛出。
     /// </exception>
     public TimeSpan DeactivationTime
     {
@@ -483,17 +482,17 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the deactivation threshold for dynamic bodies. If the magnitudes of both the angular and linear velocity
-    /// remain below the specified values for the duration of <see cref="DeactivationTime"/>, its island can be deactivated.
-    /// The threshold values are given in rad/s and length units/s, respectively.
+    /// 获取或设置动态刚体的失活阈值。如果角速度和线速度的模长在
+    /// <see cref="DeactivationTime"/> 持续时间内都保持在指定值以下，其所在的岛就可以被停用。
+    /// 阈值的单位分别为 rad/s 和长度单位/s。
     /// </summary>
     /// <remarks>
-    /// Values must be non-negative.
-    /// Default values: angular and linear are both approximately 0.316.
-    /// Kinematic bodies ignore these thresholds and only rest when both velocities are exactly zero.
+    /// 值必须为非负。
+    /// 默认值：角速度和线速度均约为 0.316。
+    /// 运动学刚体忽略这些阈值，仅在两个速度都恰好为零时才静止。
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown if either the linear or angular threshold is negative.
+    /// 如果线速度或角速度阈值为负则抛出。
     /// </exception>
     public (Real angular, Real linear) DeactivationThreshold
     {
@@ -509,16 +508,16 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the damping factors for linear and angular motion. A damping factor of 0 means the body is not
-    /// damped, while 1 brings the body to a halt immediately. Damping is applied when calling
-    /// <see cref="World.Step(Real, bool)"/>. Jitter multiplies the respective velocity each step by 1 minus the damping
-    /// factor. Note that the values are not scaled by time; a smaller time-step in <see cref="World.Step(Real, bool)"/>
-    /// results in increased damping.
+    /// 获取或设置线性和角运动的阻尼系数。阻尼系数为 0 表示刚体不受
+    /// 阻尼，而 1 会立即使刚体停止运动。阻尼在调用
+    /// <see cref="World.Step(Real, bool)"/> 时施加。Jitter 每步将相应的速度乘以 1 减去阻尼
+    /// 系数。注意这些值不按时间缩放；<see cref="World.Step(Real, bool)"/> 中较小的时间步
+    /// 会导致阻尼增加。
     /// </summary>
-    /// <remarks>The damping factors must be within the range [0, 1].
-    /// Default values: linear = 0.002, angular = 0.005.</remarks>
+    /// <remarks>阻尼系数必须在 [0, 1] 范围内。
+    /// 默认值：线性 = 0.002，角 = 0.005。</remarks>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown if either the linear or angular damping value is less than 0 or greater than 1.
+    /// 如果线性或角阻尼值小于 0 或大于 1 则抛出。
     /// </exception>
     public (Real linear, Real angular) Damping
     {
@@ -541,33 +540,33 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets the inverse inertia tensor in body (local) space.
+    /// 获取刚体（局部）空间中的逆惯性张量。
     /// </summary>
     /// <remarks>
-    /// For world-space inverse inertia, see <see cref="RigidBodyData.InverseInertiaWorld"/>.
-    /// For non-dynamic bodies, the solver treats inertia as infinite regardless of this value.
-    /// <see cref="AllowedMotion"/> preserves this tensor and restricts the solver's effective inertia.
+    /// 关于世界空间逆惯性，请参见 <see cref="RigidBodyData.InverseInertiaWorld"/>。
+    /// 对于非动态刚体，无论此值如何，求解器都将惯性视为无限大。
+    /// <see cref="AllowedMotion"/> 保留此张量，并限制求解器的等效惯性。
     /// </remarks>
     public JSymmetricMatrix InverseInertia => inverseInertia;
 
-    /// <summary>Gets or sets the body's permitted translations and rotations in world space.</summary>
-    /// <value>Defaults to <see cref="MotionAxes.All"/>.</value>
+    /// <summary>获取或设置刚体在世界空间中允许的平移和旋转。</summary>
+    /// <value>默认为 <see cref="MotionAxes.All"/>。</value>
     /// <remarks>
-    /// Each assignment replaces the previous restrictions. For example,
-    /// <see cref="MotionAxes.PlaneXY"/> permits translation along X and Y and rotation about Z.
-    /// Restricted directions have zero effective inverse mass or inverse inertia in the solver.
-    /// Restrictions preserve the scalar <see cref="Mass"/> and body-space <see cref="InverseInertia"/>.
-    /// Changes to mass properties or shapes update the response while retaining the restrictions. Assigning
-    /// <see cref="MotionAxes.All"/> restores the response derived from those original properties.
+    /// 每次赋值都会替换之前的限制。例如，
+    /// <see cref="MotionAxes.PlaneXY"/> 允许沿 X 和 Y 平移并绕 Z 旋转。
+    /// 受限方向在求解器中具有零等效逆质量或逆惯性。
+    /// 限制会保留标量 <see cref="Mass"/> 和刚体空间的 <see cref="InverseInertia"/>。
+    /// 对质量属性或形状的更改会在保留限制的同时更新响应。赋值为
+    /// <see cref="MotionAxes.All"/> 会恢复由这些原始属性推导出的响应。
     /// <para>
-    /// Changes immediately clear prohibited velocity components, invalidate cached impulses,
-    /// and schedule activation. Restrictions also apply to kinematic velocity. They govern
-    /// simulated motion; position and orientation can still be assigned directly. Setting
-    /// <see cref="MotionAxes.None"/> does not change <see cref="MotionType"/>.
+    /// 更改会立即清除被禁止的速度分量、使缓存的冲量失效，
+    /// 并安排激活。限制也适用于运动学速度。它们管的是
+    /// 模拟运动；位置和朝向仍可直接赋值。设置
+    /// <see cref="MotionAxes.None"/> 不会改变 <see cref="MotionType"/>。
     /// </para>
-    /// <para>Do not change this property concurrently with <see cref="World.Step(Real, bool)"/>.</para>
+    /// <para>不要与 <see cref="World.Step(Real, bool)"/> 并发更改此属性。</para>
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown for undefined flag bits.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">当标志位未定义时抛出。</exception>
     public MotionAxes AllowedMotion
     {
         get => Data.AllowedMotion;
@@ -595,13 +594,13 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the world-space position of the rigid body.
+    /// 获取或设置刚体的世界空间位置。
     /// </summary>
     /// <remarks>
-    /// Setting this property updates the broadphase proxies for all attached shapes
-    /// and schedules a dynamic or kinematic body for activation on the next step. Moving a static body
-    /// activates connected bodies. Any currently active
-    /// cached contacts involving this body are invalidated.
+    /// 设置此属性会更新所有附加形状的宽相代理，
+    /// 并安排动态或运动学刚体在下一步激活。移动静态刚体会
+    /// 激活与其连接的刚体。涉及此刚体的所有当前活动
+    /// 缓存接触都会失效。
     /// </remarks>
     public JVector Position
     {
@@ -615,13 +614,13 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the world-space orientation of the rigid body.
+    /// 获取或设置刚体的世界空间朝向。
     /// </summary>
     /// <remarks>
-    /// Setting this property updates the broadphase proxies for all attached shapes
-    /// and schedules a dynamic or kinematic body for activation on the next step. Moving a static body
-    /// activates connected bodies. Any currently active
-    /// cached contacts involving this body are invalidated.
+    /// 设置此属性会更新所有附加形状的宽相代理，
+    /// 并安排动态或运动学刚体在下一步激活。移动静态刚体会
+    /// 激活与其连接的刚体。涉及此刚体的所有当前活动
+    /// 缓存接触都会失效。
     /// </remarks>
     public JQuaternion Orientation
     {
@@ -673,7 +672,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
             return;
         }
 
-        // Eliminate locked velocities from the inverse inertia using Schur complements.
+        // 使用 Schur 补从逆惯性中消除被锁定的速度。
         if ((flags & MotionAxes.AngularX) == 0)
         {
             if (inertia.M11 > 0)
@@ -721,7 +720,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
         RestrictLinearMotion(ref rigidBody.Velocity, axes);
         RestrictAngularMotion(ref rigidBody.AngularVelocity, axes);
 
-        // Kinematic velocity is prescribed by the caller, so any motion prevents sleeping.
+        // 运动学速度由调用方规定，因此任何运动都会阻止休眠。
         bool isKinematic = rigidBody.MotionType == MotionType.Kinematic;
         bool resting = isKinematic
             ? rigidBody.AngularVelocity == JVector.Zero && rigidBody.Velocity == JVector.Zero
@@ -764,15 +763,15 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the linear velocity of the rigid body in world space.
+    /// 获取或设置刚体在世界空间中的线性速度。
     /// </summary>
     /// <remarks>
-    /// Measured in units per second. Setting a non-zero kinematic velocity schedules the body
-    /// for activation on the next step. For dynamic bodies, a small tolerance is applied to the activation check.
-    /// Locked translation components are cleared.
+    /// 单位为每秒长度单位。设置非零运动学速度会安排刚体
+    /// 在下一步激活。对于动态刚体，激活检查会应用一个很小的容差。
+    /// 被锁定的平移分量会被清除。
     /// </remarks>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the body's <see cref="MotionType"/> is <see cref="MotionType.Static"/>.
+    /// 如果刚体的 <see cref="MotionType"/> 为 <see cref="MotionType.Static"/> 则抛出。
     /// </exception>
     public JVector Velocity
     {
@@ -795,7 +794,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
             if (EnableSpeculativeContacts && previousVelocity != value)
             {
                 UpdateSpeculativeBroadphase();
-                // Custom shape bounds updates can relocate the body buffer.
+                // 自定义形状包围盒的更新可能会重新定位刚体缓冲区。
                 data = ref Data;
             }
 
@@ -809,16 +808,16 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets the angular velocity of the rigid body in world space.
+    /// 获取或设置刚体在世界空间中的角速度。
     /// </summary>
     /// <remarks>
-    /// Measured in radians per second. The vector direction is the rotation axis,
-    /// and its magnitude is the rotation speed. Setting a non-zero kinematic velocity schedules
-    /// the body for activation on the next step. For dynamic bodies, a small tolerance is applied to the activation check.
-    /// Locked rotation components are cleared.
+    /// 单位为弧度每秒。向量方向为旋转轴，
+    /// 其模长为旋转速率。设置非零运动学速度会安排
+    /// 刚体在下一步激活。对于动态刚体，激活检查会应用一个很小的容差。
+    /// 被锁定的旋转分量会被清除。
     /// </remarks>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the body's <see cref="MotionType"/> is <see cref="MotionType.Static"/>.
+    /// 如果刚体的 <see cref="MotionType"/> 为 <see cref="MotionType.Static"/> 则抛出。
     /// </exception>
     public JVector AngularVelocity
     {
@@ -847,32 +846,32 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets whether the body is affected by the world's gravity during integration.
+    /// 获取或设置刚体在积分过程中是否受世界重力影响。
     /// </summary>
     /// <remarks>
-    /// Only applies when <see cref="MotionType"/> is <see cref="MotionType.Dynamic"/>.
-    /// Default is <see langword="true"/>.
+    /// 仅在 <see cref="MotionType"/> 为 <see cref="MotionType.Dynamic"/> 时适用。
+    /// 默认为 <see langword="true"/>。
     /// </remarks>
     public bool AffectedByGravity { get; set; } = true;
 
     /// <summary>
-    /// A managed pointer to custom user data. This is not used by the engine.
+    /// 指向自定义用户数据的托管指针。引擎不使用此数据。
     /// </summary>
     public object? Tag { get; set; }
 
     private bool enableSpeculativeContacts;
 
     /// <summary>
-    /// Gets or sets whether linear-only speculative contacts are enabled for this body.
+    /// 获取或设置此刚体是否启用仅线性的推测接触。
     /// </summary>
     /// <remarks>
-    /// Speculative contacts help prevent tunneling from fast linear motion by generating
-    /// contacts before actual penetration occurs. Prediction and speculative bounding box
-    /// expansion use only linear velocity, with shape orientations held fixed during sweeps.
-    /// Speculative constraints ignore angular surface velocity and update only linear velocity.
-    /// They do not prevent tunneling caused by rotation. Bodies still rotate normally, and
-    /// ordinary overlap contacts retain their angular response. Enabling speculative contacts
-    /// may increase contact count and solver cost. Default is <see langword="false"/>.
+    /// 推测接触通过在真正发生穿透之前生成接触，帮助防止快速线性运动
+    /// 造成的穿透。预测和推测包围盒
+    /// 扩展仅使用线性速度，扫掠过程中形状朝向保持不变。
+    /// 推测约束忽略表面角速度，仅更新线性速度。
+    /// 它们无法防止由旋转导致的穿透。刚体仍会正常旋转，普通
+    /// 重叠接触保留其角度响应。启用推测接触
+    /// 可能增加接触数量和求解器开销。默认为 <see langword="false"/>。
     /// </remarks>
     public bool EnableSpeculativeContacts
     {
@@ -933,20 +932,20 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets how the rigid body participates in the simulation.
+    /// 获取或设置刚体如何参与模拟。
     /// </summary>
     /// <remarks>
-    /// Changing this property has immediate side effects:
+    /// 更改此属性会立即产生副作用：
     /// <list type="bullet">
-    /// <item><description>Switching to <see cref="MotionType.Static"/> zeroes velocities, removes connections, and deactivates the body.</description></item>
-    /// <item><description>Switching from <see cref="MotionType.Static"/> rebuilds connections from existing contacts.</description></item>
-    /// <item><description>Switching to <see cref="MotionType.Kinematic"/> preserves velocities. Set both velocities to zero if the body should become stationary.</description></item>
-    /// <item><description>Constraints remain registered and are suspended while neither connected body is dynamic.</description></item>
-    /// <item><description>Any queued forces, torques, and force-derived velocity changes are discarded.</description></item>
-    /// <item><description>Dynamic bodies use their mass and inertia; static and kinematic bodies are treated as having infinite mass by the solver.</description></item>
+    /// <item><description>切换到 <see cref="MotionType.Static"/> 会将速度清零、移除连接并停用刚体。</description></item>
+    /// <item><description>从 <see cref="MotionType.Static"/> 切换出来会根据现有接触重建连接。</description></item>
+    /// <item><description>切换到 <see cref="MotionType.Kinematic"/> 会保留速度。如果希望刚体静止，请将两个速度都设为零。</description></item>
+    /// <item><description>约束仍保持注册，并在两个相连刚体都不是动态刚体时挂起。</description></item>
+    /// <item><description>任何排队的力、力矩以及由力推导出的速度变化都会被丢弃。</description></item>
+    /// <item><description>动态刚体使用其质量和惯性；静态和运动学刚体在求解器中视为具有无限质量。</description></item>
     /// </list>
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is not a valid <see cref="MotionType"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">如果值不是有效的 <see cref="MotionType"/> 则抛出。</exception>
     public MotionType MotionType
     {
         get => Data.MotionType;
@@ -958,7 +957,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
             {
                 case MotionType.Static:
                     ClearQueuedForces();
-                    // Switch to static
+                    // 切换为静态
                     World.RemoveConnections(this);
                     Data.MotionType = MotionType.Static;
                     World.RemoveStaticStaticContacts(this);
@@ -970,7 +969,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
                 case MotionType.Kinematic:
                     {
                         ClearQueuedForces();
-                        // Switch to kinematic
+                        // 切换为运动学
                         if (Data.MotionType == MotionType.Static)
                         {
                             Data.MotionType = MotionType.Kinematic;
@@ -986,7 +985,7 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
                 case MotionType.Dynamic:
                     {
                         ClearQueuedForces();
-                        // Switch to dynamic
+                        // 切换为动态
                         if (Data.MotionType == MotionType.Static)
                         {
                             Data.MotionType = MotionType.Dynamic;
@@ -1017,22 +1016,22 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Indicates whether the rigid body is active or considered to be in a sleeping state.
-    /// Use <see cref="SetActivationState"/> to alter the activation state.
+    /// 指示刚体是处于活动状态还是被视为休眠状态。
+    /// 使用 <see cref="SetActivationState"/> 更改激活状态。
     /// </summary>
     public bool IsActive => Data.IsActive;
 
     /// <summary>
-    /// Instructs the engine to activate or deactivate the body at the beginning of
-    /// the next time step. The current state does not change immediately.
+    /// 指示引擎在下一个时间步开始时激活或停用刚体。
+    /// 当前状态不会立即改变。
     /// </summary>
     /// <remarks>
-    /// Activation and deactivation are applied through the body's simulation island.
-    /// Static bodies cannot be activated by this method, although moving a static body can wake connected
-    /// non-static bodies.
+    /// 激活和停用通过刚体的模拟岛生效。
+    /// 静态刚体不能通过此方法激活，不过移动静态刚体可以唤醒相连的
+    /// 非静态刚体。
     /// </remarks>
     /// <param name="active">
-    /// If <see langword="true"/>, the body will be activated; if <see langword="false"/>, deactivated.
+    /// 如果为 <see langword="true"/>，刚体将被激活；如果为 <see langword="false"/>，则被停用。
     /// </param>
     public void SetActivationState(bool active)
     {
@@ -1072,35 +1071,35 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Adds several shapes to the rigid body at once. Mass properties are
-    /// recalculated only once, if requested.
+    /// 一次向刚体添加多个形状。如有需要，质量属性
+    /// 只重新计算一次。
     /// </summary>
-    /// <param name="shapes">The shapes to add.</param>
+    /// <param name="shapes">要添加的形状。</param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shapes"/> or any contained shape is <see langword="null"/>.
+    /// 如果 <paramref name="shapes"/> 或其中任一形状为 <see langword="null"/> 则抛出。
     /// </exception>
-    /// <exception cref="ArgumentException">Thrown if any shape is already attached to a body.</exception>
+    /// <exception cref="ArgumentException">如果任一形状已附加到刚体则抛出。</exception>
     public void AddShapes(IEnumerable<RigidBodyShape> shapes)
         => AddShapes(shapes, MassInertiaUpdateMode.Update);
 
     /// <summary>
-    /// Adds several shapes to the rigid body at once. Mass properties are
-    /// recalculated only once, if requested.
+    /// 一次向刚体添加多个形状。如有需要，质量属性
+    /// 只重新计算一次。
     /// </summary>
     /// <remarks>
-    /// Shapes are added sequentially. If an exception is thrown, shapes processed before the
-    /// failure remain attached to the body.
+    /// 形状按顺序添加。如果抛出异常，失败之前已处理的形状
+    /// 仍保持附加到刚体。
     /// </remarks>
-    /// <param name="shapes">The shapes to add.</param>
+    /// <param name="shapes">要添加的形状。</param>
     /// <param name="massInertiaMode">
-    /// Controls whether the body's mass and inertia are recomputed after the shapes are added.
+    /// 控制添加形状后是否重新计算刚体的质量和惯性。
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shapes"/> or any contained shape is <see langword="null"/>.
+    /// 如果 <paramref name="shapes"/> 或其中任一形状为 <see langword="null"/> 则抛出。
     /// </exception>
-    /// <exception cref="ArgumentException">Thrown if any shape is already attached to a body.</exception>
+    /// <exception cref="ArgumentException">如果任一形状已附加到刚体则抛出。</exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="massInertiaMode"/> is not a valid <see cref="MassInertiaUpdateMode"/> value.
+    /// 当 <paramref name="massInertiaMode"/> 不是有效的 <see cref="MassInertiaUpdateMode"/> 值时抛出。
     /// </exception>
     public void AddShapes(IEnumerable<RigidBodyShape> shapes, MassInertiaUpdateMode massInertiaMode)
     {
@@ -1124,21 +1123,21 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Enables the implicit gyroscopic–torque solver for this <see cref="RigidBody"/>.
+    /// 为此 <see cref="RigidBody"/> 启用隐式陀螺力矩求解器。
     /// </summary>
     /// <remarks>
-    /// When <see langword="true"/> and <see cref="AllowedMotion"/> is
-    /// <see cref="MotionAxes.All"/>, every sub-step performs an extra Newton iteration
-    /// to solve <c>ω × (I ω)</c> implicitly. The solver is skipped while any axes are locked.
+    /// 当为 <see langword="true"/> 且 <see cref="AllowedMotion"/> 为
+    /// <see cref="MotionAxes.All"/> 时，每个子步都会执行一次额外的 Newton 迭代，
+    /// 以隐式求解 <c>ω × (I ω)</c>。当任何轴被锁定时，求解器将被跳过。
     ///
-    /// The benefit becomes noticeable for bodies with a high inertia anisotropy or very fast
-    /// spin-rates. Typical examples are long, thin rods, spinning tops, propellers, and other objects
-    /// whose principal inertia values differ by an order of magnitude. In those cases the flag eliminates artificial
-    /// precession.
+    /// 对于具有高惯性各向异性或非常快自旋速率的刚体，收益会变得明显。
+    /// 典型例子包括细长杆、陀螺、螺旋桨以及其他主惯性值
+    /// 相差一个数量级的物体。在这些情况下，该标志会消除人为的
+    /// 进动。
     /// </remarks>
     /// <value>
-    /// <see langword="true"/> to integrate gyroscopic torque each step; otherwise
-    /// <see langword="false"/> (default).
+    /// <see langword="true"/> 表示每步积分陀螺力矩；否则为
+    /// <see langword="false"/>（默认值）。
     /// </value>
     public bool EnableGyroscopicForces
     {
@@ -1147,41 +1146,41 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Adds a shape to the body.
+    /// 向刚体添加一个形状。
     /// </summary>
     /// <remarks>
-    /// If registration or mass calculation fails, the shape remains detached and the body's
-    /// mass properties remain unchanged.
+    /// 如果注册或质量计算失败，形状将保持分离，刚体的
+    /// 质量属性保持不变。
     /// </remarks>
-    /// <param name="shape">The shape to be added.</param>
+    /// <param name="shape">要添加的形状。</param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shape"/> is <see langword="null"/>.
+    /// 如果 <paramref name="shape"/> 为 <see langword="null"/> 则抛出。
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// Thrown if the shape is already registered elsewhere.
+    /// 如果形状已注册到其他地方则抛出。
     /// </exception>
     public void AddShape(RigidBodyShape shape)
         => AddShape(shape, MassInertiaUpdateMode.Update);
 
     /// <summary>
-    /// Adds a shape to the body.
+    /// 向刚体添加一个形状。
     /// </summary>
     /// <remarks>
-    /// If registration or mass calculation fails, the shape remains detached and the body's
-    /// mass properties remain unchanged.
+    /// 如果注册或质量计算失败，形状将保持分离，刚体的
+    /// 质量属性保持不变。
     /// </remarks>
-    /// <param name="shape">The shape to be added.</param>
+    /// <param name="shape">要添加的形状。</param>
     /// <param name="massInertiaMode">
-    /// Controls whether the body's mass and inertia are recomputed after the shape is added.
+    /// 控制添加形状后是否重新计算刚体的质量和惯性。
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown if the shape is already registered elsewhere.
+    /// 如果形状已注册到其他地方则抛出。
     /// </exception>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shape"/> is <see langword="null"/>.
+    /// 如果 <paramref name="shape"/> 为 <see langword="null"/> 则抛出。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="massInertiaMode"/> is not a valid <see cref="MassInertiaUpdateMode"/> value.
+    /// 当 <paramref name="massInertiaMode"/> 不是有效的 <see cref="MassInertiaUpdateMode"/> 值时抛出。
     /// </exception>
     public void AddShape(RigidBodyShape shape, MassInertiaUpdateMode massInertiaMode)
     {
@@ -1217,9 +1216,9 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
         => AddShape(shape, setMassInertia ? MassInertiaUpdateMode.Update : MassInertiaUpdateMode.Preserve);
 
     /// <summary>
-    /// Accumulated force converted to a velocity change at the end of the next
-    /// <see cref="World.Step(Real, bool)"/> call. The change is applied during the following step,
-    /// and this value is reset to zero after conversion.
+    /// 累积的力，在下次
+    /// <see cref="World.Step(Real, bool)"/> 调用结束时转换为速度变化。该变化在随后的步中施加，
+    /// 转换后此值重置为零。
     /// </summary>
     public JVector Force
     {
@@ -1232,9 +1231,9 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Accumulated torque converted to an angular velocity change at the end of the next
-    /// <see cref="World.Step(Real, bool)"/> call. The change is applied during the following step,
-    /// and this value is reset to zero after conversion.
+    /// 累积的力矩，在下次
+    /// <see cref="World.Step(Real, bool)"/> 调用结束时转换为角速度变化。该变化在随后的步中施加，
+    /// 转换后此值重置为零。
     /// </summary>
     public JVector Torque
     {
@@ -1247,16 +1246,16 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Applies a force to the rigid body, thereby altering its velocity.
+    /// 对刚体施加一个力，从而改变其速度。
     /// </summary>
     /// <param name="force">
-    /// The force to accumulate. It is converted to a velocity change at the end of the next
-    /// <see cref="World.Step(Real, bool)"/> call and applied during the following step.
+    /// 要累积的力。它在下次 <see cref="World.Step(Real, bool)"/> 调用结束时
+    /// 转换为速度变化，并在随后的步中施加。
     /// </param>
     /// <param name="wakeup">
-    /// If <c>true</c> (default), the body will be activated if it is currently sleeping.
-    /// If <c>false</c>, the force is only applied if the body is already active; sleeping
-    /// bodies will remain asleep and ignore the force.
+    /// 如果为 <c>true</c>（默认），刚体当前处于休眠状态时将被激活。
+    /// 如果为 <c>false</c>，仅当刚体已经处于活动状态时才施加该力；休眠的
+    /// 刚体将保持休眠并忽略该力。
     /// </param>
     public void AddForce(in JVector force, bool wakeup = true)
     {
@@ -1271,16 +1270,16 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Applies a force to the rigid body at a world-space position. The force and resulting torque are
-    /// converted to velocity changes at the end of the next <see cref="World.Step(Real, bool)"/> call
-    /// and applied during the following step.
+    /// 在世界空间中的某位置对刚体施加一个力。该力及其产生的力矩
+    /// 在下次 <see cref="World.Step(Real, bool)"/> 调用结束时转换为速度变化，
+    /// 并在随后的步中施加。
     /// </summary>
-    /// <param name="force">The force to be applied.</param>
-    /// <param name="position">The position where the force will be applied.</param>
+    /// <param name="force">要施加的力。</param>
+    /// <param name="position">施力的位置。</param>
     /// <param name="wakeup">
-    /// If <c>true</c> (default), the body will be activated if it is currently sleeping.
-    /// If <c>false</c>, the force is only applied if the body is already active; sleeping
-    /// bodies will remain asleep and ignore the force.
+    /// 如果为 <c>true</c>（默认），刚体当前处于休眠状态时将被激活。
+    /// 如果为 <c>false</c>，仅当刚体已经处于活动状态时才施加该力；休眠的
+    /// 刚体将保持休眠并忽略该力。
     /// </param>
     [ReferenceFrame(ReferenceFrame.World)]
     public void AddForce(in JVector force, in JVector position, bool wakeup = true)
@@ -1302,13 +1301,13 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Applies an instantaneous impulse to the rigid body, directly changing its velocity.
+    /// 对刚体施加瞬时冲量，直接改变其速度。
     /// </summary>
-    /// <param name="impulse">The impulse to be applied.</param>
+    /// <param name="impulse">要施加的冲量。</param>
     /// <param name="wakeup">
-    /// If <c>true</c> (default), the body will be activated if it is currently sleeping.
-    /// If <c>false</c>, the impulse is only applied if the body is already active; sleeping
-    /// bodies will remain asleep and ignore the impulse.
+    /// 如果为 <c>true</c>（默认），刚体当前处于休眠状态时将被激活。
+    /// 如果为 <c>false</c>，仅当刚体已经处于活动状态时才施加该冲量；休眠的
+    /// 刚体将保持休眠并忽略该冲量。
     /// </param>
     public void ApplyImpulse(in JVector impulse, bool wakeup = true)
     {
@@ -1328,15 +1327,15 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Applies an instantaneous impulse at a world-space position, directly changing both
-    /// linear and angular velocity.
+    /// 在世界空间中的某位置施加瞬时冲量，直接改变线速度
+    /// 和角速度。
     /// </summary>
-    /// <param name="impulse">The impulse to be applied.</param>
-    /// <param name="position">The position where the impulse will be applied.</param>
+    /// <param name="impulse">要施加的冲量。</param>
+    /// <param name="position">施加冲量的位置。</param>
     /// <param name="wakeup">
-    /// If <c>true</c> (default), the body will be activated if it is currently sleeping.
-    /// If <c>false</c>, the impulse is only applied if the body is already active; sleeping
-    /// bodies will remain asleep and ignore the impulse.
+    /// 如果为 <c>true</c>（默认），刚体当前处于休眠状态时将被激活。
+    /// 如果为 <c>false</c>，仅当刚体已经处于活动状态时才施加该冲量；休眠的
+    /// 刚体将保持休眠并忽略该冲量。
     /// </param>
     [ReferenceFrame(ReferenceFrame.World)]
     public void ApplyImpulse(in JVector impulse, in JVector position, bool wakeup = true)
@@ -1369,31 +1368,31 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     public void AddImpulse(in JVector impulse, in JVector position, bool wakeup = true) => ApplyImpulse(impulse, position, wakeup);
 
     /// <summary>
-    /// Predicts the position of the body after a given time step using linear extrapolation.
-    /// This does not simulate forces or collisions — it assumes constant velocity.
+    /// 使用线性外推预测刚体在给定时间步之后的位置。
+    /// 这不会模拟力或碰撞——它假设速度恒定。
     /// </summary>
-    /// <param name="dt">The time step to extrapolate forward.</param>
-    /// <returns>The predicted position after <paramref name="dt"/>.</returns>
+    /// <param name="dt">要向前外推的时间步。</param>
+    /// <returns><paramref name="dt"/> 之后的预测位置。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public JVector PredictPosition(Real dt) => Data.Position + Data.Velocity * dt;
 
     /// <summary>
-    /// Predicts the orientation of the body after a given time step using angular velocity.
-    /// This does not simulate forces or collisions — it assumes constant angular velocity.
+    /// 使用角速度预测刚体在给定时间步之后的朝向。
+    /// 这不会模拟力或碰撞——它假设角速度恒定。
     /// </summary>
-    /// <param name="dt">The time step to extrapolate forward.</param>
-    /// <returns>The predicted orientation after <paramref name="dt"/>.</returns>
+    /// <param name="dt">要向前外推的时间步。</param>
+    /// <returns><paramref name="dt"/> 之后的预测朝向。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public JQuaternion PredictOrientation(Real dt) =>
         JQuaternion.Normalize(MathHelper.RotationQuaternion(Data.AngularVelocity, dt) * Data.Orientation);
 
     /// <summary>
-    /// Predicts the pose (position and orientation) of the body after a given time step using simple extrapolation.
-    /// This method is intended for rendering purposes and does not modify the simulation state.
+    /// 使用简单外推预测刚体在给定时间步之后的位姿（位置和朝向）。
+    /// 此方法用于渲染目的，不会修改模拟状态。
     /// </summary>
-    /// <param name="dt">The time step to extrapolate forward.</param>
-    /// <param name="position">The predicted position after <paramref name="dt"/>.</param>
-    /// <param name="orientation">The predicted orientation after <paramref name="dt"/>.</param>
+    /// <param name="dt">要向前外推的时间步。</param>
+    /// <param name="position"><paramref name="dt"/> 之后的预测位置。</param>
+    /// <param name="orientation"><paramref name="dt"/> 之后的预测朝向。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PredictPose(Real dt, out JVector position, out JQuaternion orientation)
     {
@@ -1402,33 +1401,33 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Removes a specified shape from the rigid body.
+    /// 从刚体中移除指定的形状。
     /// </summary>
-    /// <param name="shape">The shape to remove from the rigid body.</param>
+    /// <param name="shape">要从刚体中移除的形状。</param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shape"/> is <see langword="null"/>.
+    /// 如果 <paramref name="shape"/> 为 <see langword="null"/> 则抛出。
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// Thrown if the specified shape is not part of this rigid body.
+    /// 如果指定的形状不属于此刚体则抛出。
     /// </exception>
     public void RemoveShape(RigidBodyShape shape)
         => RemoveShape(shape, MassInertiaUpdateMode.Update);
 
     /// <summary>
-    /// Removes a specified shape from the rigid body.
+    /// 从刚体中移除指定的形状。
     /// </summary>
-    /// <param name="shape">The shape to remove from the rigid body.</param>
+    /// <param name="shape">要从刚体中移除的形状。</param>
     /// <param name="massInertiaMode">
-    /// Controls whether the body's mass and inertia are recomputed after the shape is removed.
+    /// 控制移除形状后是否重新计算刚体的质量和惯性。
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown if the specified shape is not part of this rigid body.
+    /// 如果指定的形状不属于此刚体则抛出。
     /// </exception>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shape"/> is <see langword="null"/>.
+    /// 如果 <paramref name="shape"/> 为 <see langword="null"/> 则抛出。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="massInertiaMode"/> is not a valid <see cref="MassInertiaUpdateMode"/> value.
+    /// 当 <paramref name="massInertiaMode"/> 不是有效的 <see cref="MassInertiaUpdateMode"/> 值时抛出。
     /// </exception>
     public void RemoveShape(RigidBodyShape shape, MassInertiaUpdateMode massInertiaMode)
     {
@@ -1446,8 +1445,8 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
         {
             if (arbiter.Handle.Data.Key.Key1 == shape.ShapeId || arbiter.Handle.Data.Key.Key2 == shape.ShapeId)
             {
-                // Removes the current element we are iterating over from Contacts, i.e. the HashSet
-                // we are iterating over is altered. This is allowed.
+                // 从 Contacts（即我们正在迭代的 HashSet）中移除当前正在迭代的元素，
+                // 即正在迭代的集合被修改。这是允许的。
                 World.Remove(arbiter);
             }
         }
@@ -1459,29 +1458,29 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Removes several shapes from the body.
+    /// 从刚体中移除多个形状。
     /// </summary>
-    /// <param name="shapes">The shapes to remove from the rigid body.</param>
+    /// <param name="shapes">要从刚体中移除的形状。</param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shapes"/> or any contained shape is <see langword="null"/>.
+    /// 如果 <paramref name="shapes"/> 或其中任一形状为 <see langword="null"/> 则抛出。
     /// </exception>
-    /// <exception cref="ArgumentException">Thrown if at least one shape is not part of this rigid body.</exception>
+    /// <exception cref="ArgumentException">如果至少有一个形状不属于此刚体则抛出。</exception>
     public void RemoveShapes(IEnumerable<RigidBodyShape> shapes)
         => RemoveShapes(shapes, MassInertiaUpdateMode.Update);
 
     /// <summary>
-    /// Removes several shapes from the body.
+    /// 从刚体中移除多个形状。
     /// </summary>
-    /// <param name="shapes">The shapes to remove from the rigid body.</param>
+    /// <param name="shapes">要从刚体中移除的形状。</param>
     /// <param name="massInertiaMode">
-    /// Controls whether the body's mass and inertia are recomputed after the shapes are removed.
+    /// 控制移除形状后是否重新计算刚体的质量和惯性。
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="shapes"/> or any contained shape is <see langword="null"/>.
+    /// 如果 <paramref name="shapes"/> 或其中任一形状为 <see langword="null"/> 则抛出。
     /// </exception>
-    /// <exception cref="ArgumentException">Thrown if at least one shape is not part of this rigid body.</exception>
+    /// <exception cref="ArgumentException">如果至少有一个形状不属于此刚体则抛出。</exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="massInertiaMode"/> is not a valid <see cref="MassInertiaUpdateMode"/> value.
+    /// 当 <paramref name="massInertiaMode"/> 不是有效的 <see cref="MassInertiaUpdateMode"/> 值时抛出。
     /// </exception>
     public void RemoveShapes(IEnumerable<RigidBodyShape> shapes, MassInertiaUpdateMode massInertiaMode)
     {
@@ -1508,8 +1507,8 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
         {
             if (sids.Contains(arbiter.Handle.Data.Key.Key1) || sids.Contains(arbiter.Handle.Data.Key.Key2))
             {
-                // Removes the current element we are iterating over from Contacts, i.e. the HashSet
-                // we are iterating over is altered. This is allowed.
+                // 从 Contacts（即我们正在迭代的 HashSet）中移除当前正在迭代的元素，
+                // 即正在迭代的集合被修改。这是允许的。
                 World.Remove(arbiter);
             }
         }
@@ -1540,16 +1539,16 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
         => RemoveShapes(shapes, setMassInertia ? MassInertiaUpdateMode.Update : MassInertiaUpdateMode.Preserve);
 
     /// <summary>
-    /// Removes all shapes associated with the rigid body.
+    /// 移除与刚体关联的所有形状。
     /// </summary>
     public void ClearShapes()
         => ClearShapes(MassInertiaUpdateMode.Update);
 
     /// <summary>
-    /// Removes all shapes associated with the rigid body.
+    /// 移除与刚体关联的所有形状。
     /// </summary>
     /// <param name="massInertiaMode">
-    /// Controls whether the body's mass and inertia are recomputed after the shapes are removed.
+    /// 控制移除形状后是否重新计算刚体的质量和惯性。
     /// </param>
     public void ClearShapes(MassInertiaUpdateMode massInertiaMode)
     {
@@ -1563,14 +1562,14 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Computes the mass and inertia of this body from all attached shapes, assuming unit density.
+    /// 根据所有附加的形状计算此刚体的质量和惯性，假设密度为单位密度。
     /// </summary>
     /// <remarks>
-    /// The mass contributions of all shapes are summed. If no shapes are attached, the body
-    /// is assigned a mass of 1 and an identity inertia tensor.
+    /// 所有形状的质量贡献会求和。如果没有附加任何形状，刚体
+    /// 将被赋予质量 1 和单位惯性张量。
     /// </remarks>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the computed inertia matrix is not invertible. This may occur if a shape has invalid mass properties.
+    /// 如果计算出的惯性矩阵不可逆则抛出。这可能发生在某个形状具有无效质量属性时。
     /// </exception>
     public void SetMassInertia()
     {
@@ -1608,15 +1607,15 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Computes the inertia from all attached shapes, then uniformly scales it to match the specified mass.
+    /// 根据所有附加的形状计算惯性，然后对其统一缩放以匹配指定的质量。
     /// </summary>
     /// <remarks>
-    /// This is equivalent to calling <see cref="SetMassInertia()"/> and then scaling the resulting
-    /// inertia tensor so the body has the desired total mass. Use this when you want shape-derived
-    /// inertia proportions but a specific total mass (e.g., for gameplay tuning).
+    /// 这等价于调用 <see cref="SetMassInertia()"/>，然后缩放得到的
+    /// 惯性张量，使刚体具有所需的总质量。当你希望惯性比例来自形状，
+    /// 但需要特定总质量（例如用于玩法调优）时，请使用此方法。
     /// </remarks>
-    /// <param name="mass">The desired total mass of the body. Must be positive.</param>
-    /// <exception cref="ArgumentException">Thrown if the specified mass is zero or negative.</exception>
+    /// <param name="mass">刚体所需的总质量。必须为正。</param>
+    /// <exception cref="ArgumentException">如果指定的质量为零或负数则抛出。</exception>
     public void SetMassInertia(Real mass)
     {
         ArgumentCheck.Finite(mass, nameof(mass));
@@ -1633,26 +1632,26 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Sets the new mass properties of this body by specifying both inertia and mass directly.
+    /// 通过直接指定惯性和质量来设置此刚体的新质量属性。
     /// </summary>
     /// <param name="inertia">
-    /// The symmetric inertia tensor (or inverse inertia tensor if <paramref name="setAsInverse"/> is true)
-    /// in body (local) space, about the center of mass.
+    /// 刚体（局部）空间中关于质心的对称惯性张量
+    /// （如果 <paramref name="setAsInverse"/> 为 true，则为逆惯性张量）。
     /// </param>
     /// <param name="mass">
-    /// The mass (or inverse mass if <paramref name="setAsInverse"/> is true). When setting inverse
-    /// mass, a value of zero represents infinite mass.
+    /// 质量（如果 <paramref name="setAsInverse"/> 为 true，则为逆质量）。设置逆质量时，
+    /// 值为零表示无限质量。
     /// </param>
     /// <param name="setAsInverse">
-    /// If <see langword="true"/>, <paramref name="inertia"/> and <paramref name="mass"/> are
-    /// interpreted as inverse values.
+    /// 如果为 <see langword="true"/>，<paramref name="inertia"/> 和 <paramref name="mass"/> 将被
+    /// 解释为逆值。
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown if:
+    /// 在以下情况下抛出：
     /// <list type="bullet">
-    /// <item><description><paramref name="mass"/> is zero or negative when <paramref name="setAsInverse"/> is false.</description></item>
-    /// <item><description><paramref name="mass"/> is negative or infinite when <paramref name="setAsInverse"/> is true.</description></item>
-    /// <item><description><paramref name="inertia"/> is not invertible when <paramref name="setAsInverse"/> is false.</description></item>
+    /// <item><description>当 <paramref name="setAsInverse"/> 为 false 时，<paramref name="mass"/> 为零或负数。</description></item>
+    /// <item><description>当 <paramref name="setAsInverse"/> 为 true 时，<paramref name="mass"/> 为负数或无限大。</description></item>
+    /// <item><description>当 <paramref name="setAsInverse"/> 为 false 时，<paramref name="inertia"/> 不可逆。</description></item>
     /// </list>
     /// </exception>
     public void SetMassInertia(in JSymmetricMatrix inertia, Real mass, bool setAsInverse = false)
@@ -1690,25 +1689,25 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Draws the body's collision shapes at their current positions and rotations.
+    /// 在形状当前的位置和旋转处绘制刚体的碰撞形状。
     /// </summary>
     /// <remarks>
-    /// Emits world-space triangles through <see cref="IDebugDrawer.DrawTriangle"/>.
-    /// Point clouds and custom shapes may appear with gaps or overlapping faces.
+    /// 通过 <see cref="IDebugDrawer.DrawTriangle"/> 输出世界空间三角形。
+    /// 点云和自定义形状可能出现缺口或重叠的面。
     /// </remarks>
-    /// <param name="drawer">The debug drawer receiving the shapes.</param>
+    /// <param name="drawer">接收形状的调试绘制器。</param>
     public void DebugDraw(IDebugDrawer drawer) => DebugDraw(drawer, DebugDrawSettings.Default);
 
     /// <summary>
-    /// Draws the body's collision shapes using the supplied settings.
+    /// 使用提供的设置绘制刚体的碰撞形状。
     /// </summary>
     /// <remarks>
-    /// Uses <see cref="DebugDrawSettings.Segments"/> for built-in curved surfaces,
-    /// <see cref="DebugDrawSettings.ShapeSubdivisions"/> for approximate surfaces, and
-    /// <see cref="DebugDrawSettings.CurrentColor"/> for the triangles.
+    /// 内置曲面使用 <see cref="DebugDrawSettings.Segments"/>，
+    /// 近似曲面使用 <see cref="DebugDrawSettings.ShapeSubdivisions"/>，
+    /// 三角形使用 <see cref="DebugDrawSettings.CurrentColor"/>。
     /// </remarks>
-    /// <param name="drawer">The debug drawer receiving the shapes.</param>
-    /// <param name="settings">The visualization settings.</param>
+    /// <param name="drawer">接收形状的调试绘制器。</param>
+    /// <param name="settings">可视化设置。</param>
     public void DebugDraw(IDebugDrawer drawer, in DebugDrawSettings settings)
     {
         ArgumentNullException.ThrowIfNull(drawer);
@@ -1719,15 +1718,15 @@ public sealed class RigidBody : IPartitionedSetIndex, IDebugDrawable
     }
 
     /// <summary>
-    /// Gets the mass of the rigid body. To modify the mass, use
-    /// <see cref="RigidBody.SetMassInertia(Real)"/> or
-    /// <see cref="RigidBody.SetMassInertia(in JSymmetricMatrix, Real, bool)"/>.
+    /// 获取刚体的质量。要修改质量，请使用
+    /// <see cref="RigidBody.SetMassInertia(Real)"/> 或
+    /// <see cref="RigidBody.SetMassInertia(in JSymmetricMatrix, Real, bool)"/>。
     /// </summary>
     /// <remarks>
-    /// This value is only meaningful for <see cref="MotionType.Dynamic"/> bodies.
-    /// Static and kinematic bodies are treated as having infinite mass by the solver
-    /// regardless of this value. <see cref="AllowedMotion"/> changes the effective response
-    /// along individual axes without changing this scalar mass.
+    /// 此值仅对 <see cref="MotionType.Dynamic"/> 刚体有意义。
+    /// 无论此值为何，静态和运动学刚体在求解器中都被视为具有无限质量。
+    /// <see cref="AllowedMotion"/> 会改变沿各个轴的等效响应，
+    /// 而不会改变此标量质量。
     /// </remarks>
     public Real Mass => (Real)1.0 / inverseMass;
 

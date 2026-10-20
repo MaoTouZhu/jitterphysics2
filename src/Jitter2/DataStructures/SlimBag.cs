@@ -13,26 +13,26 @@ using System.Threading;
 namespace Jitter2.DataStructures;
 
 /// <summary>
-/// A lightweight unordered collection backed by an array. Removing an element at position n
-/// moves the last element to position n and decrements <see cref="Count"/>, providing O(1) removal.
+/// 一个由数组支持的轻量级无序集合。移除位置 n 处的元素会将最后一个元素
+/// 移到位置 n 并递减 <see cref="Count"/>，从而提供 O(1) 移除。
 /// </summary>
-/// <typeparam name="T">The type of elements in the bag.</typeparam>
+/// <typeparam name="T">包中元素的类型。</typeparam>
 /// <remarks>
-/// Key operations:
+/// 关键操作：
 /// <list type="bullet">
-///   <item><description><see cref="Add"/>: O(1) amortized, may resize the internal array.</description></item>
-///   <item><description><see cref="RemoveAt"/>: O(1), swaps with the last element.</description></item>
-///   <item><description><see cref="Remove"/>: O(n), requires linear search.</description></item>
-///   <item><description><see cref="ConcurrentAdd"/>: Thread-safe addition with reader-writer locking.</description></item>
+///   <item><description><see cref="Add"/>：分摊 O(1)，可能调整内部数组的大小。</description></item>
+///   <item><description><see cref="RemoveAt"/>：O(1)，与最后一个元素交换。</description></item>
+///   <item><description><see cref="Remove"/>：O(n)，需要线性搜索。</description></item>
+///   <item><description><see cref="ConcurrentAdd"/>：使用读写锁的线程安全添加。</description></item>
 /// </list>
 /// </remarks>
 internal class SlimBag<T> : IEnumerable<T>
 {
     /// <summary>
-    /// A lightweight struct enumerator for <see cref="SlimBag{T}"/>.
+    /// 用于 <see cref="SlimBag{T}"/> 的轻量级结构体枚举器。
     /// </summary>
     /// <remarks>
-    /// <b>Warning:</b> Not safe if the bag is mutated during enumeration.
+    /// <b>警告：</b>如果在枚举期间修改了包，则不安全。
     /// </remarks>
     public struct Enumerator : IEnumerator<T>
     {
@@ -50,11 +50,11 @@ internal class SlimBag<T> : IEnumerable<T>
 
         public bool MoveNext()
         {
-            // advance and check against the number of valid items, not array.Length
+            // 前进并与有效项的数量比较，而不是 array.Length
             return ++index < owner.counter;
         }
 
-        // No resources to release
+        // 无需释放资源
         public void Dispose() { }
 
         public void Reset() => index = -1;
@@ -67,9 +67,9 @@ internal class SlimBag<T> : IEnumerable<T>
     private readonly EqualityComparer<T> comparer = EqualityComparer<T>.Default;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SlimBag{T}"/> class with a specified initial size.
+    /// 使用指定的初始大小初始化 <see cref="SlimBag{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="initialSize">The initial size of the internal array. Defaults to 4 if not specified.</param>
+    /// <param name="initialSize">内部数组的初始大小。如果未指定，则默认为 4。</param>
     public SlimBag(int initialSize = 4)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(initialSize, 1);
@@ -80,14 +80,14 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Gets the length of the internal array.
+    /// 获取内部数组的长度。
     /// </summary>
     public int InternalSize => array.Length;
 
     /// <summary>
-    /// Shrinks the internal storage to the smallest retained capacity that can hold the current elements.
+    /// 将内部存储缩小到能够容纳当前元素的最小保留容量。
     /// </summary>
-    /// <returns><see langword="true"/> if the bag was resized; otherwise, <see langword="false"/>.</returns>
+    /// <returns>如果调整了包的大小，则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
     public bool Trim()
     {
         int newSize = initialSize;
@@ -105,7 +105,7 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Returns a span over the valid elements of the internal array.
+    /// 返回内部数组有效元素上的 span。
     /// </summary>
     public Span<T> AsSpan()
     {
@@ -113,9 +113,9 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Adds a range of elements to the <see cref="SlimBag{T}"/>.
+    /// 向 <see cref="SlimBag{T}"/> 添加一系列元素。
     /// </summary>
-    /// <param name="list">The collection of elements to add.</param>
+    /// <param name="list">要添加的元素集合。</param>
     public void AddRange(IEnumerable<T> list)
     {
         ArgumentNullException.ThrowIfNull(list);
@@ -133,9 +133,9 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Adds an element to the <see cref="SlimBag{T}"/>.
+    /// 向 <see cref="SlimBag{T}"/> 添加一个元素。
     /// </summary>
-    /// <param name="item">The element to add.</param>
+    /// <param name="item">要添加的元素。</param>
     public void Add(T item)
     {
         EnsureCapacity(counter + 1);
@@ -160,9 +160,9 @@ internal class SlimBag<T> : IEnumerable<T>
     private readonly Jitter2.Parallelization.ReaderWriterLock rwLock = new();
 
     /// <summary>
-    /// Adds an element to the <see cref="SlimBag{T}"/> in a thread-safe manner.
+    /// 以线程安全的方式向 <see cref="SlimBag{T}"/> 添加一个元素。
     /// </summary>
-    /// <param name="item">The element to add.</param>
+    /// <param name="item">要添加的元素。</param>
     public void ConcurrentAdd(T item)
     {
         int lc = Interlocked.Increment(ref counter) - 1;
@@ -192,9 +192,9 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Removes the first occurrence of a specific element from the <see cref="SlimBag{T}"/>.
+    /// 从 <see cref="SlimBag{T}"/> 中移除特定元素的第一个匹配项。
     /// </summary>
-    /// <param name="item">The element to remove.</param>
+    /// <param name="item">要移除的元素。</param>
     public void Remove(T item)
     {
         int index = -1;
@@ -211,9 +211,9 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Removes the element at the specified index from the <see cref="SlimBag{T}"/>.
+    /// 从 <see cref="SlimBag{T}"/> 中移除指定索引处的元素。
     /// </summary>
-    /// <param name="index">The zero-based index of the element to remove.</param>
+    /// <param name="index">要移除的元素的从零开始的索引。</param>
     public void RemoveAt(int index)
     {
         counter -= 1;
@@ -221,7 +221,7 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Gets or sets the number of elements contained in the <see cref="SlimBag{T}"/>.
+    /// 获取或设置 <see cref="SlimBag{T}"/> 中包含的元素数量。
     /// </summary>
     public int Count
     {
@@ -234,15 +234,15 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Gets the element at the specified index. Note that index should be smaller
-    /// than <see cref="Count"/>, however this is not enforced.
+    /// 获取指定索引处的元素。注意，索引应小于
+    /// <see cref="Count"/>，但这一点并未强制。
     /// </summary>
-    /// <param name="i">The zero-based index of the element to get.</param>
-    /// <returns>The element at the specified index.</returns>
+    /// <param name="i">要获取的元素的从零开始的索引。</param>
+    /// <returns>指定索引处的元素。</returns>
     public T this[int i] => array[i];
 
     /// <summary>
-    /// Removes all elements from the <see cref="SlimBag{T}"/>.
+    /// 从 <see cref="SlimBag{T}"/> 中移除所有元素。
     /// </summary>
     public void Clear()
     {
@@ -250,12 +250,12 @@ internal class SlimBag<T> : IEnumerable<T>
     }
 
     /// <summary>
-    /// Nulls out one stale array slot per call to allow garbage collection of removed elements.
+    /// 每次调用将一个过时的数组槽置空，以便回收已移除元素的垃圾。
     /// </summary>
     /// <remarks>
-    /// Updates the observed high-water mark of <see cref="Count"/> and clears one stale slot
-    /// when the current count is below that mark. Call this method while the bag is populated,
-    /// before it shrinks, so later calls can clear the previously used range one slot at a time.
+    /// 更新观察到的 <see cref="Count"/> 高水位标记，并在当前计数低于该标记时
+    /// 清除一个过时槽。请在包中仍有元素时、收缩之前调用此方法，
+    /// 以便后续调用能够一次一个槽地清除先前使用的范围。
     /// </remarks>
     public void TrackAndNullOutOne()
     {

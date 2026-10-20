@@ -5,15 +5,15 @@ using System.Runtime.InteropServices;
 
 namespace JitterDemo.Renderer.OpenGL.Native;
 
-// The opengl-functions can not be directly imported using DllImport.
+// OpenGL 函数无法使用 DllImport 直接导入。
 //
 // https://registry.khronos.org/OpenGL/ABI/
 // https://www.khronos.org/opengl/wiki/Load_OpenGL_Functions
 // https://stackoverflow.com/questions/36661449/glfw-load-functions
 //
-// We rely on GLFW's GetProcAddress to return the correct function pointer
-// and use Marshal.GetDelegateForFunctionPointer to make the function
-// available in the managed world.
+// 我们依赖 GLFW 的 GetProcAddress 返回正确的函数指针，
+// 并使用 Marshal.GetDelegateForFunctionPointer 使函数
+// 在托管世界中可用。
 
 public static class GL
 {

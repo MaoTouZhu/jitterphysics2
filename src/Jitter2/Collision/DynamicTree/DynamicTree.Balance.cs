@@ -12,19 +12,19 @@ namespace Jitter2.Collision;
 
 public partial class DynamicTree
 {
-    /// <summary>Default number of leaves reinserted by automatic tree maintenance.</summary>
+    /// <summary>自动树维护重新插入的叶节点默认数量。</summary>
     public const int DefaultIncrementalOptimizationBudget = 1;
 
     /// <summary>
-    /// Gets or sets whether <see cref="Update(bool, Real)"/> reinserts a bounded number of
-    /// leaves from the root and applies non-cost-increasing rotations to their affected paths. Enabled by default.
+    /// 获取或设置 <see cref="Update(bool, Real)"/> 是否从根节点重新插入有限数量的
+    /// 叶节点，并对受影响的路径应用不增加代价的旋转。默认启用。
     /// </summary>
     public bool EnableAutomaticOptimization { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets the maximum number of leaves reinserted by each <see cref="Update(bool, Real)"/>.
+    /// 获取或设置每次 <see cref="Update(bool, Real)"/> 重新插入的叶节点最大数量。
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when the value is negative.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">当值为负数时抛出。</exception>
     public int AutomaticOptimizationBudget
     {
         get => automaticOptimizationBudget;
@@ -56,15 +56,15 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Reinserts at most <paramref name="proxyBudget"/> leaves from the root.
+    /// 从根节点重新插入至多 <paramref name="proxyBudget"/> 个叶节点。
     /// </summary>
-    /// <param name="proxyBudget">Maximum number of leaves to reinsert.</param>
-    /// <returns>The number of leaves reinserted.</returns>
+    /// <param name="proxyBudget">要重新插入的叶节点最大数量。</param>
+    /// <returns>实际重新插入的叶节点数量。</returns>
     /// <remarks>
-    /// A persistent cursor selects leaves without scanning the proxy collection. Leaf node
-    /// indices, proxy activity and the potential-pair cache are preserved. Root reinsertion
-    /// gradually removes topology history, while cost-constrained rotations may repair height
-    /// imbalance without charging every ordinary tree mutation for rotation work.
+    /// 持久的游标无需扫描代理集合即可选取叶节点。叶节点索引、
+    /// 代理活动状态和潜在形状对缓存均保持不变。从根节点重新插入
+    /// 会逐步消除拓扑历史，而受代价约束的旋转可以在不使每次普通树变更
+    /// 都承担旋转开销的情况下修复高度失衡。
     /// </remarks>
     private int OptimizeIncrementally(
         int proxyBudget = DefaultIncrementalOptimizationBudget)
@@ -159,10 +159,10 @@ public partial class DynamicTree
             !secondAccepted ? first : SelectBalancingRotation(first, second);
         int subtreeRoot = ApplyRotation(node, selected);
 
-        // A newly inserted leaf may have been paired with an arbitrarily tall subtree.
-        // In that case one rotation balances the new root but leaves the old root skewed.
-        // Continue inside that child before checking the new root again. Either operation may
-        // leave height imbalance in place when every applicable rotation would increase cost.
+        // 新插入的叶节点可能与任意高的子树配对。
+        // 在这种情况下，一次旋转会平衡新的根节点，但会使旧根节点保持倾斜。
+        // 在再次检查新根节点之前，先在该子节点内部继续处理。当所有适用的旋转
+        // 都会增加代价时，两种操作都可能留下高度失衡。
         RestoreHeightBalanceWithoutIncreasingCost(node);
         RefitNode(subtreeRoot);
         return RestoreHeightBalanceWithoutIncreasingCost(subtreeRoot);
@@ -194,8 +194,8 @@ public partial class DynamicTree
     {
         if (candidate.CostChange < 0.0d) return true;
 
-        // Equal-cost rotations need a second strictly decreasing metric; otherwise two
-        // equivalent topologies can rotate back and forth indefinitely.
+        // 等代价旋转需要第二个严格递减的度量；否则两种
+        // 等价的拓扑结构可能无限地来回旋转。
         return candidate.CostChange == 0.0d && candidate.TotalHeightChange < 0;
     }
 

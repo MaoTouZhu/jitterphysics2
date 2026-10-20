@@ -11,17 +11,17 @@ namespace JitterTests.Robustness;
 
 public class ReproducibilityTest
 {
-    // Reference trajectories must remain bit-identical across single/multithreaded solves.
+    // 参考轨迹在单线程/多线程求解之间必须保持位级一致。
     private const ulong ExpectedDeterministicSceneHashSingle = 0xCC9D41DC714DB5F2;
     private const ulong ExpectedDeterministicSceneHashDouble = 0xD450B80F23CCB244;
 
     [TestCase]
     public static void BasicReproducibilityTest()
     {
-        // This is intentionally a single-threaded reproducibility check on the regular solver.
-        // Given the exact same input/world construction order, the engine should still produce
-        // the same result. The main purpose is to catch hidden state such as uninitialized
-        // memory, stale pooled data, or similar history-dependent bugs.
+        // 这刻意是对常规求解器进行的单线程可复现性检查。
+        // 给定完全相同的输入/世界构建顺序，引擎仍应产生
+        // 相同结果。其主要目的是捕获隐藏状态，例如未初始化的
+        // 内存、过期的池化数据，或类似的依赖历史的缺陷。
         var worldA = new World();
         worldA.SolverIterations = (2, 2);
         var last = Helper.BuildSimpleStack(worldA);

@@ -127,8 +127,8 @@ public class ContactSubstepTests
         sphere.AngularVelocity = -2 * JVector.UnitZ;
         sphere.Damping = (0, 0);
 
-        // Supply an exact sphere/floor contact to isolate contact generation and solving
-        // from narrowphase accuracy.
+        // 提供一个精确的球体/地面接触，以将接触生成与求解同
+        // 窄相精度隔离开来。
         ExactSphereFloorContact filter = new(floor);
         world.NarrowPhaseFilter = filter;
         const int steps = 1000;

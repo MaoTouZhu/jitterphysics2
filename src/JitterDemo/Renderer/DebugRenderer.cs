@@ -7,8 +7,8 @@ using JitterDemo.Renderer.OpenGL.Native;
 
 namespace JitterDemo.Renderer;
 
-/// Immediate-mode line and triangle renderer for debug overlays (contact points, AABBs, rays, ...).
-/// Primitives are batched by color, streamed to the GPU, and cleared after drawing each frame.
+/// 用于调试叠加层（接触点、轴对齐包围盒、射线等）的立即模式线段与三角形渲染器。
+/// 图元按颜色分批，流式上传到 GPU，并在每帧绘制后清空。
 public sealed class DebugRenderer : IDebugDrawer
 {
     public enum Color
@@ -68,10 +68,10 @@ public sealed class DebugRenderer : IDebugDrawer
     private readonly Dictionary<uint, TriangleBucket> triangleBuckets = new();
     private bool hasTriangles;
 
-    /// <summary>Applies simple directional lighting to filled debug geometry. Lines are unlit.</summary>
+    /// <summary>对填充的调试几何体应用简单的方向光照。线段不受光照影响。</summary>
     public bool ShadeTriangles { get; set; } = true;
 
-    /// <summary>Queues triangle edges instead of filled faces for subsequent DrawTriangle calls.</summary>
+    /// <summary>后续 DrawTriangle 调用改为排队绘制三角形边而非填充面。</summary>
     public bool WireframeTriangles { get; set; }
 
     private Bucket GetBucket(uint color)
@@ -107,7 +107,7 @@ public sealed class DebugRenderer : IDebugDrawer
 
         if (hasTriangles) DrawTriangles();
         shader.Set("uShade", false);
-        // Pull lines slightly toward the camera so collision surfaces remain readable over the scene meshes.
+        // 将线段稍微拉向相机，使碰撞表面在场景网格之上仍然清晰可读。
         shader.Set("uDepthBias", 0.001f);
 
         foreach (var (color, bucket) in buckets)

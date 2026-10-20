@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Represents a three-dimensional vector with components of type <see cref="Real"/>.
+/// 表示分量类型为 <see cref="Real"/> 的三维向量。
 /// </summary>
 [StructLayout(LayoutKind.Explicit, Size = 3 * sizeof(Real))]
 public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
@@ -23,25 +23,25 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     [FieldOffset(1 * sizeof(Real))] public Real Y = y;
     [FieldOffset(2 * sizeof(Real))] public Real Z = z;
 
-    /// <summary>The zero vector (0, 0, 0).</summary>
+    /// <summary>零向量 (0, 0, 0)。</summary>
     public static readonly JVector Zero;
 
-    /// <summary>The unit vector along the X-axis (1, 0, 0).</summary>
+    /// <summary>沿 X 轴的单位向量 (1, 0, 0)。</summary>
     public static readonly JVector UnitX;
 
-    /// <summary>The unit vector along the Y-axis (0, 1, 0).</summary>
+    /// <summary>沿 Y 轴的单位向量 (0, 1, 0)。</summary>
     public static readonly JVector UnitY;
 
-    /// <summary>The unit vector along the Z-axis (0, 0, 1).</summary>
+    /// <summary>沿 Z 轴的单位向量 (0, 0, 1)。</summary>
     public static readonly JVector UnitZ;
 
-    /// <summary>A vector with all components set to one (1, 1, 1).</summary>
+    /// <summary>所有分量均设为一的向量 (1, 1, 1)。</summary>
     public static readonly JVector One;
 
-    /// <summary>A vector with all components set to <see cref="Real.MinValue"/>.</summary>
+    /// <summary>所有分量均设为 <see cref="Real.MinValue"/> 的向量。</summary>
     public static readonly JVector MinValue;
 
-    /// <summary>A vector with all components set to <see cref="Real.MaxValue"/>.</summary>
+    /// <summary>所有分量均设为 <see cref="Real.MaxValue"/> 的向量。</summary>
     public static readonly JVector MaxValue;
 
     static JVector()
@@ -66,9 +66,9 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Creates a vector with all components set to the same value.
+    /// 创建一个所有分量均设为同一值的向量。
     /// </summary>
-    /// <param name="xyz">The value for X, Y, and Z components.</param>
+    /// <param name="xyz">X、Y、Z 分量的值。</param>
     public JVector(Real xyz) : this(xyz, xyz, xyz)
     {
     }
@@ -99,7 +99,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a string representation of the <see cref="JVector"/>.
+    /// 返回 <see cref="JVector"/> 的字符串表示形式。
     /// </summary>
     public readonly override string ToString()
     {
@@ -127,11 +127,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a vector containing the minimum components of the specified vectors.
+    /// 返回一个包含指定向量各分量最小值的向量。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <returns>A vector with the minimum of each component.</returns>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <returns>各分量取最小值的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Min(in JVector value1, in JVector value2)
     {
@@ -140,11 +140,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a vector containing the minimum components of the specified vectors.
+    /// 返回一个包含指定向量各分量最小值的向量。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <param name="result">Output: A vector with the minimum of each component.</param>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <param name="result">输出：各分量取最小值的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Min(in JVector value1, in JVector value2, out JVector result)
     {
@@ -154,11 +154,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a vector containing the maximum components of the specified vectors.
+    /// 返回一个包含指定向量各分量最大值的向量。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <returns>A vector with the maximum of each component.</returns>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <returns>各分量取最大值的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Max(in JVector value1, in JVector value2)
     {
@@ -167,11 +167,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a vector containing the maximum components of the specified vectors.
+    /// 返回一个包含指定向量各分量最大值的向量。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <param name="result">Output: A vector with the maximum of each component.</param>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <param name="result">输出：各分量取最大值的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Max(in JVector value1, in JVector value2, out JVector result)
     {
@@ -181,10 +181,10 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a vector containing the absolute values of the components of the specified vector.
+    /// 返回一个包含指定向量各分量绝对值的向量。
     /// </summary>
-    /// <param name="value1">The input vector.</param>
-    /// <returns>A vector with absolute values of each component.</returns>
+    /// <param name="value1">输入向量。</param>
+    /// <returns>各分量取绝对值的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Abs(in JVector value1)
     {
@@ -192,10 +192,10 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns the maximum absolute value among the vector's components.
+    /// 返回向量各分量中绝对值的最大值。
     /// </summary>
-    /// <param name="value1">The input vector.</param>
-    /// <returns>The maximum of |X|, |Y|, and |Z|.</returns>
+    /// <param name="value1">输入向量。</param>
+    /// <returns>|X|、|Y| 和 |Z| 中的最大值。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Real MaxAbs(in JVector value1)
     {
@@ -204,11 +204,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates <c>matrix * vector</c> (multiplying matrix by column vector).
+    /// 计算 <c>matrix * vector</c>（矩阵乘以列向量）。
     /// </summary>
-    /// <param name="vector">The column vector.</param>
-    /// <param name="matrix">The matrix.</param>
-    /// <returns>The transformed vector.</returns>
+    /// <param name="vector">列向量。</param>
+    /// <param name="matrix">矩阵。</param>
+    /// <returns>变换后的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Transform(in JVector vector, in JMatrix matrix)
     {
@@ -217,7 +217,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates <c>matrix * vector</c> using a symmetric matrix without expanding its storage.
+    /// 使用对称矩阵计算 <c>matrix * vector</c>，且不展开其存储。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Transform(in JVector vector, in JSymmetricMatrix matrix)
@@ -227,7 +227,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates <c>matrix * vector</c> using a symmetric matrix without expanding its storage.
+    /// 使用对称矩阵计算 <c>matrix * vector</c>，且不展开其存储。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Transform(in JVector vector, in JSymmetricMatrix matrix, out JVector result)
@@ -242,11 +242,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Transforms the vector by a quaternion rotation.
+    /// 通过四元数旋转对向量进行变换。
     /// </summary>
-    /// <param name="vector">The vector to transform.</param>
-    /// <param name="quat">The unit quaternion representing the rotation.</param>
-    /// <returns>The rotated vector.</returns>
+    /// <param name="vector">要变换的向量。</param>
+    /// <param name="quat">表示旋转的单位四元数。</param>
+    /// <returns>旋转后的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Transform(in JVector vector, in JQuaternion quat)
     {
@@ -255,11 +255,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates <c>matrixᵀ * vector</c> (multiplying transposed matrix by column vector).
+    /// 计算 <c>matrixᵀ * vector</c>（转置矩阵乘以列向量）。
     /// </summary>
-    /// <param name="vector">The column vector.</param>
-    /// <param name="matrix">The matrix (transposed during operation).</param>
-    /// <returns>The transformed vector.</returns>
+    /// <param name="vector">列向量。</param>
+    /// <param name="matrix">矩阵（运算时转置）。</param>
+    /// <returns>变换后的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector TransposedTransform(in JVector vector, in JMatrix matrix)
     {
@@ -268,11 +268,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Transforms the vector by the conjugate of a quaternion (inverse rotation for unit quaternions).
+    /// 通过四元数的共轭对向量进行变换（对单位四元数而言即逆旋转）。
     /// </summary>
-    /// <param name="vector">The vector to transform.</param>
-    /// <param name="quat">The quaternion (conjugated during operation).</param>
-    /// <returns>The inversely rotated vector.</returns>
+    /// <param name="vector">要变换的向量。</param>
+    /// <param name="quat">四元数（运算时取共轭）。</param>
+    /// <returns>逆旋转后的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector ConjugatedTransform(in JVector vector, in JQuaternion quat)
     {
@@ -281,11 +281,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates <c>matrix * vector</c> (multiplying matrix by column vector).
+    /// 计算 <c>matrix * vector</c>（矩阵乘以列向量）。
     /// </summary>
-    /// <param name="vector">The column vector.</param>
-    /// <param name="matrix">The matrix.</param>
-    /// <param name="result">Output: The transformed vector.</param>
+    /// <param name="vector">列向量。</param>
+    /// <param name="matrix">矩阵。</param>
+    /// <param name="result">输出：变换后的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Transform(in JVector vector, in JMatrix matrix, out JVector result)
     {
@@ -299,11 +299,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates <c>matrixᵀ * vector</c> (multiplying transposed matrix by column vector).
+    /// 计算 <c>matrixᵀ * vector</c>（转置矩阵乘以列向量）。
     /// </summary>
-    /// <param name="vector">The column vector.</param>
-    /// <param name="matrix">The matrix (transposed during operation).</param>
-    /// <param name="result">Output: The transformed vector.</param>
+    /// <param name="vector">列向量。</param>
+    /// <param name="matrix">矩阵（运算时转置）。</param>
+    /// <param name="result">输出：变换后的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void TransposedTransform(in JVector vector, in JMatrix matrix, out JVector result)
     {
@@ -317,11 +317,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Transforms the vector by a quaternion rotation.
+    /// 通过四元数旋转对向量进行变换。
     /// </summary>
-    /// <param name="vector">The vector to transform.</param>
-    /// <param name="quaternion">The unit quaternion representing the rotation.</param>
-    /// <param name="result">Output: The rotated vector.</param>
+    /// <param name="vector">要变换的向量。</param>
+    /// <param name="quaternion">表示旋转的单位四元数。</param>
+    /// <param name="result">输出：旋转后的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Transform(in JVector vector, in JQuaternion quaternion, out JVector result)
     {
@@ -339,11 +339,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Transforms the vector by the conjugate of a unit quaternion (inverse rotation).
+    /// 通过单位四元数的共轭对向量进行变换（逆旋转）。
     /// </summary>
-    /// <param name="vector">The vector to transform.</param>
-    /// <param name="quaternion">The quaternion (conjugated during operation).</param>
-    /// <param name="result">Output: The inversely rotated vector.</param>
+    /// <param name="vector">要变换的向量。</param>
+    /// <param name="quaternion">四元数（运算时取共轭）。</param>
+    /// <param name="result">输出：逆旋转后的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ConjugatedTransform(in JVector vector, in JQuaternion quaternion, out JVector result)
     {
@@ -361,14 +361,14 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the outer product (tensor product) of two vectors.
+    /// 计算两个向量的外积（张量积）。
     /// </summary>
     /// <remarks>
-    /// Result is the matrix <c>u * vᵀ</c>.
+    /// 结果为矩阵 <c>u * vᵀ</c>。
     /// </remarks>
-    /// <param name="u">The first vector.</param>
-    /// <param name="v">The second vector.</param>
-    /// <returns>A 3x3 matrix representing the outer product.</returns>
+    /// <param name="u">第一个向量。</param>
+    /// <param name="v">第二个向量。</param>
+    /// <returns>表示外积的 3x3 矩阵。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JMatrix Outer(in JVector u, in JVector v)
     {
@@ -386,11 +386,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the dot product of two vectors (<c>u · v</c>).
+    /// 计算两个向量的点积（<c>u · v</c>）。
     /// </summary>
-    /// <param name="vector1">The first vector.</param>
-    /// <param name="vector2">The second vector.</param>
-    /// <returns>The dot product.</returns>
+    /// <param name="vector1">第一个向量。</param>
+    /// <param name="vector2">第二个向量。</param>
+    /// <returns>点积。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Real Dot(in JVector vector1, in JVector vector2)
     {
@@ -398,11 +398,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Adds two vectors.
+    /// 将两个向量相加。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <returns>The sum of the two vectors.</returns>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <returns>两个向量之和。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Add(in JVector value1, in JVector value2)
     {
@@ -411,11 +411,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Adds two vectors.
+    /// 将两个向量相加。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <param name="result">Output: The sum of the two vectors.</param>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <param name="result">输出：两个向量之和。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Add(in JVector value1, in JVector value2, out JVector result)
     {
@@ -425,11 +425,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Subtracts the second vector from the first.
+    /// 从第一个向量中减去第二个向量。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <returns>The difference of the two vectors.</returns>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <returns>两个向量之差。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Subtract(JVector value1, JVector value2)
     {
@@ -438,11 +438,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Subtracts the second vector from the first.
+    /// 从第一个向量中减去第二个向量。
     /// </summary>
-    /// <param name="value1">The first vector.</param>
-    /// <param name="value2">The second vector.</param>
-    /// <param name="result">Output: The difference of the two vectors.</param>
+    /// <param name="value1">第一个向量。</param>
+    /// <param name="value2">第二个向量。</param>
+    /// <param name="result">输出：两个向量之差。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Subtract(in JVector value1, in JVector value2, out JVector result)
     {
@@ -456,11 +456,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the cross product of two vectors (<c>u × v</c>).
+    /// 计算两个向量的叉积（<c>u × v</c>）。
     /// </summary>
-    /// <param name="vector1">The first vector.</param>
-    /// <param name="vector2">The second vector.</param>
-    /// <returns>The cross product.</returns>
+    /// <param name="vector1">第一个向量。</param>
+    /// <param name="vector2">第二个向量。</param>
+    /// <returns>叉积。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Cross(in JVector vector1, in JVector vector2)
     {
@@ -469,11 +469,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the cross product of two vectors (<c>u × v</c>).
+    /// 计算两个向量的叉积（<c>u × v</c>）。
     /// </summary>
-    /// <param name="vector1">The first vector.</param>
-    /// <param name="vector2">The second vector.</param>
-    /// <param name="result">Output: The cross product.</param>
+    /// <param name="vector1">第一个向量。</param>
+    /// <param name="vector2">第二个向量。</param>
+    /// <param name="result">输出：叉积。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Cross(in JVector vector1, in JVector vector2, out JVector result)
     {
@@ -499,9 +499,9 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Negates the vector in-place.
+    /// 就地取反向量。
     /// </summary>
-    /// <param name="vector">The vector to negate.</param>
+    /// <param name="vector">要取反的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void NegateInPlace(ref JVector vector)
     {
@@ -511,10 +511,10 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a negated copy of the vector.
+    /// 返回向量的取反副本。
     /// </summary>
-    /// <param name="value">The vector to negate.</param>
-    /// <returns>The negated vector.</returns>
+    /// <param name="value">要取反的向量。</param>
+    /// <returns>取反后的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Negate(in JVector value)
     {
@@ -523,10 +523,10 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a negated copy of the vector.
+    /// 返回向量的取反副本。
     /// </summary>
-    /// <param name="value">The vector to negate.</param>
-    /// <param name="result">Output: The negated vector.</param>
+    /// <param name="value">要取反的向量。</param>
+    /// <param name="result">输出：取反后的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Negate(in JVector value, out JVector result)
     {
@@ -540,10 +540,10 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a normalized unit vector.
+    /// 返回归一化的单位向量。
     /// </summary>
-    /// <param name="value">The vector to normalize.</param>
-    /// <returns>The normalized unit vector.</returns>
+    /// <param name="value">要归一化的向量。</param>
+    /// <returns>归一化的单位向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Normalize(in JVector value)
     {
@@ -552,11 +552,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Normalizes <paramref name="value"/>; returns <see cref="JVector.Zero"/> when its squared-length is below <paramref name="epsilonSquared"/>.
+    /// 归一化 <paramref name="value"/>；当其平方长度低于 <paramref name="epsilonSquared"/> 时返回 <see cref="JVector.Zero"/>。
     /// </summary>
-    /// <param name="value">Vector to normalize.</param>
-    /// <param name="epsilonSquared">Cut-off for <c>‖value‖²</c>; default is <c>1 × 10⁻¹⁶</c>.</param>
-    /// <returns>Unit vector or zero.</returns>
+    /// <param name="value">要归一化的向量。</param>
+    /// <param name="epsilonSquared"><c>‖value‖²</c> 的截断阈值；默认为 <c>1 × 10⁻¹⁶</c>。</param>
+    /// <returns>单位向量或零向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector NormalizeSafe(in JVector value, Real epsilonSquared = (Real)1e-16)
     {
@@ -579,9 +579,9 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Normalizes the vector in-place.
+    /// 就地归一化向量。
     /// </summary>
-    /// <param name="toNormalize">The vector to normalize.</param>
+    /// <param name="toNormalize">要归一化的向量。</param>
     public static void NormalizeInPlace(ref JVector toNormalize)
     {
         Real lengthSquared = toNormalize.LengthSquared();
@@ -592,10 +592,10 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns a normalized unit vector.
+    /// 返回归一化的单位向量。
     /// </summary>
-    /// <param name="value">The vector to normalize.</param>
-    /// <param name="result">Output: The normalized unit vector.</param>
+    /// <param name="value">要归一化的向量。</param>
+    /// <param name="result">输出：归一化的单位向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Normalize(in JVector value, out JVector result)
     {
@@ -607,7 +607,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the squared length of the vector (<c>‖v‖²</c>).
+    /// 计算向量的平方长度（<c>‖v‖²</c>）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real LengthSquared()
@@ -616,7 +616,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the length of the vector (<c>‖v‖</c>).
+    /// 计算向量的长度（<c>‖v‖</c>）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real Length()
@@ -625,7 +625,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Swaps the values of two vectors.
+    /// 交换两个向量的值。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Swap(ref JVector vector1, ref JVector vector2)
@@ -634,11 +634,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Multiplies a vector by a scalar.
+    /// 将向量乘以一个标量。
     /// </summary>
-    /// <param name="value1">The vector.</param>
-    /// <param name="scaleFactor">The scalar factor.</param>
-    /// <returns>The scaled vector.</returns>
+    /// <param name="value1">向量。</param>
+    /// <param name="scaleFactor">标量因子。</param>
+    /// <returns>缩放后的向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Multiply(in JVector value1, Real scaleFactor)
     {
@@ -646,7 +646,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
         return result;
     }
 
-    /// <summary>Multiplies two vectors component-wise.</summary>
+    /// <summary>将两个向量按分量相乘。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector Multiply(in JVector value1, in JVector value2)
     {
@@ -654,11 +654,11 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Multiplies a vector by a scalar.
+    /// 将向量乘以一个标量。
     /// </summary>
-    /// <param name="value1">The vector.</param>
-    /// <param name="scaleFactor">The scalar factor.</param>
-    /// <param name="result">Output: The scaled vector.</param>
+    /// <param name="value1">向量。</param>
+    /// <param name="scaleFactor">标量因子。</param>
+    /// <param name="result">输出：缩放后的向量。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Multiply(in JVector value1, Real scaleFactor, out JVector result)
     {
@@ -668,7 +668,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the cross product of two vectors (<c>u × v</c>).
+    /// 计算两个向量的叉积（<c>u × v</c>）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator %(in JVector vector1, in JVector vector2)
@@ -681,7 +681,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Calculates the dot product of two vectors (<c>u · v</c>).
+    /// 计算两个向量的点积（<c>u · v</c>）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Real operator *(in JVector vector1, in JVector vector2)
@@ -690,7 +690,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Multiplies a vector by a scalar.
+    /// 将向量乘以一个标量。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator *(in JVector value1, Real value2)
@@ -703,7 +703,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Multiplies a vector by a scalar.
+    /// 将向量乘以一个标量。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator *(Real value1, in JVector value2)
@@ -716,7 +716,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Subtracts the second vector from the first.
+    /// 从第一个向量中减去第二个向量。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator -(in JVector value1, in JVector value2)
@@ -729,7 +729,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Negates the vector.
+    /// 对向量取反。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator -(in JVector left)
@@ -738,7 +738,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Returns the vector itself.
+    /// 返回向量本身。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator +(in JVector left)
@@ -747,7 +747,7 @@ public partial struct JVector(Real x, Real y, Real z) : IEquatable<JVector>
     }
 
     /// <summary>
-    /// Adds two vectors.
+    /// 将两个向量相加。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector operator +(in JVector value1, in JVector value2)

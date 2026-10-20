@@ -17,9 +17,8 @@ public class Demo12 : IDemo
 
         world.BroadPhaseFilter = new Common.IgnoreCollisionBetweenFilter();
         
-        // For the ragdoll: joint constraints and speculative contacts compete during
-        // the iterative solve. A slightly higher iteration count makes this fast impact
-        // case more stable.
+        // 对于布娃娃：在迭代求解过程中，关节约束与推测接触会相互竞争。
+        // 略微提高迭代次数可以让这种高速撞击场景更加稳定。
         world.SolverIterations = (12, 4);
 
         var wallBody = world.CreateRigidBody();

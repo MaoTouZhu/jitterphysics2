@@ -12,24 +12,22 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// The main entity of the collision system. Implements <see cref="ISupportMappable"/> for
-/// narrow-phase and <see cref="IDynamicTreeProxy"/> for broad-phase collision detection.
-/// The shape itself does not have a position or orientation. Shapes can be associated with
-/// instances of <see cref="RigidBody"/>.
+/// 碰撞系统的主要实体。为窄相实现 <see cref="ISupportMappable"/>，为宽相碰撞检测
+/// 实现 <see cref="IDynamicTreeProxy"/>。形状本身没有位置或朝向。形状可与
+/// <see cref="RigidBody"/> 实例关联。
 /// </summary>
 public abstract class Shape : IDynamicTreeProxy, IUpdatableBoundingBox, ISupportMappable, IRayCastable, ISweepTestable, IDistanceTestable, IDebugDrawable
 {
     int IPartitionedSetIndex.SetIndex { get; set; } = -1;
 
     /// <summary>
-    /// A 64-bit integer representing the shape ID. This is used by algorithms that require
-    /// arranging shapes in a well-defined order.
+    /// 表示形状 ID 的 64 位整数。需要将形状按明确定义的顺序排列的算法会使用它。
     /// </summary>
     public readonly ulong ShapeId = World.RequestId();
 
     /// <summary>
-    /// The bounding box of the shape in world space. It is automatically updated when the position or
-    /// orientation of the corresponding instance of <see cref="RigidBody"/> changes.
+    /// 形状在世界空间中的包围盒。当对应的 <see cref="RigidBody"/> 实例的位置或
+    /// 朝向发生变化时，它会自动更新。
     /// </summary>
     public JBoundingBox WorldBoundingBox { get; protected set; }
 
@@ -73,13 +71,13 @@ public abstract class Shape : IDynamicTreeProxy, IUpdatableBoundingBox, ISupport
     [ReferenceFrame(ReferenceFrame.Local)]
     public abstract void GetCenter(out JVector point);
 
-    /// <summary>Draws the shape using the default visualization settings.</summary>
+    /// <summary>使用默认可视化设置绘制形状。</summary>
     public void DebugDraw(IDebugDrawer drawer) => DebugDraw(drawer, DebugDrawSettings.Default);
 
-    /// <summary>Draws the shape as world-space triangles using the supplied settings.</summary>
+    /// <summary>使用提供的设置将形状绘制为世界空间三角形。</summary>
     /// <remarks>
-    /// Point clouds and custom shapes may use an approximate surface with gaps or overlapping faces.
-    /// Higher detail settings increase the drawing cost and do not guarantee a more accurate surface.
+    /// 点云和自定义形状可能使用带有缝隙或面片重叠的近似表面。
+    /// 更高的细节设置会增加绘制开销，且并不保证表面更精确。
     /// </remarks>
     public virtual void DebugDraw(IDebugDrawer drawer, in DebugDrawSettings settings)
     {
@@ -88,14 +86,14 @@ public abstract class Shape : IDynamicTreeProxy, IUpdatableBoundingBox, ISupport
         DebugDrawLocal(ref sink, settings);
     }
 
-    /// <summary>Appends debug triangles in the coordinate system used by <see cref="SupportMap"/>.</summary>
+    /// <summary>以 <see cref="SupportMap"/> 所使用的坐标系追加调试三角形。</summary>
     /// <remarks>
-    /// Override this method to supply custom surface geometry. Rigid-body and affine transforms are
-    /// applied by the caller. Use outward-facing triangles for closed surfaces.
-    /// Without an override, the shape is drawn as an approximate surface.
+    /// 重写此方法以提供自定义表面几何。刚体和仿射变换由调用方
+    /// 应用。闭合表面请使用朝外的三角形。
+    /// 若未重写，形状将绘制为近似表面。
     /// </remarks>
-    /// <param name="triangleSink">The destination for generated triangles.</param>
-    /// <param name="settings">The visualization settings.</param>
+    /// <param name="triangleSink">生成三角形的目标。</param>
+    /// <param name="settings">可视化设置。</param>
     protected internal virtual void DebugDrawLocal<TSink>(ref TSink triangleSink, in DebugDrawSettings settings)
         where TSink : ISink<JTriangle>
     {

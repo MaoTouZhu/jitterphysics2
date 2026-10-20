@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Represents an axis-aligned bounding box (AABB), a rectangular bounding box whose edges are parallel to the coordinate axes.
+/// 表示轴对齐包围盒（AABB），即边与坐标轴平行的矩形包围盒。
 /// </summary>
 [StructLayout(LayoutKind.Explicit, Size = 6 * sizeof(Real))]
 public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
@@ -19,45 +19,45 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     public const Real Epsilon = (Real)1e-12;
 
     /// <summary>
-    /// Describes how one bounding box relates to another spatially.
+    /// 描述一个包围盒与另一个包围盒在空间上的关系。
     /// </summary>
     public enum ContainmentType
     {
         /// <summary>
-        /// The two boxes are completely separated and do not touch or overlap.
+        /// 两个盒子完全分离，既不接触也不重叠。
         /// </summary>
         Disjoint,
 
         /// <summary>
-        /// The other box is completely inside this box.
+        /// 另一个盒子完全位于此盒子内部。
         /// </summary>
         Contains,
 
         /// <summary>
-        /// The boxes overlap, but neither completely contains the other.
+        /// 两个盒子重叠，但彼此都不完全包含对方。
         /// </summary>
         Intersects
     }
 
     /// <summary>
-    /// The minimum corner of the bounding box (smallest X, Y, Z coordinates).
+    /// 包围盒的最小角点（最小的 X、Y、Z 坐标）。
     /// </summary>
     [FieldOffset(0 * sizeof(Real))]
     public JVector Min = min;
 
     /// <summary>
-    /// The maximum corner of the bounding box (largest X, Y, Z coordinates).
+    /// 包围盒的最大角点（最大的 X、Y、Z 坐标）。
     /// </summary>
     [FieldOffset(3 * sizeof(Real))]
     public JVector Max = max;
 
     /// <summary>
-    /// A bounding box covering the entire valid range of coordinates.
+    /// 覆盖整个有效坐标范围的包围盒。
     /// </summary>
     public static readonly JBoundingBox LargeBox;
 
     /// <summary>
-    /// An inverted bounding box initialized with Min > Max, useful for growing a box from scratch.
+    /// 一个以 Min > Max 初始化的反向包围盒，适用于从零开始扩展一个盒子。
     /// </summary>
     public static readonly JBoundingBox SmallBox;
 
@@ -70,14 +70,14 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Returns a string representation of the <see cref="JBoundingBox"/>.
+    /// 返回 <see cref="JBoundingBox"/> 的字符串表示。
     /// </summary>
     public readonly override string ToString()
     {
         return $"Min={{{Min}}}, Max={{{Max}}}";
     }
 
-    // Prefer using CreateTransformed for clarity and to avoid mutations.
+    // 建议改用 CreateTransformed，以获得更清晰的语义并避免修改原对象。
     [Obsolete($"Use static {nameof(CreateTransformed)} instead.", true)]
     public void Transform(in JMatrix orientation)
     {
@@ -94,14 +94,14 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Creates a new AABB that encloses the original box after it has been rotated by the given orientation matrix.
+    /// 创建一个新的 AABB，用于包住原包围盒经过给定方向矩阵旋转后的结果。
     /// </summary>
     /// <remarks>
-    /// Rotating an AABB usually results in a larger AABB to fit the rotated geometry.
+    /// 旋转 AABB 通常会产生一个更大的 AABB，以容纳旋转后的几何体。
     /// </remarks>
-    /// <param name="box">The original bounding box.</param>
-    /// <param name="orientation">The rotation matrix to apply.</param>
-    /// <returns>A new AABB enclosing the rotated box.</returns>
+    /// <param name="box">原始包围盒。</param>
+    /// <param name="orientation">要应用的旋转矩阵。</param>
+    /// <returns>包住旋转后盒子的新 AABB。</returns>
     public static JBoundingBox CreateTransformed(in JBoundingBox box, in JMatrix orientation)
     {
         JVector halfExtents = (Real)0.5 * (box.Max - box.Min);
@@ -140,11 +140,11 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Checks if a finite line segment intersects this bounding box.
+    /// 检查一条有限线段是否与此包围盒相交。
     /// </summary>
-    /// <param name="origin">The start point of the segment.</param>
-    /// <param name="direction">The vector from start to end (End = Origin + Direction).</param>
-    /// <returns><c>true</c> if the segment passes through the box; otherwise, <c>false</c>.</returns>
+    /// <param name="origin">线段的起点。</param>
+    /// <param name="direction">从起点指向终点的向量（End = Origin + Direction）。</param>
+    /// <returns>如果线段穿过该盒子则返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     public readonly bool SegmentIntersect(in JVector origin, in JVector direction)
     {
         Real enter = (Real)0.0, exit = (Real)1.0;
@@ -162,11 +162,11 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Checks if an infinite ray intersects this bounding box.
+    /// 检查一条无限射线是否与此包围盒相交。
     /// </summary>
-    /// <param name="origin">The origin of the ray.</param>
-    /// <param name="direction">The direction of the ray (not necessarily normalized).</param>
-    /// <returns><c>true</c> if the ray intersects the box; otherwise, <c>false</c>.</returns>
+    /// <param name="origin">射线的起点。</param>
+    /// <param name="direction">射线的方向（不要求归一化）。</param>
+    /// <returns>如果射线与该盒子相交则返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     public readonly bool RayIntersect(in JVector origin, in JVector direction)
     {
         Real enter = (Real)0.0, exit = Real.MaxValue;
@@ -184,13 +184,13 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Checks if a ray intersects this bounding box and calculates the entry parameter.
+    /// 检查射线是否与此包围盒相交，并计算入射参数。
     /// </summary>
-    /// <param name="origin">The origin of the ray.</param>
-    /// <param name="direction">The direction of the ray (not necessarily normalized).</param>
-    /// <param name="enter">Outputs the parameter in <c>origin + enter * direction</c> where the ray enters
-    /// the box. Returns 0 if the origin is inside; this is a distance only for a unit direction.</param>
-    /// <returns><c>true</c> if the ray intersects the box; otherwise, <c>false</c>.</returns>
+    /// <param name="origin">射线的起点。</param>
+    /// <param name="direction">射线的方向（不要求归一化）。</param>
+    /// <param name="enter">输出 <c>origin + enter * direction</c> 中的参数，即射线进入
+    /// 盒子的位置。若起点在盒子内部则返回 0；仅当方向为单位向量时该值才是距离。</param>
+    /// <returns>如果射线与该盒子相交则返回 <c>true</c>；否则返回 <c>false</c>。</returns>
     public readonly bool RayIntersect(in JVector origin, in JVector direction, out Real enter)
     {
         enter = (Real)0.0;
@@ -209,7 +209,7 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Determines whether the bounding box contains the specified point.
+    /// 判断包围盒是否包含指定点。
     /// </summary>
     public readonly bool Contains(in JVector point)
     {
@@ -219,9 +219,9 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Gets the 8 corners of the bounding box.
+    /// 获取包围盒的 8 个角点。
     /// </summary>
-    /// <param name="destination">A span of at least 8 JVectors to hold the corners.</param>
+    /// <param name="destination">至少能容纳 8 个 JVector 的 span，用于存放角点。</param>
     public readonly void GetCorners(Span<JVector> destination)
     {
         destination[0] = new(Min.X, Max.Y, Max.Z);
@@ -234,7 +234,7 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
         destination[7] = new(Min.X, Min.Y, Min.Z);
     }
 
-    // Marked obsolete to guide users toward the preferred static method.
+    // 标记为过时，以引导用户使用更推荐的静态方法。
     [Obsolete($"Use static {nameof(AddPointInPlace)} instead.", true)]
     public void AddPoint(in JVector point)
     {
@@ -243,10 +243,10 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Expands the bounding box to include the specified point.
+    /// 扩展包围盒以包含指定点。
     /// </summary>
-    /// <param name="box">The bounding box to expand.</param>
-    /// <param name="point">The point to include.</param>
+    /// <param name="box">要扩展的包围盒。</param>
+    /// <param name="point">要包含的点。</param>
     public static void AddPointInPlace(ref JBoundingBox box, in JVector point)
     {
         JVector.Max(box.Max, point, out box.Max);
@@ -254,10 +254,10 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Creates a bounding box that exactly encompasses a collection of points.
+    /// 创建一个恰好包住一组点的包围盒。
     /// </summary>
-    /// <param name="points">The collection of points to encompass.</param>
-    /// <returns>A bounding box containing all the points.</returns>
+    /// <param name="points">要包含的点集合。</param>
+    /// <returns>包含所有点的包围盒。</returns>
     public static JBoundingBox CreateFromPoints(IEnumerable<JVector> points)
     {
         JBoundingBox box = SmallBox;
@@ -271,13 +271,13 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Determines the relationship between this box and another box.
+    /// 确定此盒子与另一个盒子之间的关系。
     /// </summary>
-    /// <param name="box">The other bounding box to test.</param>
+    /// <param name="box">要测试的另一个包围盒。</param>
     /// <returns>
-    /// <see cref="ContainmentType.Disjoint"/> if they do not touch.<br/>
-    /// <see cref="ContainmentType.Contains"/> if <paramref name="box"/> is fully contained by this box.<br/>
-    /// <see cref="ContainmentType.Intersects"/> if they overlap but this box does not fully contain the other.
+    /// 若两者不接触则返回 <see cref="ContainmentType.Disjoint"/>。<br/>
+    /// 若 <paramref name="box"/> 被此盒子完全包含则返回 <see cref="ContainmentType.Contains"/>。<br/>
+    /// 若两者重叠但此盒子未完全包含对方则返回 <see cref="ContainmentType.Intersects"/>。
     /// </returns>
     public readonly ContainmentType Contains(in JBoundingBox box)
     {
@@ -295,9 +295,9 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Determines whether the two boxes intersect or overlap.
+    /// 判断两个盒子是否相交或重叠。
     /// </summary>
-    /// <returns><c>true</c> if the boxes overlap; <c>false</c> if they are disjoint.</returns>
+    /// <returns>如果盒子重叠则返回 <c>true</c>；如果互不相交则返回 <c>false</c>。</returns>
     [Obsolete($"Use !{nameof(Disjoint)} instead.", true)]
     public static bool NotDisjoint(in JBoundingBox left, in JBoundingBox right)
     {
@@ -306,11 +306,11 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Determines whether the two boxes are completely separated (disjoint).
+    /// 判断两个盒子是否完全分离（互不相交）。
     /// </summary>
-    /// <param name="left">The first bounding box.</param>
-    /// <param name="right">The second bounding box.</param>
-    /// <returns><see langword="true"/> if there is a gap between the boxes on at least one axis; otherwise, <see langword="false"/>.</returns>
+    /// <param name="left">第一个包围盒。</param>
+    /// <param name="right">第二个包围盒。</param>
+    /// <returns>如果两个盒子在至少一个轴上存在间隙则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool Disjoint(in JBoundingBox left, in JBoundingBox right)
     {
         return left.Max.X < right.Min.X || left.Min.X > right.Max.X || left.Max.Y < right.Min.Y || left.Min.Y > right.Max.Y ||
@@ -318,11 +318,11 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Determines whether the <paramref name="outer"/> box completely contains the <paramref name="inner"/> box.
+    /// 判断 <paramref name="outer"/> 盒子是否完全包含 <paramref name="inner"/> 盒子。
     /// </summary>
-    /// <param name="outer">The outer bounding box.</param>
-    /// <param name="inner">The inner bounding box to test.</param>
-    /// <returns><see langword="true"/> if <paramref name="inner"/> is entirely within the boundaries of <paramref name="outer"/>; otherwise, <see langword="false"/>.</returns>
+    /// <param name="outer">外部包围盒。</param>
+    /// <param name="inner">要测试的内部包围盒。</param>
+    /// <returns>如果 <paramref name="inner"/> 完全位于 <paramref name="outer"/> 的边界之内则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool Contains(in JBoundingBox outer, in JBoundingBox inner)
     {
         return outer.Min.X <= inner.Min.X && outer.Max.X >= inner.Max.X && outer.Min.Y <= inner.Min.Y && outer.Max.Y >= inner.Max.Y &&
@@ -330,9 +330,9 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Determines whether the <paramref name="outer"/> box completely contains the <paramref name="inner"/> box.
+    /// 判断 <paramref name="outer"/> 盒子是否完全包含 <paramref name="inner"/> 盒子。
     /// </summary>
-    /// <remarks>This is an alias for <see cref="Contains(in JBoundingBox, in JBoundingBox)"/>.</remarks>
+    /// <remarks>这是 <see cref="Contains(in JBoundingBox, in JBoundingBox)"/> 的别名。</remarks>
     [Obsolete($"Use {nameof(Contains)} instead.", true)]
     public static bool Encompasses(in JBoundingBox outer, in JBoundingBox inner)
     {
@@ -341,11 +341,11 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Creates a new bounding box that is the union of two other bounding boxes.
+    /// 创建一个新包围盒，它是另外两个包围盒的并集。
     /// </summary>
-    /// <param name="original">The first bounding box.</param>
-    /// <param name="additional">The second bounding box.</param>
-    /// <returns>A bounding box encompassing both inputs.</returns>
+    /// <param name="original">第一个包围盒。</param>
+    /// <param name="additional">第二个包围盒。</param>
+    /// <returns>包含这两个输入的包围盒。</returns>
     public static JBoundingBox CreateMerged(in JBoundingBox original, in JBoundingBox additional)
     {
         CreateMerged(original, additional, out JBoundingBox result);
@@ -353,11 +353,11 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Creates a new bounding box that is the union of two other bounding boxes.
+    /// 创建一个新包围盒，它是另外两个包围盒的并集。
     /// </summary>
-    /// <param name="original">The first bounding box.</param>
-    /// <param name="additional">The second bounding box.</param>
-    /// <param name="result">Output: A bounding box encompassing both inputs.</param>
+    /// <param name="original">第一个包围盒。</param>
+    /// <param name="additional">第二个包围盒。</param>
+    /// <param name="result">输出：包含这两个输入的包围盒。</param>
     public static void CreateMerged(in JBoundingBox original, in JBoundingBox additional, out JBoundingBox result)
     {
         JVector.Min(original.Min, additional.Min, out result.Min);
@@ -365,12 +365,12 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Gets the center point of the bounding box.
+    /// 获取包围盒的中心点。
     /// </summary>
     public readonly JVector Center => (Min + Max) * ((Real)(1.0 / 2.0));
 
     /// <summary>
-    /// Calculates the volume of the bounding box.
+    /// 计算包围盒的体积。
     /// </summary>
     public readonly Real GetVolume()
     {
@@ -379,7 +379,7 @@ public struct JBoundingBox(JVector min, JVector max) : IEquatable<JBoundingBox>
     }
 
     /// <summary>
-    /// Calculates the surface area of the bounding box.
+    /// 计算包围盒的表面积。
     /// </summary>
     public readonly Real GetSurfaceArea()
     {

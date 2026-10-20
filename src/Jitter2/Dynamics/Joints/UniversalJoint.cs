@@ -10,8 +10,8 @@ using Jitter2.LinearMath;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Creates a universal joint using a <see cref="TwistAngle"/> and a <see cref="BallSocket"/>,
-/// with an optional <see cref="AngularMotor"/> or <see cref="AngularServo"/>.
+/// 使用 <see cref="TwistAngle"/> 和 <see cref="BallSocket"/> 创建一个万向节，
+/// 并可选地附带 <see cref="AngularMotor"/> 或 <see cref="AngularServo"/>。
 /// </summary>
 public class UniversalJoint : Joint
 {
@@ -24,14 +24,13 @@ public class UniversalJoint : Joint
     public AngularServo? Servo { get; }
 
     /// <summary>
-    /// Initializes a new universal joint.
+    /// 初始化一个新的万向节。
     /// </summary>
-    /// <param name="drive">The optional drive. Motor and servo torque default to zero.</param>
-    /// <exception cref="ArgumentOutOfRangeException">The drive selection is invalid.</exception>
+    /// <param name="drive">可选的驱动。马达和伺服的力矩默认为零。</param>
+    /// <exception cref="ArgumentOutOfRangeException">驱动选择无效。</exception>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="center"/> contains a non-finite value, when either rotation axis is zero
-    /// or contains a non-finite value, when either body does not belong to <paramref name="world"/>,
-    /// or when both body references are the same.
+    /// 当 <paramref name="center"/> 包含非有限值时，当任一旋转轴为零或包含非有限值时，
+    /// 当任一刚体不属于 <paramref name="world"/> 时，或当两个刚体引用相同时抛出。
     /// </exception>
     public UniversalJoint(World world, RigidBody body1, RigidBody body2, JVector center, JVector rotateAxis1, JVector rotateAxis2,
         JointDrive drive = JointDrive.None)

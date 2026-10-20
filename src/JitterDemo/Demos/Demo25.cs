@@ -10,10 +10,10 @@ using JitterDemo.Renderer.OpenGL;
 
 namespace JitterDemo;
 
-// In this example, we create a heightmap and use it for collision detection.
-// Note that only the rendering code requires memory, the heightmap itself may be
-// generated procedurally and be of infinite size.
-// To save resources when performing raycasts, we use a ray with finite size (segment).
+// 在本示例中，我们创建一个高度图并将其用于碰撞检测。
+// 注意只有渲染代码需要内存，高度图本身可以程序化生成，
+// 并且可以是无限大的。
+// 为了在进行射线投射时节省资源，我们使用有限长度的射线（线段）。
 
 public static class Heightmap
 {
@@ -23,7 +23,7 @@ public static class Heightmap
 
     public static float GetHeight(int x, int z)
     {
-        // GetHeight could be implemented as an array, make sure to respect array bounds
+        // GetHeight 也可以用数组实现，请确保遵守数组边界
         if (x < 0 || x >= Width || z < 0 || z >= Height)
             throw new ArgumentOutOfRangeException();
 
@@ -78,11 +78,11 @@ public class HeightmapTester(JBoundingBox box) : IDynamicTreeProxy, IRayCastable
 
         while (t <= maxDistance)
         {
-            // check if we are out of bounds
+            // 检查是否越界
             if (x < 0 || x + 1 >= Heightmap.Width || z < 0 || z + 1 >= Heightmap.Height)
                 goto continue_walk;
 
-            // check this quad!
+            // 检查这个四边形！
             var a = new JVector(x + 0, Heightmap.GetHeight(x + 0, z + 0), z + 0);
             var b = new JVector(x + 1, Heightmap.GetHeight(x + 1, z + 0), z + 0);
             var c = new JVector(x + 1, Heightmap.GetHeight(x + 1, z + 1), z + 1);
@@ -175,7 +175,7 @@ public class HeightmapDetection : IBroadPhaseFilter
         {
             for (int z = minZ; z < maxZ; z++)
             {
-                // First triangle of the quad
+                // 四边形中的第一个三角形
 
                 ulong index = 2 * (ulong)(x * Heightmap.Width + z);
 
@@ -196,7 +196,7 @@ public class HeightmapDetection : IBroadPhaseFilter
                         pointA, pointB, normal);
                 }
 
-                // Second triangle of the quad
+                // 四边形中的第二个三角形
 
                 index += 1;
                 triangle.A = new JVector(x + 0, Heightmap.GetHeight(x + 0, z + 0), z + 0);
@@ -227,7 +227,7 @@ public class Demo25 : IDemo, IDrawUpdate
 
     private MutableMeshDrawable terrainRenderer = null!;
 
-    // Only for rendering...
+    // 仅用于渲染……
     TriangleVertexIndex[] GetIndices(int width, int height)
     {
         var indices = new List<TriangleVertexIndex>();
@@ -241,14 +241,14 @@ public class Demo25 : IDemo, IDrawUpdate
                 int c = (j + 1) * width + i;
                 int d = (j + 1) * width + (i + 1);
 
-                indices.Add(new TriangleVertexIndex(b, a, c)); // Triangle 1
-                indices.Add(new TriangleVertexIndex(d, b, c)); // Triangle 2
+                indices.Add(new TriangleVertexIndex(b, a, c)); // 三角形 1
+                indices.Add(new TriangleVertexIndex(d, b, c)); // 三角形 2
             }
         }
         return indices.ToArray();
     }
 
-    // Only for rendering...
+    // 仅用于渲染……
     void FillVertices(Vertex[] vertices, int width, int height)
     {
         for (int j = 0; j < height; j++)
@@ -259,7 +259,7 @@ public class Demo25 : IDemo, IDrawUpdate
 
                 vertices[index].Position = new Vector3(i, Heightmap.GetHeight(i, j), j);
                 vertices[index].Texture = new Vector2(i * 0.5f, j * 0.5f);
-                // Normals are automatically calculated within terrainRenderer.VerticesChanged();
+                // 法线会在 terrainRenderer.VerticesChanged() 中自动计算。
             }
         }
     }
@@ -271,7 +271,7 @@ public class Demo25 : IDemo, IDrawUpdate
         world.BroadPhaseFilter = new HeightmapDetection(world, tester);
         world.DynamicTree.AddProxy(tester, false);
 
-        // Only for rendering...
+        // 仅用于渲染……
         terrainRenderer = RenderWindow.Instance.GetDrawable<MutableMeshDrawable>();
         terrainRenderer.SetTriangles(GetIndices(Heightmap.Width, Heightmap.Height));
         terrainRenderer.Material = ClothMaterial.Create();

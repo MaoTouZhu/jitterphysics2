@@ -31,7 +31,7 @@ public class DistanceLimitRegressionTests
         Assert.That(limit.Impulse, Is.EqualTo((Real)(-1)).Within(Tolerance));
         Assert.That(body.Velocity.Length(), Is.LessThan(Tolerance));
 
-        // Updated anchors must not amplify the cached impulse when their separation grows.
+        // 更新锚点后，即使二者间距增大，也不得放大缓存的冲量。
         limit.Anchor2 = JVector.UnitY * (10 * distance);
         DistanceLimit.PrepareForIterationDistanceLimit(ref limit.Handle.Data, new TimeStep((Real)1.0 / 100));
         Assert.That(body.Velocity.Y, Is.EqualTo((Real)(-1)).Within(Tolerance));

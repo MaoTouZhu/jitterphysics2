@@ -10,12 +10,11 @@ using Jitter2.LinearMath;
 namespace Jitter2;
 
 /// <summary>
-/// Validates public API inputs that must be checked in all build configurations.
+/// 校验必须在所有构建配置中检查的公共 API 输入。
 /// </summary>
 /// <remarks>
-/// Use this helper for construction, setup, and configuration values that would otherwise leave
-/// Jitter2 in an invalid persistent state. For Debug-only sanity checks on runtime mutation paths,
-/// use <see cref="DebugCheck"/>.
+/// 对于构造、初始化和配置值，如果缺少校验会让 Jitter2 停留在无效的持久状态，请使用此辅助类。
+/// 对于运行时修改路径上仅在 Debug 构建中执行的健全性检查，请使用 <see cref="DebugCheck"/>。
 /// </remarks>
 internal static class ArgumentCheck
 {

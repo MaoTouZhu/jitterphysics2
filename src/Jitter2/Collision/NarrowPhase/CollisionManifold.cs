@@ -13,54 +13,54 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Represents a contact manifold between two convex shapes.
+/// 表示两个凸形状之间的接触流形。
 /// </summary>
 /// <remarks>
-/// The manifold is constructed from support points sampled around the collision normal,
-/// then reduced to a small contact set suitable for the solver.
+/// 该流形由围绕碰撞法线采样的支撑点构建，
+/// 随后缩减为适合求解器的小型接触点集。
 /// </remarks>
 public unsafe struct CollisionManifold
 {
-    // We sample each shape with six perturbed support directions, but the sampled polygons can
-    // intersect in up to twelve vertices before the solver-facing reduction step.
+    // 我们用六个扰动后的支撑方向对每个形状采样，但在面向求解器的缩减步骤之前，
+    // 采样多边形最多可有十二个顶点相交。
     private const int MaxSupportPoints = 6;
     private const int MaxManifoldPoints = 12;
     private const int SolverContactLimit = 4;
     private const Real DuplicatePointDistanceSq = (Real)0.001;
 
-    // Layout: MaxManifoldPoints on shape A followed by the matching points on shape B.
+    // 布局：先是形状 A 上的 MaxManifoldPoints 个点，随后是形状 B 上与之匹配的点。
     private fixed Real manifoldData[MaxManifoldPoints * 2 * 3];
 
-    // Number of sampled support points collected for each shape.
+    // 为每个形状收集的采样支撑点数量。
     private int leftCount;
     private int rightCount;
-    // Number of actual contact pairs written into manifoldData.
+    // 写入 manifoldData 的实际接触点对数量。
     private int manifoldCount;
 
     private const Real Sqrt3Over2 = (Real)0.86602540378;
-    // Small perturbation used to sample support points around the contact normal.
+    // 用于围绕接触法线采样支撑点的小扰动。
     private const Real Perturbation = (Real)0.01;
 
-    // Unit hexagon around the normal. These offsets generate the six support directions.
+    // 法线周围的单位六边形。这些偏移量生成六个支撑方向。
     private static readonly Real[] hexagonVertices = [(Real)1.0, (Real)0.0, (Real)0.5, Sqrt3Over2, -(Real)0.5, Sqrt3Over2,
         -(Real)1.0, (Real)0.0, -(Real)0.5, -Sqrt3Over2, (Real)0.5, -Sqrt3Over2];
 
     /// <summary>
-    /// Gets the contact points on shape A.
+    /// 获取形状 A 上的接触点。
     /// </summary>
     public Span<JVector> ManifoldA => MemoryMarshal.CreateSpan(ref Unsafe.As<Real, JVector>(ref manifoldData[0]), manifoldCount);
 
     /// <summary>
-    /// Gets the contact points on shape B.
+    /// 获取形状 B 上的接触点。
     /// </summary>
     public Span<JVector> ManifoldB => MemoryMarshal.CreateSpan(ref Unsafe.As<Real, JVector>(ref manifoldData[MaxManifoldPoints * 3]), manifoldCount);
 
     /// <summary>
-    /// Gets the number of contact points in the manifold.
+    /// 获取流形中的接触点数量。
     /// </summary>
     public readonly int Count => manifoldCount;
 
-    // Add a support sample for shape A unless it is effectively identical to one we already kept.
+    // 为形状 A 添加一个支撑采样点，除非它与已保留的点实际上重合。
     private void PushLeft(Span<JVector> left, in JVector v)
     {
         if (leftCount > 0)
@@ -76,7 +76,7 @@ public unsafe struct CollisionManifold
         left[leftCount++] = v;
     }
 
-    // Add a support sample for shape B unless it is effectively identical to one we already kept.
+    // 为形状 B 添加一个支撑采样点，除非它与已保留的点实际上重合。
     private void PushRight(Span<JVector> right, in JVector v)
     {
         if (rightCount > 0)
@@ -92,8 +92,8 @@ public unsafe struct CollisionManifold
         right[rightCount++] = v;
     }
 
-    // Determine the winding sign of a sampled polygon relative to the contact normal.
-    // If the area is near zero, the sample degenerated to a segment or point.
+    // 确定采样多边形相对于接触法线的环绕方向符号。
+    // 如果面积接近零，说明采样退化成了线段或点。
     private static bool TryGetPolygonSign(ReadOnlySpan<JVector> polygon, int count, in JVector normal, out Real sign)
     {
         const Real epsilon = (Real)1e-6;
@@ -118,7 +118,7 @@ public unsafe struct CollisionManifold
         return true;
     }
 
-    // Standard convex point-in-polygon test, evaluated directly in 3D via the contact normal.
+    // 标准的凸多边形内点测试，借助接触法线直接在三维中计算。
     private static bool ContainsPoint(ReadOnlySpan<JVector> polygon, int count, in JVector point,
         in JVector normal, Real sign)
     {
@@ -139,8 +139,8 @@ public unsafe struct CollisionManifold
         return true;
     }
 
-    // Clip a segment against the half-spaces of a convex polygon.
-    // This is the polygon/segment fallback when one sampled feature collapses to a line.
+    // 用凸多边形的各个半空间裁剪线段。
+    // 当某个采样特征塌缩为直线时，这就是多边形/线段的回退方案。
     private static int ClipSegmentAgainstPolygon(in JVector start, in JVector end,
         ReadOnlySpan<JVector> polygon, int polygonCount, in JVector normal, Real sign, Span<JVector> clipped)
     {
@@ -193,14 +193,14 @@ public unsafe struct CollisionManifold
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    // Signed scalar 2D cross product after projecting along the contact normal.
+    // 沿接触法线投影后的带符号标量二维叉积。
     private static Real CrossAlongNormal(in JVector left, in JVector right, in JVector normal)
     {
         return JVector.Dot(left % right, normal);
     }
 
-    // Intersect two segments in the contact plane.
-    // Handles both the normal crossing case and parallel collinear overlap.
+    // 在接触平面内求两条线段的交点。
+    // 同时处理常规相交情形和平行共线重叠情形。
     private static int IntersectSegments(in JVector startA, in JVector endA,
         in JVector startB, in JVector endB, in JVector normal,
         Span<JVector> clippedA, Span<JVector> clippedB)
@@ -263,7 +263,7 @@ public unsafe struct CollisionManifold
         return 1;
     }
 
-    // Avoid inserting the same contact multiple times from overlapping collection paths.
+    // 避免因收集路径重叠而重复插入同一个接触点。
     private static bool IsDuplicatePoint(ReadOnlySpan<JVector> manifold, int count, in JVector point)
     {
         for (int i = 0; i < count; i++)
@@ -274,8 +274,8 @@ public unsafe struct CollisionManifold
         return false;
     }
 
-    // Register a contact whose geometric anchor came from shape A.
-    // The matching point on B is reconstructed by sliding along the collision normal.
+    // 登记一个几何锚点来自形状 A 的接触点。
+    // 形状 B 上的匹配点通过沿碰撞法线滑动来重建。
     private static void AddPointOnA(Span<JVector> manifoldA, Span<JVector> manifoldB, ref int manifoldCount,
         in JVector point, in JVector pB, in JVector normal)
     {
@@ -289,7 +289,7 @@ public unsafe struct CollisionManifold
         manifoldB[manifoldCount++] = point - diff * normal;
     }
 
-    // Register a contact whose geometric anchor came from shape B.
+    // 登记一个几何锚点来自形状 B 的接触点。
     private static void AddPointOnB(Span<JVector> manifoldA, Span<JVector> manifoldB, ref int manifoldCount,
         in JVector point, in JVector pA, in JVector normal)
     {
@@ -303,7 +303,7 @@ public unsafe struct CollisionManifold
         manifoldA[manifoldCount++] = point - diff * normal;
     }
 
-    // Register a contact where both sides came from an explicit intersection computation.
+    // 登记一个两侧均来自显式求交计算的接触点。
     private static void AddPointPair(Span<JVector> manifoldA, Span<JVector> manifoldB, ref int manifoldCount,
         in JVector pointA, in JVector pointB, in JVector normal)
     {
@@ -316,8 +316,8 @@ public unsafe struct CollisionManifold
         manifoldB[manifoldCount++] = pointB;
     }
 
-    // The solver only wants four contacts. We sort the points around the centroid and
-    // keep four evenly distributed samples so the retained set covers the contact patch.
+    // 求解器只需要四个接触点。我们围绕质心对点排序，
+    // 并保留四个均匀分布的采样点，使保留的集合覆盖接触区域。
     private static void ReduceManifold(Span<JVector> manifoldA, Span<JVector> manifoldB, ref int manifoldCount, in JVector normal)
     {
         if (manifoldCount <= SolverContactLimit) return;
@@ -375,36 +375,36 @@ public unsafe struct CollisionManifold
     }
 
     /// <summary>
-    /// Builds the contact manifold between two shapes given their transforms and initial contact.
+    /// 在给定两个形状的变换和初始接触点的情况下，构建两者之间的接触流形。
     /// </summary>
-    /// <typeparam name="Ta">The type of support shape A.</typeparam>
-    /// <typeparam name="Tb">The type of support shape B.</typeparam>
-    /// <param name="shapeA">The first shape.</param>
-    /// <param name="shapeB">The second shape.</param>
-    /// <param name="quaternionA">Orientation of shape A.</param>
-    /// <param name="quaternionB">Orientation of shape B.</param>
-    /// <param name="positionA">Position of shape A.</param>
-    /// <param name="positionB">Position of shape B.</param>
-    /// <param name="pA">Initial contact point on shape A.</param>
-    /// <param name="pB">Initial contact point on shape B.</param>
-    /// <param name="normal">The collision normal (from B to A).</param>
+    /// <typeparam name="Ta">支撑形状 A 的类型。</typeparam>
+    /// <typeparam name="Tb">支撑形状 B 的类型。</typeparam>
+    /// <param name="shapeA">第一个形状。</param>
+    /// <param name="shapeB">第二个形状。</param>
+    /// <param name="quaternionA">形状 A 的朝向。</param>
+    /// <param name="quaternionB">形状 B 的朝向。</param>
+    /// <param name="positionA">形状 A 的位置。</param>
+    /// <param name="positionB">形状 B 的位置。</param>
+    /// <param name="pA">形状 A 上的初始接触点。</param>
+    /// <param name="pB">形状 B 上的初始接触点。</param>
+    /// <param name="normal">碰撞法线（从 B 指向 A）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SkipLocalsInit]
     public void BuildManifold<Ta, Tb>(Ta shapeA, Tb shapeB, in JQuaternion quaternionA, in JQuaternion quaternionB,
         in JVector positionA, in JVector positionB, in JVector pA, in JVector pB, in JVector normal)
         where Ta : ISupportMappable where Tb : ISupportMappable
     {
-        // Reset
+        // 重置
         leftCount = 0;
         rightCount = 0;
         manifoldCount = 0;
 
-        // Build a local tangent frame around the collision normal.
+        // 围绕碰撞法线构建局部切向坐标系。
         JVector crossVector1 = MathHelper.CreateOrthonormal(normal);
         JVector crossVector2 = normal % crossVector1;
 
-        // Operate in a frame translated by -positionA so intermediates stay near the origin.
-        // Absolute epsilons in the clipping helpers are scaled to shape size, not world offset.
+        // 在平移了 -positionA 的坐标系中运算，使中间量保持在原点附近。
+        // 裁剪辅助函数中的绝对 epsilon 按形状尺寸缩放，而不受世界坐标偏移影响。
         JVector relPosB = positionB - positionA;
         JVector pAloc = pA - positionA;
         JVector pBloc = pB - positionA;
@@ -412,8 +412,8 @@ public unsafe struct CollisionManifold
         Span<JVector> left = stackalloc JVector[MaxSupportPoints];
         Span<JVector> right = stackalloc JVector[MaxSupportPoints];
 
-        // Sample support points for both shapes around the normal in a hexagonal pattern.
-        // This approximates the active contact feature without a full clipping pipeline.
+        // 按六边形模式围绕法线为两个形状采样支撑点。
+        // 这近似得到当前有效的接触特征，而无需完整的裁剪流程。
         for (int e = 0; e < MaxSupportPoints; e++)
         {
             JVector ptNormal = normal + hexagonVertices[2 * e + 0] * Perturbation * crossVector1 +
@@ -436,14 +436,14 @@ public unsafe struct CollisionManifold
         Span<JVector> mA = MemoryMarshal.CreateSpan(ref Unsafe.As<Real, JVector>(ref manifoldData[0]), MaxManifoldPoints);
         Span<JVector> mB = MemoryMarshal.CreateSpan(ref Unsafe.As<Real, JVector>(ref manifoldData[MaxManifoldPoints * 3]), MaxManifoldPoints);
 
-        // If a sampled loop has non-zero signed area, treat it as a polygon; otherwise it is
-        // effectively a line or point and handled by the dedicated fallback cases below.
+        // 如果某个采样环的带符号面积非零，就把它当作多边形；否则它实际上
+        // 是一条直线或一个点，由下面专门的回退情形处理。
         Real leftSign = (Real)0.0;
         Real rightSign = (Real)0.0;
         bool leftPolygon = leftCount > 2 && TryGetPolygonSign(left, leftCount, normal, out leftSign);
         bool rightPolygon = rightCount > 2 && TryGetPolygonSign(right, rightCount, normal, out rightSign);
 
-        // Polygon/point and polygon/segment cases with shape A contributing the polygon.
+        // 形状 A 提供多边形的多边形/点与多边形/线段情形。
         if (leftPolygon)
         {
             for (int e = 0; e < rightCount; e++)
@@ -468,7 +468,7 @@ public unsafe struct CollisionManifold
             }
         }
 
-        // Same logic with the roles reversed so we also pick anchors contributed by shape A.
+        // 角色互换的相同逻辑，这样我们也能选取形状 A 提供的锚点。
         if (rightPolygon)
         {
             for (int e = 0; e < leftCount; e++)
@@ -493,7 +493,7 @@ public unsafe struct CollisionManifold
             }
         }
 
-        // Pure segment/segment manifold. This is needed because neither side produced a polygon.
+        // 纯线段/线段流形。这里需要它，因为两侧都没有生成多边形。
         if (leftCount == 2 && rightCount == 2)
         {
             Span<JVector> clippedA = stackalloc JVector[2];
@@ -507,7 +507,7 @@ public unsafe struct CollisionManifold
             }
         }
 
-        // Polygon/polygon case: in addition to inside vertices, also collect explicit edge intersections.
+        // 多边形/多边形情形：除了内部顶点外，还要收集显式的边交点。
         if (leftPolygon && rightPolygon)
         {
             Span<JVector> clippedA = stackalloc JVector[2];
@@ -534,10 +534,9 @@ public unsafe struct CollisionManifold
             }
         }
 
-        // Sampling support points around the normal can leave a single point offset from the
-        // original contact, especially on curved surfaces. This offset is an artifact of the
-        // manifold algorithm and can make a resting sphere start rolling. If we found at most
-        // one point, use the original deepest contact pair instead.
+        // 围绕法线采样支撑点可能会留下一个偏离原始接触点的单点，尤其在曲面上。
+        // 这个偏移是流形算法产生的伪影，可能让静止的球体开始滚动。如果
+        // 我们最多只找到一个点，就改用原始的最深接触点对。
         if (manifoldCount <= 1)
         {
             mA[0] = pAloc;
@@ -546,18 +545,18 @@ public unsafe struct CollisionManifold
         }
         else if (manifoldCount < SolverContactLimit)
         {
-            // Support sampling can also offset a small contact patch. If a solver slot is
-            // free, keep the original pair last without dropping any sampled contacts.
+            // 支撑点采样也可能使小块接触区发生偏移。若有空闲的求解器槽位，
+            // 就把原始点对保留在最后，同时不丢弃任何采样得到的接触点。
             mA[manifoldCount] = pAloc;
             mB[manifoldCount] = pBloc;
             manifoldCount++;
         }
 
     Finalize:
-        // Final reduction from raw manifold candidates to the solver-facing contact set.
+        // 从原始流形候选点最终缩减为面向求解器的接触点集。
         ReduceManifold(mA, mB, ref manifoldCount, normal);
 
-        // Lift the surviving contacts back into world space.
+        // 将保留下来的接触点抬回世界空间。
         for (int i = 0; i < manifoldCount; i++)
         {
             mA[i] += positionA;
@@ -566,15 +565,15 @@ public unsafe struct CollisionManifold
     } // BuildManifold
 
     /// <summary>
-    /// Builds the contact manifold between two rigid body shapes using their current transforms.
+    /// 使用两个刚体形状当前变换，构建它们之间的接触流形。
     /// </summary>
-    /// <typeparam name="Ta">The type of shape A.</typeparam>
-    /// <typeparam name="Tb">The type of shape B.</typeparam>
-    /// <param name="shapeA">The first rigid body shape.</param>
-    /// <param name="shapeB">The second rigid body shape.</param>
-    /// <param name="pA">Initial contact point on shape A.</param>
-    /// <param name="pB">Initial contact point on shape B.</param>
-    /// <param name="normal">The collision normal (from B to A).</param>
+    /// <typeparam name="Ta">形状 A 的类型。</typeparam>
+    /// <typeparam name="Tb">形状 B 的类型。</typeparam>
+    /// <param name="shapeA">第一个刚体形状。</param>
+    /// <param name="shapeB">第二个刚体形状。</param>
+    /// <param name="pA">形状 A 上的初始接触点。</param>
+    /// <param name="pB">形状 B 上的初始接触点。</param>
+    /// <param name="normal">碰撞法线（从 B 指向 A）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     [SkipLocalsInit]
     public void BuildManifold<Ta, Tb>(Ta shapeA, Tb shapeB,

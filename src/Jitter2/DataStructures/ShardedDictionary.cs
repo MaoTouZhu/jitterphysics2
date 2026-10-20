@@ -17,20 +17,20 @@ using Lock = System.Object;
 namespace Jitter2.DataStructures;
 
 /// <summary>
-/// A sharded dictionary whose entries are partitioned to reduce lock contention.
-/// Each shard has its own lock, allowing callers to synchronize different shards independently.
+/// 一个分片字典，其条目被分区以减少锁争用。
+/// 每个分片都有自己的锁，允许调用方独立同步不同分片。
 /// </summary>
-/// <typeparam name="TKey">The type of keys in the dictionary.</typeparam>
-/// <typeparam name="TValue">The type of values in the dictionary.</typeparam>
+/// <typeparam name="TKey">字典中键的类型。</typeparam>
+/// <typeparam name="TValue">字典中值的类型。</typeparam>
 /// <remarks>
 /// <para>
-/// This implementation avoids the GC overhead of <see cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/>.
+/// 此实现避免了 <see cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/> 的 GC 开销。
 /// </para>
 /// <para>
-/// <b>Threading:</b> Individual operations are not thread-safe. Callers must acquire the shard lock
-/// via <see cref="GetLock"/> before calling <see cref="Add"/>, <see cref="Remove"/>,
-/// <see cref="TryGetValue"/>, or the indexer during concurrent writes. <see cref="TrimExcess"/>
-/// requires excluding all concurrent operations.
+/// <b>线程：</b>单个操作不是线程安全的。在并发写入期间，调用方必须先通过
+/// <see cref="GetLock"/> 获取分片锁，然后再调用 <see cref="Add"/>、<see cref="Remove"/>、
+/// <see cref="TryGetValue"/> 或索引器。<see cref="TrimExcess"/>
+/// 要求排除所有并发操作。
 /// </para>
 /// </remarks>
 internal class ShardedDictionary<TKey, TValue> where TKey : notnull
@@ -57,7 +57,7 @@ internal class ShardedDictionary<TKey, TValue> where TKey : notnull
         return (key.GetHashCode() & 0x7FFFFFFF) % locks.Length;
     }
 
-    /// <summary>Gets the value associated with the specified key.</summary>
+    /// <summary>获取与指定键关联的值。</summary>
     public TValue this[TKey key]
     {
         get
@@ -68,19 +68,19 @@ internal class ShardedDictionary<TKey, TValue> where TKey : notnull
     }
 
     /// <summary>
-    /// Gets the lock object for the shard containing the specified key.
+    /// 获取包含指定键的分片的锁对象。
     /// </summary>
-    /// <param name="key">The key to locate the shard for.</param>
-    /// <returns>The lock object for the shard.</returns>
+    /// <param name="key">用于定位分片的键。</param>
+    /// <returns>该分片的锁对象。</returns>
     public Lock GetLock(TKey key)
     {
         return locks[GetShardIndex(key)];
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ShardedDictionary{TKey, TValue}"/> class.
+    /// 初始化 <see cref="ShardedDictionary{TKey, TValue}"/> 类的新实例。
     /// </summary>
-    /// <param name="threads">The expected number of concurrent threads, used to determine shard count.</param>
+    /// <param name="threads">预期的并发线程数，用于确定分片数量。</param>
     public ShardedDictionary(int threads)
     {
         int count = ShardSuggestion(threads);
@@ -96,7 +96,7 @@ internal class ShardedDictionary<TKey, TValue> where TKey : notnull
     }
 
     /// <summary>
-    /// Sets the capacity of each shard to the actual number of entries it contains.
+    /// 将每个分片的容量设置为其实际包含的条目数。
     /// </summary>
     public void TrimExcess()
     {
@@ -107,30 +107,30 @@ internal class ShardedDictionary<TKey, TValue> where TKey : notnull
     }
 
     /// <summary>
-    /// Attempts to get the value associated with the specified key.
+    /// 尝试获取与指定键关联的值。
     /// </summary>
-    /// <param name="key">The key to locate.</param>
-    /// <param name="value">The value associated with the key, if found; otherwise, the default value.</param>
-    /// <returns><see langword="true"/> if the key was found; otherwise, <see langword="false"/>.</returns>
+    /// <param name="key">要定位的键。</param>
+    /// <param name="value">如果找到，则为与该键关联的值；否则为默认值。</param>
+    /// <returns>如果找到该键，则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
     public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
     {
         return dictionaries[GetShardIndex(key)].TryGetValue(key, out value);
     }
 
     /// <summary>
-    /// Adds a key-value pair to the dictionary.
+    /// 向字典添加一个键值对。
     /// </summary>
-    /// <param name="key">The key to add.</param>
-    /// <param name="value">The value to associate with the key.</param>
+    /// <param name="key">要添加的键。</param>
+    /// <param name="value">要与该键关联的值。</param>
     public void Add(TKey key, TValue value)
     {
         dictionaries[GetShardIndex(key)].Add(key, value);
     }
 
     /// <summary>
-    /// Removes the entry with the specified key from the dictionary.
+    /// 从字典中移除具有指定键的条目。
     /// </summary>
-    /// <param name="key">The key to remove.</param>
+    /// <param name="key">要移除的键。</param>
     public void Remove(TKey key)
     {
         dictionaries[GetShardIndex(key)].Remove(key);

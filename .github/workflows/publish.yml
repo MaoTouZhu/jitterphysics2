@@ -1,17 +1,17 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 
-name: Publish NuGet
+name: 发布 NuGet
 on:
-  workflow_dispatch: # Allow running the workflow manually from the GitHub UI
+  workflow_dispatch: # 允许从 GitHub UI 手动运行工作流
   push:
     branches:
-      - 'main'       # Run the workflow when pushing to the main branch
+      - 'main'       # 推送到 main 分支时运行工作流
   pull_request:
     branches:
-      - '*'          # Run the workflow for all pull requests
+      - '*'          # 对所有拉取请求运行工作流
   release:
     types:
-      - published    # Run the workflow when a new GitHub release is published
+      - published    # 发布新的 GitHub Release 时运行工作流
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -34,27 +34,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+          fetch-depth: 0 # 获取全部历史记录，以便使用 MinVer 自动生成版本号
 
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Add MinVer and Reproducible Builds
+      - name: 添加 MinVer 与 Reproducible Builds
         run: |
           dotnet add package MinVer
           dotnet add package DotNet.ReproducibleBuilds
 
-      # Pack single-precision version
-      - name: Pack Single Precision
+      # 打包单精度版本
+      - name: 打包单精度
         run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }}
 
-      # Pack double-precision version
-      - name: Pack Double Precision
+      # 打包双精度版本
+      - name: 打包双精度
         run: dotnet pack --configuration Release -p:DoublePrecision=true --output ${{ env.NuGetDirectory }}
 
-      # Upload artifacts
+      # 上传产物
       - uses: actions/upload-artifact@v4
         with:
           name: nuget
@@ -67,21 +67,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: [create_nuget]
     steps:
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Download NuGet Packages
+      - name: 下载 NuGet 包
         uses: actions/download-artifact@v4
         with:
           name: nuget
           path: ${{ env.NuGetDirectory }}
 
-      - name: Install NuGet Validator
+      - name: 安装 NuGet 校验器
         run: dotnet tool update Meziantou.Framework.NuGetPackageValidation.Tool --global
 
-      - name: Validate NuGet Packages
+      - name: 校验 NuGet 包
         run: |
           foreach ($file in Get-ChildItem "${{ env.NuGetDirectory }}" -Recurse -Include *.nupkg) {
               meziantou.validate-nuget-package $file
@@ -96,7 +96,7 @@ jobs:
         precision:
           - single
           - double
-    name: Run Tests (${{ matrix.precision }})
+    name: 运行测试（${{ matrix.precision }}）
 
     defaults:
       run:
@@ -104,19 +104,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore dependencies
+      - name: 还原依赖
         run: dotnet restore
 
-      - name: Run Tests - Single Precision
+      - name: 运行测试 - 单精度
         if: matrix.precision == 'single'
         run: dotnet test --configuration Release --no-restore
 
-      - name: Run Tests - Double Precision
+      - name: 运行测试 - 双精度
         if: matrix.precision == 'double'
         run: dotnet test --configuration Release --no-restore -p:DoublePrecision=true
 
@@ -126,18 +126,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate_nuget, run_test]
     steps:
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Download NuGet Packages
+      - name: 下载 NuGet 包
         uses: actions/download-artifact@v4
         with:
           name: nuget
           path: ${{ env.NuGetDirectory }}
 
-      - name: Publish NuGet Packages
+      - name: 发布 NuGet 包
         run: |
           dotnet nuget add source --username notgiven688 --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/notgiven688/index.json"
 

@@ -21,10 +21,10 @@ public static class Program
         {
             string colorCode = level switch
             {
-                Jitter2.Logger.LogLevel.Information => "\e[32m", // Green
-                Jitter2.Logger.LogLevel.Warning     => "\e[33m", // Yellow
-                Jitter2.Logger.LogLevel.Error       => "\e[31m", // Red
-                _                                   => "\e[0m",  // Reset
+                Jitter2.Logger.LogLevel.Information => "\e[32m", // 绿色
+                Jitter2.Logger.LogLevel.Warning     => "\e[33m", // 黄色
+                Jitter2.Logger.LogLevel.Error       => "\e[31m", // 红色
+                _                                   => "\e[0m",  // 重置
             };
 
             const string bold = "\e[1m";

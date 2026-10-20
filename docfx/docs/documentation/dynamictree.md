@@ -1,58 +1,58 @@
-# Dynamic Tree
+# 动态树
 
-The dynamic tree holds instances which implement the `IDynamicTreeProxy` interface.
-Its main task is to efficiently determine if a proxy's axis-aligned bounding box overlaps with the axis-aligned bounding box of any other proxy in the world.
-A naive implementation requires $\mathcal{O}\left(n\right)$ operations (checking for an overlap with every of the $n-1$ entities).
-The tree structure accelerates this to $\mathcal{O}\left(\mathrm{log}(n)\right)$.
-Since proxies are dynamic and can move, the tree must be continuously updated.
-To trigger updates less frequently, entities are enclosed within slightly larger bounding boxes than their actual size.
-This bounding box extension is defined by the `Velocity` property of the `IDynamicTreeProxy` interface.
+动态树保存实现了 `IDynamicTreeProxy` 接口的实例。
+它的主要任务是高效判断某个代理的轴对齐包围盒是否与世界中的任何其他代理的轴对齐包围盒重叠。
+朴素实现需要 $\mathcal{O}\left(n\right)$ 次操作（与 $n-1$ 个实体逐一检查是否重叠）。
+树结构将其加速到 $\mathcal{O}\left(\mathrm{log}(n)\right)$。
+由于代理是动态的且可以移动，树必须持续更新。
+为了降低更新频率，实体会被包裹在比其实际尺寸略大的包围盒中。
+该包围盒扩展量由 `IDynamicTreeProxy` 接口的 `Velocity` 属性定义。
 
-![img alt](images/dynamictree.png)
+![动态树示意图](images/dynamictree.png)
 
-## Adding proxies
+## 添加代理
 
-All shapes added to a rigid body (`body.AddShape`) are automatically registered with `world.DynamicTree`.
-Custom implementations of `IDynamicTreeProxy` can be added to the tree using `tree.AddProxy`.
-In this case, a `BroadPhaseFilter` must be implemented and registered (using `world.BroadPhaseFilter`) to handle collisions with the custom proxy, otherwise an `InvalidCollisionTypeException` is thrown.
+添加到刚体的所有形状（`body.AddShape`）都会自动注册到 `world.DynamicTree`。
+`IDynamicTreeProxy` 的自定义实现可以通过 `tree.AddProxy` 添加到树中。
+在这种情况下，必须实现并注册 `BroadPhaseFilter`（通过 `world.BroadPhaseFilter`）来处理与自定义代理的碰撞，否则会抛出 `InvalidCollisionTypeException`。
 
-## Enumerate Overlaps
+## 枚举重叠
 
-The tree implementation needs to be updated using `tree.Update`.
-This is done automatically for the dynamic tree owned by the world class (`world.DynamicTree`).
-Internally, `UpdateWorldBoundingBox` is called for active proxies implementing the `IUpdatableBoundingBox` interface, and the internal book-keeping of overlapping pairs is updated.
-Overlaps can be queried using `tree.EnumerateOverlaps`.
-To refresh one shape after changing its geometry, call `world.DynamicTree.Update(shape)`. See [Changing an attached shape](shapes.md#changing-an-attached-shape) for the other state that may need updating.
+树实现需要使用 `tree.Update` 更新。
+对于世界类所拥有的动态树（`world.DynamicTree`），此操作是自动完成的。
+内部会为实现了 `IUpdatableBoundingBox` 接口的活动代理调用 `UpdateWorldBoundingBox`，并更新重叠对内部记录。
+重叠可以通过 `tree.EnumerateOverlaps` 查询。
+要在修改某个形状的几何形状后刷新它，请调用 `world.DynamicTree.Update(shape)`。其他可能需要更新的状态见[修改已附加的形状](shapes.md#changing-an-attached-shape)。
 
-## Querying the tree
+## 查询树
 
-The dynamic tree is a broadphase structure.
-Its job is to quickly reduce the set of possible candidates.
-Some APIs stop there and return proxies, while others continue with an exact narrowphase test.
+动态树是一种宽相结构。
+它的职责是快速缩小候选集合。
+有些 API 止步于此并返回代理，而另一些则继续进行精确的窄相测试。
 
-In practice there are two layers of queries:
+实际上查询分为两层：
 
-- Broadphase-only queries, such as `Query(...)`, which return candidate proxies.
-- Broadphase + narrowphase queries, such as `RayCast(...)`, `SweepCast(...)`, and `FindNearest(...)`, which continue with exact tests on supported proxies.
+- 仅宽相查询，例如 `Query(...)`，返回候选代理。
+- 宽相 + 窄相查询，例如 `RayCast(...)`、`SweepCast(...)` 和 `FindNearest(...)`，会对受支持的代理继续进行精确测试。
 
-### Broadphase-only queries
+### 仅宽相查询
 
-All tree proxies that overlap a given axis-aligned box can be queried:
+可以查询与给定轴对齐盒重叠的所有树代理：
 
 ```cs
 public void Query<T>(T hits, in JBoundingBox box) where T : class, ICollection<IDynamicTreeProxy>
 public void Query<TSink>(ref TSink hits, in JBoundingBox box) where TSink : ISink<IDynamicTreeProxy>
 ```
 
-As well as all proxies which overlap with a ray:
+以及所有与射线重叠的代理：
 
 ```cs
 public void Query<T>(T hits, in JVector rayOrigin, in JVector rayDirection) where T : class, ICollection<IDynamicTreeProxy>
 public void Query<TSink>(ref TSink hits, in JVector rayOrigin, in JVector rayDirection) where TSink : ISink<IDynamicTreeProxy>
 ```
 
-Custom broadphase queries can easily be implemented.
-An implementation which queries all proxies overlapping with a single point:
+自定义宽相查询可以很容易地实现。
+下面是一个查询与单个点重叠的所有代理的实现：
 
 ```cs
 var stack = new Stack<int>();
@@ -79,66 +79,66 @@ while (stack.TryPop(out int id))
 }
 ```
 
-### Exact query helpers
+### 精确查询辅助方法
 
-The tree also provides helpers that combine broadphase pruning with an exact narrowphase test.
-These return the closest exact hit instead of raw candidate proxies.
-All exact query helpers return `true` on success and `false` when nothing is found.
+树还提供了将宽相剪枝与精确窄相测试相结合的辅助方法。
+这些方法返回最近的精确命中结果，而不是原始候选代理。
+所有精确查询辅助方法在成功时返回 `true`，未找到任何结果时返回 `false`。
 
-#### Ray casting
+#### 射线投射
 
-All proxies implementing `IRayCastable` can be ray cast, including all shapes:
+所有实现 `IRayCastable` 的代理都可以进行射线投射，包括所有形状：
 
 ```cs
-// Unbounded
+// 无界
 public bool RayCast(JVector origin, JVector direction, RayCastFilterPre? pre, RayCastFilterPost? post,
     out IDynamicTreeProxy? proxy, out JVector normal, out float lambda)
 
-// Bounded: only considers hits with lambda ≤ maxLambda
+// 有界：只考虑 lambda ≤ maxLambda 的命中
 public bool RayCast(JVector origin, JVector direction, float maxLambda, RayCastFilterPre? pre, RayCastFilterPost? post,
     out IDynamicTreeProxy? proxy, out JVector normal, out float lambda)
 ```
 
-The pre- and post-filters can be used to discard hits during the ray cast.
-A ray is shot from the origin into the specified direction.
-Returns `true` if a hit is found, including the case where the ray origin is inside the hit shape (in which case `lambda` is zero and `normal` is `JVector.Zero`).
-The point of collision is given by `hit = origin + lambda * direction`.
+前置过滤器和后置过滤器可用于在射线投射过程中丢弃命中。
+射线从原点沿指定方向射出。
+如果找到命中则返回 `true`，包括射线原点位于命中形状内部的情况（此时 `lambda` 为零，`normal` 为 `JVector.Zero`）。
+碰撞点由 `hit = origin + lambda * direction` 给出。
 
-#### Sweep casting
+#### 扫掠投射
 
-All proxies implementing `ISweepTestable` can be sweep-tested, including all shapes:
+所有实现 `ISweepTestable` 的代理都可以进行扫掠测试，包括所有形状：
 
 ```cs
-// Unbounded
+// 无界
 public bool SweepCast<T>(in T support, in JQuaternion orientation, in JVector position, in JVector direction,
     SweepCastFilterPre? pre, SweepCastFilterPost? post,
     out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out float lambda)
     where T : ISupportMappable
 
-// Bounded: only considers hits with lambda ≤ maxLambda
+// 有界：只考虑 lambda ≤ maxLambda 的命中
 public bool SweepCast<T>(in T support, in JQuaternion orientation, in JVector position, in JVector direction, float maxLambda,
     SweepCastFilterPre? pre, SweepCastFilterPost? post,
     out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out float lambda)
     where T : ISupportMappable
 ```
 
-The query shape is defined by an `ISupportMappable` plus its world-space `orientation` and `position`.
-`direction` is the sweep direction vector; `lambda` is expressed in units of `direction`, so the query shape's center at impact is at `position + lambda * direction`.
+查询形状由一个 `ISupportMappable` 及其世界空间中的 `orientation` 和 `position` 定义。
+`direction` 是扫掠方向向量；`lambda` 以 `direction` 为单位表示，因此查询形状在撞击时的中心位于 `position + lambda * direction`。
 
-`pointA` and `pointB` are the contact points at the sweep origin (before any displacement is applied).
-Because sweep cast targets are always stationary, `pointB` is simply the world-space contact point.
-The world-space contact point on the query shape at impact is `pointA + lambda * direction`.
-`normal` is the collision normal in world space.
+`pointA` 和 `pointB` 是扫掠原点处（尚未施加任何位移之前）的接触点。
+由于扫掠投射的目标始终是静止的，`pointB` 就是世界空间中的接触点。
+查询形状在撞击时的世界空间接触点为 `pointA + lambda * direction`。
+`normal` 是世界空间中的碰撞法线。
 
-Returns `true` if a hit is found, including the case where the shapes already overlap (in which case `lambda` is zero and `normal` is `JVector.Zero`).
+如果找到命中则返回 `true`，包括形状已经重叠的情况（此时 `lambda` 为零，`normal` 为 `JVector.Zero`）。
 
-The **pre-filter** (`SweepCastFilterPre`) is called before the exact narrowphase test and receives only the candidate proxy.
-Use it to cheaply skip proxies by identity (e.g. ignore the body being swept).
-The **post-filter** (`SweepCastFilterPost`) is called after the exact test and receives the full `SweepCastResult` (including `Lambda`, `Normal`, `PointA`, `PointB`).
-Use it to reject hits based on geometry, or to collect multiple results rather than stopping at the first.
-Returning `false` from either filter skips that candidate without terminating the sweep.
+**前置过滤器**（`SweepCastFilterPre`）在精确窄相测试之前调用，只接收候选代理。
+可用它按标识廉价地跳过代理（例如忽略正在被扫掠的刚体）。
+**后置过滤器**（`SweepCastFilterPost`）在精确测试之后调用，接收完整的 `SweepCastResult`（包括 `Lambda`、`Normal`、`PointA`、`PointB`）。
+可用它根据几何形状拒绝命中，或收集多个结果而不是在第一个结果处停止。
+任一过滤器返回 `false` 都会跳过该候选，而不会终止扫掠。
 
-For common built-in query shapes, convenience overloads are available:
+对于常见的内置查询形状，提供了便捷重载：
 
 ```cs
 public bool SweepCastSphere(float radius, in JVector position, in JVector direction, ...)
@@ -147,39 +147,39 @@ public bool SweepCastCapsule(float radius, float halfLength, in JQuaternion orie
 public bool SweepCastCylinder(float radius, float halfHeight, in JQuaternion orientation, in JVector position, in JVector direction, ...)
 ```
 
-Each has a bounded variant with a `maxLambda` parameter.
+每个都有一个带 `maxLambda` 参数的有界变体。
 
-#### Find nearest query
+#### 查找最近查询
 
-All proxies implementing `IDistanceTestable` can be distance-queried, including all shapes:
+所有实现 `IDistanceTestable` 的代理都可以进行距离查询，包括所有形状：
 
 ```cs
-// Unbounded: considers all IDistanceTestable proxies in the tree
+// 无界：考虑树中所有 IDistanceTestable 代理
 public bool FindNearest<T>(in T support, in JQuaternion orientation, in JVector position,
     FindNearestFilterPre? pre, FindNearestFilterPost? post,
     out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out float distance)
     where T : ISupportMappable
 
-// Bounded: only considers proxies closer than maxDistance
+// 有界：只考虑距离小于 maxDistance 的代理
 public bool FindNearest<T>(in T support, in JQuaternion orientation, in JVector position, float maxDistance,
     FindNearestFilterPre? pre, FindNearestFilterPost? post,
     out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out float distance)
     where T : ISupportMappable
 ```
 
-The query shape is defined by an `ISupportMappable` plus its world-space `orientation` and `position`.
-`pointA` and `pointB` are the closest points on the query shape and the found proxy respectively.
-`normal` is the unit direction from the query shape toward the found proxy.
+查询形状由一个 `ISupportMappable` 及其世界空间中的 `orientation` 和 `position` 定义。
+`pointA` 和 `pointB` 分别是查询形状上和找到的代理上的最近点。
+`normal` 是从查询形状指向所找到代理的单位方向。
 
-Returns `true` if a proxy is found, including the case where the query shape already overlaps a proxy (in which case `distance` is zero and `normal` is `JVector.Zero`).
-Returns `false` only when no proxy is found within range.
+如果找到代理则返回 `true`，包括查询形状已经与某个代理重叠的情况（此时 `distance` 为零，`normal` 为 `JVector.Zero`）。
+仅当范围内没有找到任何代理时返回 `false`。
 
-The **pre-filter** (`FindNearestFilterPre`) is called before the exact narrowphase test and receives only the candidate proxy.
-The **post-filter** (`FindNearestFilterPost`) is called after the exact test and receives the full `FindNearestResult`.
-For overlap results the post-filter receives `distance = 0` and `normal = Zero`.
-Returning `false` from either filter skips that candidate and continues the search.
+**前置过滤器**（`FindNearestFilterPre`）在精确窄相测试之前调用，只接收候选代理。
+**后置过滤器**（`FindNearestFilterPost`）在精确测试之后调用，接收完整的 `FindNearestResult`。
+对于重叠结果，后置过滤器收到的 `distance = 0` 且 `normal = Zero`。
+任一过滤器返回 `false` 都会跳过该候选并继续搜索。
 
-To skip overlapping proxies and find the nearest *separated* proxy instead, reject overlap results in the post-filter:
+若要跳过重叠的代理并寻找最近的*分离*代理，可在后置过滤器中拒绝重叠结果：
 
 ```cs
 world.DynamicTree.FindNearestSphere(radius, position,
@@ -188,21 +188,21 @@ world.DynamicTree.FindNearestSphere(radius, position,
     out proxy, out pointA, out pointB, out normal, out distance);
 ```
 
-For common built-in query shapes, convenience overloads are available:
+对于常见的内置查询形状，提供了便捷重载：
 
 ```cs
 public bool FindNearestPoint(in JVector position, ...)
 public bool FindNearestSphere(float radius, in JVector position, ...)
 ```
 
-Each has a bounded variant with a `maxDistance` parameter.
+每个都有一个带 `maxDistance` 参数的有界变体。
 
-### Overlap check example
+### 重叠检查示例
 
-Overlap checks can be composed by querying the tree with a bounding box first and then running an exact narrowphase overlap test against the returned candidates:
+重叠检查可以这样组合：先用包围盒查询树，然后对返回的候选执行精确的窄相重叠测试：
 
 ```cs
-// Returns all RigidBodyShapes overlapping a sphere at 'center' with 'radius'.
+// 返回所有与位于 'center'、半径为 'radius' 的球体重叠的 RigidBodyShape。
 static IEnumerable<RigidBodyShape> OverlapSphere(World world, JVector center, float radius)
 {
     var queryBox = new JBoundingBox(
@@ -233,4 +233,4 @@ static IEnumerable<RigidBodyShape> OverlapSphere(World world, JVector center, fl
 }
 ```
 
-This pattern is usually enough for overlap checks and avoids introducing additional broadphase API surface.
+这种模式通常足以完成重叠检查，并可避免引入额外的宽相 API。

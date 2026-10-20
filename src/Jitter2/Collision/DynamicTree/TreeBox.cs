@@ -13,13 +13,12 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Represents an axis-aligned bounding box with SIMD-friendly memory layout, used for spatial partitioning in
-/// acceleration structures such as <see cref="DynamicTree"/>.
+/// 表示一种具有 SIMD 友好内存布局的轴对齐包围盒，用于 <see cref="DynamicTree"/> 等加速结构中的空间划分。
 /// </summary>
 /// <remarks>
-/// The struct is explicitly laid out to occupy exactly 8 <see cref="Real"/> fields, enabling efficient SIMD operations and
-/// binary comparisons. It contains both minimum and maximum corners of the box as <see cref="JVector"/>, along with
-/// unused W components (<c>MinW</c>, <c>MaxW</c>) to match memory alignment.
+/// 该结构体经过显式布局，恰好占用 8 个 <see cref="Real"/> 字段，从而实现高效的 SIMD 运算和
+/// 二进制比较。它同时包含盒子作为 <see cref="JVector"/> 的最小角与最大角，以及
+/// 未使用的 W 分量（<c>MinW</c>、<c>MaxW</c>）以匹配内存对齐。
 /// </remarks>
 /// <seealso cref="JBoundingBox"/>
 /// <seealso cref="JVector"/>
@@ -27,34 +26,34 @@ namespace Jitter2.Collision;
 public struct TreeBox : IEquatable<TreeBox>
 {
     /// <summary>
-    /// Small epsilon value used for ray-box intersection tests.
+    /// 用于射线与盒相交测试的小 epsilon 值。
     /// </summary>
     public const Real Epsilon = (Real)1e-12;
 
-    /// <summary>The minimum corner of the bounding box.</summary>
+    /// <summary>包围盒的最小角。</summary>
     [FieldOffset(0 * sizeof(Real))] public JVector Min;
 
-    /// <summary>Padding for SIMD alignment. Not used directly.</summary>
+    /// <summary>用于 SIMD 对齐的填充。不直接使用。</summary>
     [FieldOffset(3 * sizeof(Real))] public Real MinW;
 
-    /// <summary>The maximum corner of the bounding box.</summary>
+    /// <summary>包围盒的最大角。</summary>
     [FieldOffset(4 * sizeof(Real))] public JVector Max;
 
-    /// <summary>Padding for SIMD alignment. Not used directly.</summary>
+    /// <summary>用于 SIMD 对齐的填充。不直接使用。</summary>
     [FieldOffset(7 * sizeof(Real))] public Real MaxW;
 
     /// <summary>
-    /// Returns a <see cref="VectorReal"/> view of the <see cref="Min"/> vector for SIMD operations.
+    /// 返回 <see cref="Min"/> 向量的 <see cref="VectorReal"/> 视图，用于 SIMD 运算。
     /// </summary>
     public readonly ref VectorReal VectorMin => ref Unsafe.As<JVector, VectorReal>(ref Unsafe.AsRef(in this.Min));
 
     /// <summary>
-    /// Returns a <see cref="VectorReal"/> view of the <see cref="Max"/> vector for SIMD operations.
+    /// 返回 <see cref="Max"/> 向量的 <see cref="VectorReal"/> 视图，用于 SIMD 运算。
     /// </summary>
     public readonly ref VectorReal VectorMax => ref Unsafe.As<JVector, VectorReal>(ref Unsafe.AsRef(in this.Max));
 
     /// <summary>
-    /// Creates a new <see cref="TreeBox"/> from minimum and maximum corner vectors.
+    /// 根据最小角与最大角向量创建新的 <see cref="TreeBox"/>。
     /// </summary>
     public TreeBox(in JVector min, in JVector max)
     {
@@ -65,7 +64,7 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Creates a new <see cref="TreeBox"/> from an existing <see cref="JBoundingBox"/>.
+    /// 根据现有的 <see cref="JBoundingBox"/> 创建新的 <see cref="TreeBox"/>。
     /// </summary>
     public TreeBox(in JBoundingBox box)
     {
@@ -76,17 +75,17 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Converts this <see cref="TreeBox"/> to a <see cref="JBoundingBox"/>.
+    /// 将该 <see cref="TreeBox"/> 转换为 <see cref="JBoundingBox"/>。
     /// </summary>
     public readonly JBoundingBox AsJBoundingBox() => new(Min, Max);
 
-    // ─── Helper functions 1:1 like in JBox ───────────────────────────
+    // ─── 与 JBox 中完全一致的辅助函数 ───────────────────────────
 
     /// <summary>
-    /// Determines whether this box contains the specified point.
+    /// 判断该盒是否包含指定点。
     /// </summary>
-    /// <param name="point">The point to check.</param>
-    /// <returns><c>true</c> if the point is within the boundaries of this box; otherwise, <c>false</c>.</returns>
+    /// <param name="point">要检查的点。</param>
+    /// <returns>若点位于该盒边界内则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public readonly bool Contains(in JVector point)
     {
         return Min.X <= point.X && point.X <= Max.X &&
@@ -95,15 +94,15 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Gets the center point of the bounding box.
+    /// 获取包围盒的中心点。
     /// </summary>
     public readonly JVector Center => (Min + Max) * ((Real)(1.0 / 2.0));
 
     /// <summary>
-    /// Determines whether this box intersects with or overlaps the specified box.
+    /// 判断该盒是否与指定盒相交或重叠。
     /// </summary>
-    /// <param name="box">The box to check against.</param>
-    /// <returns><c>true</c> if the boxes overlap; <c>false</c> if they are completely separated.</returns>
+    /// <param name="box">用于比较的盒。</param>
+    /// <returns>若两盒重叠则为 <c>true</c>；若完全分离则为 <c>false</c>。</returns>
     [Obsolete($"Use !{nameof(Disjoint)} instead.", true)]
     public readonly bool NotDisjoint(in JBoundingBox box)
     {
@@ -112,10 +111,10 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether this box is completely separated from (does not overlap) the specified box.
+    /// 判断该盒是否与指定盒完全分离（不重叠）。
     /// </summary>
-    /// <param name="box">The box to check against.</param>
-    /// <returns><c>true</c> if the boxes are separated by a gap on at least one axis; otherwise, <c>false</c>.</returns>
+    /// <param name="box">用于比较的盒。</param>
+    /// <returns>若两盒在至少一个轴上存在间隙而分离则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public readonly bool Disjoint(in JBoundingBox box)
     {
         return Max.X < box.Min.X || Min.X > box.Max.X || Max.Y < box.Min.Y || Min.Y > box.Max.Y ||
@@ -123,10 +122,10 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether this box completely encloses the specified box.
+    /// 判断该盒是否完全包围指定盒。
     /// </summary>
-    /// <param name="box">The box to check for containment.</param>
-    /// <returns><c>true</c> if the <paramref name="box"/> is entirely inside this box; otherwise, <c>false</c>.</returns>
+    /// <param name="box">要检查是否被包含的盒。</param>
+    /// <returns>若 <paramref name="box"/> 完全位于该盒内部则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public readonly bool Contains(in JBoundingBox box)
     {
         return Min.X <= box.Min.X && Max.X >= box.Max.X && Min.Y <= box.Min.Y && Max.Y >= box.Max.Y &&
@@ -134,9 +133,9 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether this box completely encloses the specified box.
+    /// 判断该盒是否完全包围指定盒。
     /// </summary>
-    /// <remarks>This is an alias for <see cref="Contains(in JBoundingBox)"/>.</remarks>
+    /// <remarks>这是 <see cref="Contains(in JBoundingBox)"/> 的别名。</remarks>
     [Obsolete($"Use {nameof(Contains)} instead.", true)]
     public readonly bool Encompasses(in JBoundingBox box)
     {
@@ -165,11 +164,11 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Checks if a finite line segment intersects this bounding box.
+    /// 检查有限线段是否与该包围盒相交。
     /// </summary>
-    /// <param name="origin">The start point of the segment.</param>
-    /// <param name="direction">The vector defining the direction and length of the segment (End Point = Origin + Direction).</param>
-    /// <returns><c>true</c> if the segment passes through the box; otherwise, <c>false</c>.</returns>
+    /// <param name="origin">线段的起点。</param>
+    /// <param name="direction">定义线段方向与长度的向量（终点 = 起点 + 方向）。</param>
+    /// <returns>若线段穿过该盒则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public readonly bool SegmentIntersect(in JVector origin, in JVector direction)
     {
         Real enter = (Real)0.0, exit = (Real)1.0;
@@ -187,11 +186,11 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Checks if an infinite ray intersects this bounding box.
+    /// 检查无限射线是否与该包围盒相交。
     /// </summary>
-    /// <param name="origin">The origin of the ray.</param>
-    /// <param name="direction">The direction of the ray (not necessarily normalized).</param>
-    /// <returns><c>true</c> if the ray intersects the box; otherwise, <c>false</c>.</returns>
+    /// <param name="origin">射线的原点。</param>
+    /// <param name="direction">射线的方向（不要求归一化）。</param>
+    /// <returns>若射线与该盒相交则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public readonly bool RayIntersect(in JVector origin, in JVector direction)
     {
         Real enter = (Real)0.0, exit = Real.MaxValue;
@@ -209,12 +208,12 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Checks if an infinite ray intersects this bounding box and calculates the entry distance.
+    /// 检查无限射线是否与该包围盒相交，并计算进入距离。
     /// </summary>
-    /// <param name="origin">The origin of the ray.</param>
-    /// <param name="direction">The direction of the ray (not necessarily normalized).</param>
-    /// <param name="enter">Outputs the scalar distance along the direction vector where the ray enters the box. If inside, this is 0.</param>
-    /// <returns><c>true</c> if the ray intersects the box; otherwise, <c>false</c>.</returns>
+    /// <param name="origin">射线的原点。</param>
+    /// <param name="direction">射线的方向（不要求归一化）。</param>
+    /// <param name="enter">输出沿方向向量的标量距离，即射线进入该盒的位置。若已在盒内，则为 0。</param>
+    /// <returns>若射线与该盒相交则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public readonly bool RayIntersect(in JVector origin, in JVector direction, out Real enter)
     {
         enter = (Real)0.0;
@@ -237,26 +236,26 @@ public struct TreeBox : IEquatable<TreeBox>
         return $"Min={{{Min}}}, Max={{{Max}}}";
     }
 
-    // ─── Helper functions with SIMD support ───────────────────────────
+    // ─── 支持 SIMD 的辅助函数 ───────────────────────────
 
     /// <summary>
-    /// Determines whether this box is completely separated from the specified <see cref="TreeBox"/>.
+    /// 判断该盒是否与指定的 <see cref="TreeBox"/> 完全分离。
     /// </summary>
-    /// <param name="box">The box to check against.</param>
-    /// <returns><c>true</c> if the boxes do not overlap; <c>false</c> if they touch or overlap.</returns>
+    /// <param name="box">用于比较的盒。</param>
+    /// <returns>若两盒不重叠则为 <c>true</c>；若接触或重叠则为 <c>false</c>。</returns>
     public readonly bool Disjoint(in TreeBox box) => TreeBox.Disjoint(this, box);
 
     /// <summary>
-    /// Determines whether this box completely encloses the specified <see cref="TreeBox"/>.
+    /// 判断该盒是否完全包围指定的 <see cref="TreeBox"/>。
     /// </summary>
-    /// <param name="box">The box to check for containment.</param>
-    /// <returns><c>true</c> if the <paramref name="box"/> is entirely inside this box.</returns>
+    /// <param name="box">要检查是否被包含的盒。</param>
+    /// <returns>若 <paramref name="box"/> 完全位于该盒内部则为 <c>true</c>。</returns>
     public readonly bool Contains(in TreeBox box) => TreeBox.Contains(this, box);
 
     /// <summary>
-    /// Calculates the surface area of the bounding box.
+    /// 计算包围盒的表面积。
     /// </summary>
-    /// <returns>The total surface area: 2*(ex*ey + ey*ez + ez*ex).</returns>
+    /// <returns>总表面积：2*(ex*ey + ey*ez + ez*ex)。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly double GetSurfaceArea()
     {
@@ -270,11 +269,11 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Calculates the surface area of a hypothetical box that would result from merging the two specified boxes.
+    /// 计算将两个指定盒合并后所得假想盒的表面积。
     /// </summary>
-    /// <param name="first">The first box.</param>
-    /// <param name="second">The second box.</param>
-    /// <returns>The surface area of the union box.</returns>
+    /// <param name="first">第一个盒。</param>
+    /// <param name="second">第二个盒。</param>
+    /// <returns>并集盒的表面积。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double MergedSurface(in TreeBox first, in TreeBox second)
     {
@@ -290,11 +289,11 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether the outer box completely contains the inner box using SIMD instructions.
+    /// 使用 SIMD 指令判断外部盒是否完全包含内部盒。
     /// </summary>
-    /// <param name="outer">The potential container box.</param>
-    /// <param name="inner">The box to check for inclusion.</param>
-    /// <returns><c>true</c> if <paramref name="inner"/> is fully inside <paramref name="outer"/>.</returns>
+    /// <param name="outer">可能的容器盒。</param>
+    /// <param name="inner">要检查是否被包含的盒。</param>
+    /// <returns>若 <paramref name="inner"/> 完全位于 <paramref name="outer"/> 内则为 <c>true</c>。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Contains(in TreeBox outer, in TreeBox inner)
     {
@@ -306,11 +305,11 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether two boxes overlap using SIMD instructions.
+    /// 使用 SIMD 指令判断两个盒是否重叠。
     /// </summary>
-    /// <param name="first">The first box.</param>
-    /// <param name="second">The second box.</param>
-    /// <returns><c>true</c> if the boxes intersect; <c>false</c> if they are disjoint.</returns>
+    /// <param name="first">第一个盒。</param>
+    /// <param name="second">第二个盒。</param>
+    /// <returns>若两盒相交则为 <c>true</c>；若相互分离则为 <c>false</c>。</returns>
     [Obsolete($"Use !{nameof(Disjoint)} instead.", true)]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool NotDisjoint(in TreeBox first, in TreeBox second)
@@ -323,16 +322,16 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether two boxes are completely separated (disjoint) using SIMD instructions.
+    /// 使用 SIMD 指令判断两个盒是否完全分离（不相交）。
     /// </summary>
-    /// <param name="first">The first box.</param>
-    /// <param name="second">The second box.</param>
-    /// <returns><c>true</c> if the boxes do not overlap on any axis; <c>false</c> if they touch or intersect.</returns>
+    /// <param name="first">第一个盒。</param>
+    /// <param name="second">第二个盒。</param>
+    /// <returns>若两盒在任何轴上都不重叠则为 <c>true</c>；若接触或相交则为 <c>false</c>。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Disjoint(in TreeBox first, in TreeBox second)
     {
-        // If first.Max < second.Min OR first.Min > second.Max on any axis,
-        // the two boxes cannot overlap.
+        // 若在任一轴上 first.Max < second.Min 或 first.Min > second.Max，
+        // 则两个盒不可能重叠。
         var ltMin = Vector.LessThan(first.VectorMax, second.VectorMin);
         var gtMax = Vector.GreaterThan(first.VectorMin, second.VectorMax);
 
@@ -341,11 +340,11 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Creates a new box that encompasses both input boxes.
+    /// 创建一个同时包含两个输入盒的新盒。
     /// </summary>
-    /// <param name="first">The first box.</param>
-    /// <param name="second">The second box.</param>
-    /// <param name="result">The resulting union box.</param>
+    /// <param name="first">第一个盒。</param>
+    /// <param name="second">第二个盒。</param>
+    /// <param name="result">生成的并集盒。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void CreateMerged(in TreeBox first, in TreeBox second, out TreeBox result)
     {
@@ -355,14 +354,14 @@ public struct TreeBox : IEquatable<TreeBox>
     }
 
     /// <summary>
-    /// Determines whether two boxes are equal using binary comparison.
+    /// 使用二进制比较判断两个盒是否相等。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Equals(in TreeBox first, in TreeBox second)
     {
         var a = MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in first), 1));
         var b = MemoryMarshal.AsBytes(MemoryMarshal.CreateReadOnlySpan(ref Unsafe.AsRef(in second), 1));
-        return a.SequenceEqual(b); // SIMD-accelerated in .NET ≥ 5
+        return a.SequenceEqual(b); // 在 .NET ≥ 5 中由 SIMD 加速
     }
 
     /// <inheritdoc />

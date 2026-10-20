@@ -15,13 +15,13 @@ using System.Runtime.InteropServices.JavaScript;
 
 namespace WebDemo;
 
-// ─── Render metadata stored in body.Tag ──────────────────────────────────────
+// ─── 存放在 body.Tag 中的渲染元数据 ──────────────────────────────────────
 
 public enum BodyShape { Box, Sphere }
 
 public record struct RenderTag(BodyShape Shape, float Sx, float Sy, float Sz);
 
-// ─── Scene interface ──────────────────────────────────────────────────────────
+// ─── 场景接口 ──────────────────────────────────────────────────────────
 
 public interface IScene
 {
@@ -30,7 +30,7 @@ public interface IScene
     void Build(Playground pg);
 }
 
-// ─── Pressurized soft-body sphere ────────────────────────────────────────────
+// ─── 加压软体球 ────────────────────────────────────────────────────────────
 
 sealed class PressurizedSphere : SoftBody
 {
@@ -121,7 +121,7 @@ sealed class PressurizedSphere : SoftBody
     }
 }
 
-// ─── Scenes ──────────────────────────────────────────────────────────────────
+// ─── 场景 ──────────────────────────────────────────────────────────────────
 
 sealed class SceneSoftBall : IScene
 {
@@ -137,13 +137,13 @@ sealed class SceneSoftBall : IScene
         pg.World.BroadPhaseFilter = new BroadPhaseCollisionFilter(pg.World);
         pg.AddGround();
 
-        // Tilted ramp (~30°)
+        // 倾斜的斜坡（约 30°）
         var ramp = pg.AddBox(new JVector(0f, 3f, 0f), 9f, 0.4f, 3.5f);
         ramp.MotionType = MotionType.Static;
         ramp.Orientation = JQuaternion.CreateRotationZ(-0.52f);
         ramp.Friction = 0.6f;
 
-        // Small 2D pyramid
+        // 小型 2D 金字塔
         int[] layerN = [3, 2, 1];
         for (int layer = 0; layer < layerN.Length; layer++)
         {
@@ -259,11 +259,11 @@ sealed class SceneDominoes : IScene
     public string Name => "Dominoes";
     public string Hint => "Toppling domino chain";
 
-    // domino geometry
-    const float Sp = 0.72f;   // spacing
-    const float DH = 2.0f;    // height
-    const float DW = 0.9f;    // width
-    const float DT = 0.15f;   // thickness
+    // 多米诺几何
+    const float Sp = 0.72f;   // 间距
+    const float DH = 2.0f;    // 高度
+    const float DW = 0.9f;    // 宽度
+    const float DT = 0.15f;   // 厚度
     const float DY = DH * 0.5f;
 
     public void Build(Playground pg)
@@ -277,13 +277,13 @@ sealed class SceneDominoes : IScene
             d.Friction = 0.5f;
         }
 
-        // ── Segment 1: straight along +X ─────────────────────────────
+        // ── 第 1 段：沿 +X 直线 ─────────────────────────────
         const int n1 = 9;
         const float s1x = -7f, s1z = -7f;
         for (int i = 0; i < n1; i++)
             Add(s1x + i * Sp, s1z, 0f);
 
-        // ── Arc 1: 90° left turn (+X → +Z), R=3, CCW ─────────────────
+        // ── 圆弧 1：左转 90°（+X → +Z），R=3，逆时针 ─────────────────
         float a1cx = s1x + n1 * Sp, a1cz = s1z + 3f;
         const int na1 = 7;
         for (int i = 1; i <= na1; i++)
@@ -292,13 +292,13 @@ sealed class SceneDominoes : IScene
             Add(a1cx + 3f * MathF.Cos(phi), a1cz + 3f * MathF.Sin(phi), -(phi + MathF.PI / 2f));
         }
 
-        // ── Segment 2: straight along +Z ─────────────────────────────
+        // ── 第 2 段：沿 +Z 直线 ─────────────────────────────
         const int n2 = 9;
         float s2x = a1cx + 3f, s2z = a1cz;
         for (int i = 0; i < n2; i++)
             Add(s2x, s2z + i * Sp, -MathF.PI / 2f);
 
-        // ── Arc 2: 90° right turn (+Z → +X), R=3, CW ─────────────────
+        // ── 圆弧 2：右转 90°（+Z → +X），R=3，顺时针 ─────────────────
         float a2cx = s2x + 3f, a2cz = s2z + n2 * Sp;
         const int na2 = 7;
         for (int i = 1; i <= na2; i++)
@@ -307,13 +307,13 @@ sealed class SceneDominoes : IScene
             Add(a2cx + 3f * MathF.Cos(phi), a2cz + 3f * MathF.Sin(phi), MathF.PI / 2f - phi);
         }
 
-        // ── Segment 3: straight along +X ─────────────────────────────
+        // ── 第 3 段：沿 +X 直线 ─────────────────────────────
         const int n3 = 9;
         float s3x = a2cx, s3z = a2cz + 3f;
         for (int i = 0; i < n3; i++)
             Add(s3x + i * Sp, s3z, 0f);
 
-        // ── Trigger ball ──────────────────────────────────────────────
+        // ── 触发球 ──────────────────────────────────────────────
         var ball = pg.AddSphere(new JVector(s1x - 3.5f, 0.9f, s1z), 0.9f);
         ball.SetMassInertia(3f);
         ball.Restitution = 0.1f;
@@ -336,7 +336,7 @@ sealed class SceneJenga : IScene
         pg.World.SubstepCount = 3;
         pg.AddGround();
 
-        const float bD = 0.8f, bH = 0.8f, bW = 3f * bD; // bW = 3*bD keeps both layer orientations identical
+        const float bD = 0.8f, bH = 0.8f, bW = 3f * bD; // bW = 3*bD 使两种层朝向保持一致
         const int layers = 22;
         for (int layer = 0; layer < layers; layer++)
         {
@@ -372,23 +372,23 @@ sealed class SceneWreckingBall : IScene
     {
         pg.AddGround();
 
-        // Box tower on the right
+        // 右侧的箱体塔
         for (int ix = 0; ix < 3; ix++)
         for (int iz = 0; iz < 3; iz++)
         for (int iy = 0; iy < 8; iy++)
             pg.AddBox(new JVector(5f + ix * 1.0f, 0.5f + iy, iz * 1.0f - 1.0f));
 
-        // Static anchor point above and left
+        // 左上方静态锚点
         AnchorPos = new JVector(-1f, 14f, 0f);
         var anchor = pg.World.CreateRigidBody();
         anchor.Position = AnchorPos;
         anchor.MotionType = MotionType.Static;
 
-        // Heavy ball: rope attaches at sphere surface toward anchor
+        // 重球：绳索连接在球体朝向锚点的表面上
         const float RopeLength = 10f;
-        const float PullAngle = MathF.PI * 0.25f; // 45° from vertical
+        const float PullAngle = MathF.PI * 0.25f; // 与竖直方向成 45°
         var ropeDir = new JVector(-MathF.Sin(PullAngle), -MathF.Cos(PullAngle), 0f);
-        JVector constraintPt = AnchorPos + ropeDir * RopeLength;           // on ball surface
+        JVector constraintPt = AnchorPos + ropeDir * RopeLength;           // 位于球体表面
         var ball = pg.AddSphere(AnchorPos + ropeDir * (RopeLength + BallRadius), BallRadius);
         ball.SetMassInertia(40f);
         ball.Restitution = 0.2f;
@@ -401,7 +401,7 @@ sealed class SceneWreckingBall : IScene
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── Playground ──────────────────────────────────────────────────────────────
+// ─── 场景管理器 ──────────────────────────────────────────────────────────────
 
 public class Playground
 {
@@ -515,7 +515,7 @@ public class Playground
         LoadScene(0);
     }
 
-    // ─── Scene management ────────────────────────────────────────────────────
+    // ─── 场景管理 ────────────────────────────────────────────────────
 
     private void LoadScene(int index)
     {
@@ -526,7 +526,7 @@ public class Playground
         Current.Build(this);
     }
 
-    // ─── Scene helpers ───────────────────────────────────────────────────────
+    // ─── 场景辅助方法 ───────────────────────────────────────────────────────
 
     public RigidBody AddGround(float y = 0f)
     {
@@ -534,7 +534,7 @@ public class Playground
         body.AddShape(new BoxShape(GroundSize, 2f, GroundSize));
         body.Position = new JVector(0f, y - 1f, 0f);
         body.MotionType = MotionType.Static;
-        // no Tag → not drawn by DrawBodies
+        // 没有 Tag → 不会被 DrawBodies 绘制
         return body;
     }
 
@@ -590,7 +590,7 @@ public class Playground
         _ctrlColor = lightTheme ? new Color(176, 193, 209, 255) : new Color(130, 130, 130, 255);
     }
 
-    // ─── Frame ───────────────────────────────────────────────────────────────
+    // ─── 帧更新 ───────────────────────────────────────────────────────────────
 
     public void UpdateFrame()
     {
@@ -635,7 +635,7 @@ public class Playground
         }
     }
 
-    // ─── Input ───────────────────────────────────────────────────────────────
+    // ─── 输入 ───────────────────────────────────────────────────────────────
 
     private void HandleInput()
     {
@@ -674,7 +674,7 @@ public class Playground
         _hasPendingPointerTap = true;
     }
 
-    // ─── Drawing ─────────────────────────────────────────────────────────────
+    // ─── 绘制 ─────────────────────────────────────────────────────────────
 
     private void DrawGround()
     {
@@ -704,7 +704,7 @@ public class Playground
 
     private void DrawExtras()
     {
-        // Soft Body: draw triangles
+        // 软体球：绘制三角形
         if (Current is SceneSoftBall sb && sb.Sphere is { } sphere)
         {
             var col = new Color(60, 220, 80, 255);
@@ -719,7 +719,7 @@ public class Playground
             }
         }
 
-        // Wrecking Ball: draw rope
+        // 破碎球：绘制绳索
         if (Current is SceneWreckingBall wb && wb.Ball is { } ball)
         {
             Vector3 a = new(wb.AnchorPos.X, wb.AnchorPos.Y, wb.AnchorPos.Z);
@@ -760,7 +760,7 @@ public class Playground
 
     }
 
-    // ─── UI overlay ──────────────────────────────────────────────────────────
+    // ─── UI 覆盖层 ──────────────────────────────────────────────────────────
 
     private Font SelectFont(float size)
     {
@@ -821,7 +821,7 @@ public class Playground
         }
     }
 
-    // ─── Math ────────────────────────────────────────────────────────────────
+    // ─── 数学 ────────────────────────────────────────────────────────────────
 
     static Matrix4x4 BuildTransform(RigidBody body, float sx, float sy, float sz)
     {
@@ -835,7 +835,7 @@ public class Playground
     }
 }
 
-// ─── Application entry point ──────────────────────────────────────────────────
+// ─── 应用程序入口点 ──────────────────────────────────────────────────────────
 
 public partial class Application
 {

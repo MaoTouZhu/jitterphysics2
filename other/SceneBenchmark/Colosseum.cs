@@ -1,4 +1,4 @@
-// Frozen headless adaptation of JitterDemo/Demos/Demo28.cs.
+// 由 JitterDemo/Demos/Demo28.cs 改造而来的冻结无头版本。
 using System;
 using Jitter2;
 using Jitter2.Collision.Shapes;
@@ -7,8 +7,8 @@ using Jitter2.LinearMath;
 namespace SceneBenchmark;
 
 /*
- * Jitter2 Colosseum Demo
- * This demo logic is ported from BepuPhysics2
+ * Jitter2 斗兽场演示
+ * 该演示逻辑移植自 BepuPhysics2
  * https://github.com/bepu/bepuphysics2/blob/cfb5daa1837aef30a5437ac347ac583f2ffaf2b0/Demos/Demos/ColosseumDemo.cs
  * Original Copyright Ross Nordby.
  *

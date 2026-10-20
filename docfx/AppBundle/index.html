@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
-  <title>Jitter2 WebDemo</title>
+  <title>Jitter2 Web 演示</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="modulepreload" href="./main.js" />
@@ -135,14 +135,14 @@ canvas.emscripten {
 </head>
 
 <body>
-  <a id="github-link" href="https://github.com/notgiven688/jitterphysics2" target="_blank">⭐ View on GitHub</a>
+  <a id="github-link" href="https://github.com/notgiven688/jitterphysics2" target="_blank">⭐ 在 GitHub 上查看</a>
   <div id="page">
     <div id="canvas_wrapper">
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
-      <!-- Spinner is removed when .NET is loaded -->
+      <!-- .NET 加载完成后会移除加载动画 -->
       <div id="spinner"><div id="spinner_animation"></div></div>
     </div>
-    <p class="hint">Use <strong>← →</strong> to switch scenes and press <strong>R</strong> to reset.</p>
+    <p class="hint">使用 <strong>← →</strong> 切换场景，按 <strong>R</strong> 重置。</p>
   </div>
 
   <script type="module" src="./main.js"></script>

@@ -1,0 +1,15 @@
+{
+  "base_ref": "upstream/main",
+  "base_commit": "8c5cd35ae8a2a496d4b5a1eddca8ab6df00c1879",
+  "localized_ref": "zh",
+  "localized_commit": "cdc11cbe95782cc920f2b3edbd43b0534239a8bc",
+  "counts": {
+    "md": 815,
+    "md_files": 27,
+    "yaml": 88,
+    "yaml_files": 9,
+    "files": 4,
+    "csharp": 2488,
+    "csharp_files": 301
+  }
+}

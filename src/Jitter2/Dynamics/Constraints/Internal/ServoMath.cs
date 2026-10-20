@@ -40,8 +40,8 @@ internal static class ServoMath
     internal static void ClampAngular(ref JVector impulse, in JMatrix jacobian, Real maximumImpulse)
     {
         if (Real.IsPositiveInfinity(maximumImpulse)) return;
-        // The solver coordinates are not necessarily unit axes. Limit the angular
-        // impulse actually applied to a body, then scale the stored coordinates with it.
+        // 求解器坐标不一定是单位轴。限制实际施加到刚体上的角
+        // 冲量，再按它缩放存储的坐标。
         Real lengthSquared = JVector.TransposedTransform(impulse, jacobian).LengthSquared();
         if (lengthSquared > maximumImpulse * maximumImpulse)
             impulse *= maximumImpulse / MathR.Sqrt(lengthSquared);

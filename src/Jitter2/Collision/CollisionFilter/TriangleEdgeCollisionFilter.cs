@@ -14,11 +14,10 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Filters internal edge collisions for <see cref="TriangleShape"/> geometry. Adjusts collision
-/// normals at shared edges to match neighboring triangles, or discards the collision if the normal
-/// cannot be resolved. Requires triangle adjacency information; boundary edges (no neighbor)
-/// are left unmodified. Back-face normals within <see cref="AngleThreshold"/> of the opposite
-/// triangle normal are discarded.
+/// 过滤 <see cref="TriangleShape"/> 几何体的内部边碰撞。在共享边处调整碰撞
+/// 法线以匹配相邻三角形，或在法线无法解析时丢弃该碰撞。需要三角形邻接信息；
+/// 边界边（无邻接三角形）保持不变。与相对三角形法线夹角在
+/// <see cref="AngleThreshold"/> 以内的背面法线会被丢弃。
 /// </summary>
 public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 {
@@ -30,41 +29,40 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
     }
 
     /// <summary>
-    /// Gets or sets the distance threshold for edge collision detection, in world units.
+    /// 获取或设置边碰撞检测的距离阈值，单位为世界单位。
     /// </summary>
     /// <remarks>
-    /// Larger values are more aggressive at filtering edges but may incorrectly affect
-    /// legitimate collisions near triangle boundaries.
+    /// 值越大，对边的过滤越激进，但可能错误地影响
+    /// 三角形边界附近的合法碰撞。
     /// </remarks>
-    /// <value>The default value is 0.01 world units.</value>
+    /// <value>默认值为 0.01 个世界单位。</value>
     public Real EdgeThreshold { get; set; } = (Real)0.01;
 
     private Real cosAngle = (Real)0.999;
 
     /// <summary>
-    /// Gets or sets whether dynamic triangle bodies receive edge filtering. Static and kinematic
-    /// triangle geometry is always filtered. Defaults to <see langword="false"/>.
+    /// 获取或设置动态三角形刚体是否接受边过滤。静态和运动学
+    /// 三角形几何体始终会被过滤。默认为 <see langword="false"/>。
     /// </summary>
     public bool FilterDynamicBodies { get; set; }
 
     /// <summary>
-    /// Gets or sets the minimum length of the projected collision normal required to keep the contact.
+    /// 获取或设置保留接触所需的投影碰撞法线最小长度。
     /// </summary>
     /// <remarks>
-    /// When the collision normal is projected onto the plane formed by the triangle normal and its
-    /// neighbor's normal, a very short projection indicates the collision is occurring along the
-    /// edge crease itself and is discarded. Lower values allow more edge collisions through;
-    /// higher values are more aggressive at filtering.
+    /// 当碰撞法线投影到由三角形法线及其相邻三角形法线构成的平面上时，
+    /// 投影非常短意味着碰撞正沿边折痕本身发生，此时将丢弃该碰撞。
+    /// 值越小，允许通过的边碰撞越多；值越大，过滤越激进。
     /// </remarks>
-    /// <value>The default value is 0.5.</value>
+    /// <value>默认值为 0.5。</value>
     public Real ProjectionThreshold { get; set; } = (Real)0.5;
 
     /// <summary>
-    /// Gets or sets the angle threshold used for two purposes: determining when two triangle normals
-    /// are considered coplanar (using simpler snapping logic), and discarding back-face collisions
-    /// whose normal is anti-parallel to the triangle normal within this angle.
+    /// 获取或设置用于两个目的的角度阈值：判断两个三角形法线
+    /// 何时被视为共面（使用更简单的吸附逻辑），以及丢弃法线在此角度内
+    /// 与三角形法线反平行的背面碰撞。
     /// </summary>
-    /// <value>The default value is approximately 2.5 degrees.</value>
+    /// <value>默认值约为 2.5 度。</value>
     public JAngle AngleThreshold
     {
         get => JAngle.FromRadian(StableMath.Acos(cosAngle));
@@ -95,7 +93,7 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 
         if (triangleIsShapeB) JVector.NegateInPlace(ref triangleNormal);
 
-        // Make triangles penetrable from one side.
+        // 使三角形可从一侧穿透。
         if (JVector.Dot(normal, triangleNormal) < -cosAngle) return EdgeContactEvaluation.Discard;
 
         triangleShape.GetWorldVertices(out JVector a, out JVector b, out JVector c);
@@ -153,7 +151,7 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
         bool c1 = ts1 != null;
         bool c2 = ts2 != null;
 
-        // both shapes are triangles or both of them are not -> return
+        // 两个形状都是三角形或都不是 -> 直接返回
         if (c1 == c2) return true;
 
         TriangleShape triangleShape;
@@ -182,9 +180,9 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 
         if (!isSpeculative)
         {
-            // Check collision again (for non-speculative contacts),
-            // but with zero epa threshold parameter. This is necessary since
-            // MPR is not exact for flat shapes, like triangles.
+            // 再次检查碰撞（针对非推测接触），
+            // 但将 EPA 阈值参数设为零。这是必要的，因为
+            // MPR 对平面形状（如三角形）并不精确。
 
             bool result = NarrowPhase.MprEpa(shapeA, shapeB,
                 b1Data.Orientation, b2Data.Orientation,
@@ -194,7 +192,7 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 
             if (!result)
             {
-                // MPR refinement failed; reject the contact.
+                // MPR 细化失败；拒绝该接触。
                 return false;
             }
 
@@ -207,16 +205,16 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 
         JVector midPoint = (Real)0.5 * (pointA + pointB);
 
-        // Now the fun part.
+        // 现在是有趣的部分。
         //
-        // we have a collision close to an edge, with
+        // 我们在一条边附近发生了碰撞，其中
         //
-        // triangleNormal -> the triangle normal where collision occurred
-        // neighborNormal -> the normal of the neighboring triangle
-        // normal         -> the collision normal
+        // triangleNormal -> 碰撞发生处的三角形法线
+        // neighborNormal -> 相邻三角形的法线
+        // normal         -> 碰撞法线
         if (JVector.Dot(triangleNormal, neighborNormal) > cosAngle)
         {
-            // triangleNormal and neighborNormal are the same
+            // triangleNormal 与 neighborNormal 相同
             // ----------------------------------------------
             Real f5 = JVector.Dot(normal, neighborNormal);
             Real f6 = JVector.Dot(normal, triangleNormal);
@@ -252,11 +250,11 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 
             return true;
         }
-        // neighborNormal and triangleNormal are different
+        // neighborNormal 与 triangleNormal 不同
         // -----------------------------------------------
 
-        // 1st step, project the normal onto the plane given by triangleNormal and neighborNormal
-        // by removing the component along the cross product axis
+        // 第一步，将法线投影到由 triangleNormal 和 neighborNormal 给定的平面上，
+        // 即移除沿叉积轴方向的分量
         JVector cross = neighborNormal % triangleNormal;
         Real crossLenSq = cross.LengthSquared();
         JVector proj = normal - (cross * normal / crossLenSq) * cross;
@@ -267,11 +265,11 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
             Console.WriteLine($"case #3: discarding");
 
 #endif
-            // Cannot project onto the plane, discard.
+            // 无法投影到该平面上，丢弃。
             return false;
         }
 
-        // 2nd step, determine if "proj" is between neighborNormal and triangleNormal
+        // 第二步，判断“proj”是否位于 neighborNormal 与 triangleNormal 之间
         //
         //    /    neighborNormal
         //   /
@@ -287,7 +285,7 @@ public class TriangleEdgeCollisionFilter : INarrowPhaseFilter
 
         if (!between)
         {
-            // not in-between, snap normal
+            // 不在两者之间，吸附法线
             Real f3 = JVector.Dot(normal, neighborNormal);
             Real f4 = JVector.Dot(normal, triangleNormal);
 

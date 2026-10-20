@@ -150,12 +150,12 @@ public class CubedSoftBody(World world) : SoftBody(world)
 			if (!Quads.Add(bq)) Quads.Remove(bq);
 		}
 
-		PushQuad(new BuildQuad(idx[5], idx[4], idx[7], idx[6], true));  // top
-		PushQuad(new BuildQuad(idx[2], idx[3], idx[0], idx[1], false)); // bottom
-		PushQuad(new BuildQuad(idx[6], idx[7], idx[3], idx[2], true));  // left
-		PushQuad(new BuildQuad(idx[1], idx[0], idx[4], idx[5], false)); // right
-		PushQuad(new BuildQuad(idx[3], idx[7], idx[4], idx[0], true));  // front
-		PushQuad(new BuildQuad(idx[1], idx[5], idx[6], idx[2], false)); // back
+		PushQuad(new BuildQuad(idx[5], idx[4], idx[7], idx[6], true));  // 顶面
+		PushQuad(new BuildQuad(idx[2], idx[3], idx[0], idx[1], false)); // 底面
+		PushQuad(new BuildQuad(idx[6], idx[7], idx[3], idx[2], true));  // 左面
+		PushQuad(new BuildQuad(idx[1], idx[0], idx[4], idx[5], false)); // 右面
+		PushQuad(new BuildQuad(idx[3], idx[7], idx[4], idx[0], true));  // 前面
+		PushQuad(new BuildQuad(idx[1], idx[5], idx[6], idx[2], false)); // 后面
 	}
 
 	public void Finalize(float scale = 0.25f)
@@ -426,7 +426,7 @@ public partial class Program : Node3D
 
 		world.Clear();
 
-		// floor shape
+		// 地板形状
 		RigidBody floor = world.CreateRigidBody();
 		floor.AddShape(new BoxShape(40));
 		floor.Position = new JVector(0, -20, 0);
@@ -462,8 +462,8 @@ public partial class Program : Node3D
 			world.Step(fixedStep, true);
 			accumulatedTime -= fixedStep;
 
-			// we can not keep up with the real time, i.e. the simulation
-			// is running slower than the real time is passing.
+			// 我们无法跟上实时时间，即模拟
+			// 运行得比真实时间流逝更慢。
 			if (++steps >= 4) return;
 		}
 	}

@@ -11,57 +11,57 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Represents a triangle defined by three vertices.
+/// 表示由三个顶点定义的三角形。
 /// </summary>
 [StructLayout(LayoutKind.Explicit, Size = 9 * sizeof(Real))]
 public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatable<JTriangle>
 {
     /// <summary>
-    /// Specifies the face culling mode for triangles based on their winding order.
-    /// Counter-clockwise (CCW) winding is considered front-facing.
+    /// 指定基于绕序的三角形面剔除模式。
+    /// 逆时针（CCW）绕序被视为正面朝向。
     /// </summary>
     public enum CullMode
     {
         /// <summary>
-        /// Cull triangles that are front-facing.
-        /// A triangle is front-facing if its vertices are ordered counter-clockwise (CCW).
+        /// 剔除正面朝向的三角形。
+        /// 若三角形的顶点按逆时针（CCW）顺序排列，则该三角形为正面朝向。
         /// </summary>
         FrontFacing,
 
         /// <summary>
-        /// Cull triangles that are back-facing.
-        /// A triangle is back-facing if its vertices are ordered clockwise (CW).
-        /// This is the most common culling mode.
+        /// 剔除背面朝向的三角形。
+        /// 若三角形的顶点按顺时针（CW）顺序排列，则该三角形为背面朝向。
+        /// 这是最常见的剔除模式。
         /// </summary>
         BackFacing,
 
         /// <summary>
-        /// Do not perform face culling; both front- and back-facing triangles are processed.
+        /// 不执行面剔除；正面和背面朝向的三角形都会被处理。
         /// </summary>
         None
     }
 
-    /// <summary>The first vertex of the triangle.</summary>
+    /// <summary>三角形的第一个顶点。</summary>
     [FieldOffset(0 * sizeof(Real))] public JVector V0 = v0;
 
-    /// <summary>The second vertex of the triangle.</summary>
+    /// <summary>三角形的第二个顶点。</summary>
     [FieldOffset(3 * sizeof(Real))] public JVector V1 = v1;
 
-    /// <summary>The third vertex of the triangle.</summary>
+    /// <summary>三角形的第三个顶点。</summary>
     [FieldOffset(6 * sizeof(Real))] public JVector V2 = v2;
 
     /// <summary>
-    /// Checks whether the line through the ray origin intersects the strict interior of the triangle.
-    /// This method can return an intersection behind the origin.
+    /// 检查穿过射线原点的直线是否与三角形的严格内部相交。
+    /// 此方法可能返回位于原点之后的交点。
     /// </summary>
-    /// <param name="origin">The starting point (origin) of the ray.</param>
-    /// <param name="direction">The direction vector of the ray.</param>
-    /// <param name="cullMode">Determines whether to ignore triangles based on their winding order (Front/Back facing).</param>
-    /// <param name="normal">Output: The normalized surface normal at the point of intersection.</param>
-    /// <param name="lambda">Output: The signed ray parameter at the intersection
-    /// (hit point = origin + lambda * direction). It is not a distance if direction is not normalized.</param>
-    /// <returns><c>true</c> if the line intersects the triangle interior and passes the face-culling test;
-    /// otherwise, <c>false</c>. Hits exactly on an edge are excluded.</returns>
+    /// <param name="origin">射线的起点（原点）。</param>
+    /// <param name="direction">射线的方向向量。</param>
+    /// <param name="cullMode">决定是否根据绕序（正面/背面朝向）忽略三角形。</param>
+    /// <param name="normal">输出：交点处的归一化表面法线。</param>
+    /// <param name="lambda">输出：交点处的有符号射线参数
+    /// （命中点 = origin + lambda * direction）。若 direction 未归一化，则它不是距离。</param>
+    /// <returns>若直线与三角形内部相交并通过面剔除测试，则为 <c>true</c>；
+    /// 否则为 <c>false</c>。恰好落在边上的命中会被排除。</returns>
     public readonly bool RayIntersect(in JVector origin, in JVector direction, CullMode cullMode,
         out JVector normal, out Real lambda)
     {
@@ -75,7 +75,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
 
         if (Math.Abs(denominator) < (Real)1e-06)
         {
-            // Triangle and ray are parallel.
+            // 三角形与射线平行。
             goto return_false;
         }
 
@@ -90,10 +90,10 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
 
         lambda /= denominator;
 
-        // point where the ray intersects the plane of the triangle.
+        // 射线与三角形所在平面的交点。
         JVector hitPoint = origin + lambda * direction;
 
-        // check if the point is inside the triangle
+        // 检查该点是否位于三角形内部
         JVector at = V0 - hitPoint;
         JVector.Cross(u, at, out JVector tmp);
         Real gamma = JVector.Dot(tmp, normal) * it;
@@ -114,7 +114,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
     }
 
     /// <summary>
-    /// Returns a string representation of the <see cref="JTriangle"/>.
+    /// 返回 <see cref="JTriangle"/> 的字符串表示形式。
     /// </summary>
     public readonly override string ToString()
     {
@@ -122,10 +122,10 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
     }
 
     /// <summary>
-    /// Calculates the face normal of the triangle.
-    /// The direction follows the Right-Hand Rule (counter-clockwise winding).
+    /// 计算三角形的面法线。
+    /// 方向遵循右手定则（逆时针绕序）。
     /// </summary>
-    /// <returns>The non-normalized normal vector.</returns>
+    /// <returns>未归一化的法线向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly JVector GetNormal()
     {
@@ -133,7 +133,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
     }
 
     /// <summary>
-    /// Calculates the geometric center (centroid) of the triangle.
+    /// 计算三角形的几何中心（质心）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly JVector GetCenter()
@@ -142,7 +142,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
     }
 
     /// <summary>
-    /// Calculates the area of the triangle.
+    /// 计算三角形的面积。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real GetArea()
@@ -151,7 +151,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
     }
 
     /// <summary>
-    /// Calculates the axis-aligned bounding box (AABB) of this triangle.
+    /// 计算此三角形的轴对齐包围盒（AABB）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly JBoundingBox GetBoundingBox()
@@ -164,10 +164,10 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
     }
 
     /// <summary>
-    /// Finds the closest point on the triangle surface to a specified point.
+    /// 查找三角形表面上距离指定点最近的点。
     /// </summary>
-    /// <param name="point">The query point.</param>
-    /// <returns>The point on the triangle closest to the query point.</returns>
+    /// <param name="point">查询点。</param>
+    /// <returns>三角形上距离查询点最近的点。</returns>
     public readonly JVector ClosestPoint(JVector point)
     {
         JVector ab = V1 - V0;
@@ -177,17 +177,17 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
         Real d1 = JVector.Dot(ab, ap);
         Real d2 = JVector.Dot(ac, ap);
 
-        // Vertex region V0
+        // 顶点区域 V0
         if (d1 <= 0 && d2 <= 0) return V0;
 
         JVector bp = point - V1;
         Real d3 = JVector.Dot(ab, bp);
         Real d4 = JVector.Dot(ac, bp);
 
-        // Vertex region V1
+        // 顶点区域 V1
         if (d3 >= 0 && d4 <= d3) return V1;
 
-        // Edge region V0-V1
+        // 边区域 V0-V1
         Real vc = d1 * d4 - d3 * d2;
         if (vc <= 0 && d1 >= 0 && d3 <= 0)
         {
@@ -199,10 +199,10 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
         Real d5 = JVector.Dot(ab, cp);
         Real d6 = JVector.Dot(ac, cp);
 
-        // Vertex region V2
+        // 顶点区域 V2
         if (d6 >= 0 && d5 <= d6) return V2;
 
-        // Edge region V0-V2
+        // 边区域 V0-V2
         Real vb = d5 * d2 - d1 * d6;
         if (vb <= 0 && d2 >= 0 && d6 <= 0)
         {
@@ -210,7 +210,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
             return V0 + w * ac;
         }
 
-        // Edge region V1-V2
+        // 边区域 V1-V2
         Real va = d3 * d6 - d5 * d4;
         if (va <= 0 && (d4 - d3) >= 0 && (d5 - d6) >= 0)
         {
@@ -218,7 +218,7 @@ public struct JTriangle(in JVector v0, in JVector v1, in JVector v2) : IEquatabl
             return V1 + w * (V2 - V1);
         }
 
-        // Face region
+        // 面区域
         Real denom = (Real)1.0 / (va + vb + vc);
         Real vbn = vb * denom;
         Real wn = vc * denom;

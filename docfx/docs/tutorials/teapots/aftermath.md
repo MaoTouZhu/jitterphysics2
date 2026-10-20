@@ -1,11 +1,11 @@
-# Aftermath
+# 后续说明
 
-### `PointCloudShape` vs `ConvexHullShape`
+### `PointCloudShape` 与 `ConvexHullShape`
 
-In this example, we used the `PointCloudShape` to simulate a rigid body with a convex hull. As the name suggests, this shape only requires a set of points — they don't need to lie exactly on a convex surface. By design, Jitter treats the convex hull of these points as the actual shape for collision detection.
+在本例中，我们使用 `PointCloudShape` 来模拟一个具有凸包的刚体。顾名思义，这种形状只需要一组点——这些点不必精确地落在凸面上。按照设计，Jitter 会把这些点的凸包当作碰撞检测时实际使用的形状。
 
-Although the algorithm used here is brute-force, it can be extremely fast: the data is stored in a linear memory layout, and SIMD instructions are used to accelerate the support function. Because of this, `PointCloudShape` is usually the best choice for quickly and efficiently adding simple convex geometry to your simulation.
+尽管这里使用的算法是暴力式的，但它可以非常快：数据以线性内存布局存储，并使用 SIMD 指令加速支撑函数。因此，`PointCloudShape` 通常是快速、高效地为模拟添加简单凸几何体的最佳选择。
 
-The `ConvexHullShape`, on the other hand, is intended for more complex and detailed convex models. Unlike `PointCloudShape`, this shape requires a precomputed convex hull provided as a list of triangles (`List<JTriangle>`). Jitter does not generate this for you — you'll need to use third-party tools like Blender or dedicated convex hull libraries. The input mesh must be strictly convex for collision detection to work correctly.
+另一方面，`ConvexHullShape` 面向更复杂、更精细的凸模型。与 `PointCloudShape` 不同，该形状需要提供预先计算好的凸包，形式为三角形列表（`List<JTriangle>`）。Jitter 不会为你生成它——你需要使用 Blender 之类的第三方工具或专门的凸包库。输入网格必须是严格凸的，碰撞检测才能正确工作。
 
-Internally, `ConvexHullShape` uses a hill-climbing algorithm to compute the support function. While this approach is algorithmically more efficient than brute-force, the performance benefits only become noticeable with larger shapes. As a general rule of thumb, `ConvexHullShape` starts to outperform `PointCloudShape` at around 300 vertices or more.
+在内部，`ConvexHullShape` 使用爬山算法来计算支撑函数。虽然这种方法在算法上比暴力法更高效，但性能优势只有在形状较大时才会显现。一般经验法则是：当顶点数达到约 300 个或更多时，`ConvexHullShape` 开始比 `PointCloudShape` 表现更好。

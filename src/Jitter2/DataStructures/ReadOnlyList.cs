@@ -10,12 +10,12 @@ using System.Collections.Generic;
 namespace Jitter2.DataStructures;
 
 /// <summary>
-/// A read-only wrapper around <see cref="List{T}"/> that prevents modification while allowing indexed access and enumeration.
+/// 一个围绕 <see cref="List{T}"/> 的只读包装器，在允许索引访问和枚举的同时阻止修改。
 /// </summary>
-/// <typeparam name="T">The type of elements in the list.</typeparam>
+/// <typeparam name="T">列表中元素的类型。</typeparam>
 public readonly struct ReadOnlyList<T>(List<T> list) : IReadOnlyList<T>
 {
-    /// <summary>Gets the element at the specified index.</summary>
+    /// <summary>获取指定索引处的元素。</summary>
     public T this[int i] => list[i];
 
     public List<T>.Enumerator GetEnumerator()
@@ -33,6 +33,6 @@ public readonly struct ReadOnlyList<T>(List<T> list) : IReadOnlyList<T>
         return list.GetEnumerator();
     }
 
-    /// <summary>Gets the number of elements in the list.</summary>
+    /// <summary>获取列表中的元素数量。</summary>
     public int Count => list.Count;
 }

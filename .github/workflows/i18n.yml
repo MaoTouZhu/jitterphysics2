@@ -1,0 +1,53 @@
+name: i18n
+
+on:
+  push:
+    branches: [l10n, zh]
+  pull_request:
+    branches: [l10n, zh]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 校验汉化与翻译记忆
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 获取 main 与 zh
+        run: git fetch origin main zh --prune
+
+      - name: 端到端回归测试
+        run: python -m unittest discover -s tools/i18n/tests -v
+
+      - name: 校验 zh 与 main
+        run: python tools/i18n/verify.py --base-ref origin/main --localized-ref origin/zh
+
+  build-zh:
+    name: 构建并测试 zh
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: zh
+          fetch-depth: 1
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: 构建 Jitter2
+        run: dotnet build src/Jitter2/Jitter2.csproj -f net10.0 -c Release --nologo
+
+      - name: 运行测试
+        run: dotnet test src/JitterTests/JitterTests.csproj -c Release --nologo

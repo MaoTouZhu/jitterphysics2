@@ -14,44 +14,44 @@ using System.Threading;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// A hash set implementation which stores unordered pairs of (int, int) values.
-/// The implementation is based on open addressing with power-of-two sizing.
+/// 一种用于存储 (int, int) 无序对的哈希集合实现。
+/// 该实现基于开放寻址，容量为 2 的幂。
 /// </summary>
 /// <remarks>
 /// <para>
-/// Pairs are stored in a canonical form where the smaller ID comes first.
-/// A pair with <see cref="Pair.ID"/> equal to zero is treated as an empty slot.
+/// 对以规范形式存储，较小的 ID 在前。
+/// <see cref="Pair.ID"/> 等于零的对被视为空槽。
 /// </para>
 /// <para>
-/// This class is not generally thread-safe. Only <see cref="ConcurrentAdd"/> may be called
-/// concurrently from multiple threads. All other methods require external synchronization.
+/// 此类通常不是线程安全的。只有 <see cref="ConcurrentAdd"/> 可以被
+/// 多个线程同时调用。所有其他方法都需要外部同步。
 /// </para>
 /// </remarks>
 internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
 {
     /// <summary>
-    /// Represents an unordered pair of integer IDs stored in canonical form.
+    /// 表示以规范形式存储的整数 ID 无序对。
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 8)]
     public readonly struct Pair
     {
-        /// <summary>Combined 64-bit identifier for the pair.</summary>
+        /// <summary>该对的组合 64 位标识符。</summary>
         [FieldOffset(0)] public readonly long ID;
 
-        /// <summary>The smaller of the two IDs.</summary>
+        /// <summary>两个 ID 中较小的一个。</summary>
         [FieldOffset(0)] public readonly int ID1;
 
-        /// <summary>The larger of the two IDs.</summary>
+        /// <summary>两个 ID 中较大的一个。</summary>
         [FieldOffset(4)] public readonly int ID2;
 
-        /// <summary>A zero pair representing an empty slot.</summary>
+        /// <summary>表示空槽的零对。</summary>
         public static readonly Pair Zero = new();
 
         /// <summary>
-        /// Creates a pair from two IDs, storing them in canonical order.
+        /// 由两个 ID 创建一对，并按规范顺序存储。
         /// </summary>
-        /// <param name="id1">First ID.</param>
-        /// <param name="id2">Second ID.</param>
+        /// <param name="id1">第一个 ID。</param>
+        /// <param name="id2">第二个 ID。</param>
         public Pair(int id1, int id2)
         {
             if (id1 < id2)
@@ -65,9 +65,9 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
         }
 
         /// <summary>
-        /// Computes a hash code for the pair.
+        /// 计算该对的哈希码。
         /// </summary>
-        /// <returns>The hash code.</returns>
+        /// <returns>哈希码。</returns>
         public int GetHash()
         {
             return HashCode.Combine(ID1, ID2);
@@ -75,7 +75,7 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Enumerates non-empty pairs in the hash set.
+    /// 枚举哈希集合中的非空对。
     /// </summary>
     public struct Enumerator(PairHashSet hashSet) : IEnumerator<Pair>
     {
@@ -112,28 +112,28 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// The internal storage array for pairs. Empty slots have <see cref="Pair.ID"/> equal to zero.
+    /// 对的内部存储数组。空槽的 <see cref="Pair.ID"/> 等于零。
     /// </summary>
     public Pair[] Slots = [];
     private int count;
 
     /// <summary>
-    /// Minimum number of slots in the hash set (128 KB at 8 bytes per slot).
+    /// 哈希集合中的最小槽数（每槽 8 字节时为 128 KB）。
     /// </summary>
     public const int MinimumSize = 16384;
 
     /// <summary>
-    /// Factor used to determine when to shrink the hash set.
+    /// 用于确定何时收缩哈希集合的因子。
     /// </summary>
     public const int TrimFactor = 8;
 
     /// <summary>
-    /// Factor used to leave growth headroom after shrinking the hash set.
+    /// 用于在收缩哈希集合后保留增长余量的因子。
     /// </summary>
     public const int TrimTargetFactor = 4;
 
     /// <summary>
-    /// Gets the number of pairs in the hash set.
+    /// 获取哈希集合中的对数量。
     /// </summary>
     public int Count => count;
 
@@ -149,10 +149,10 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Removes all pairs from the hash set.
+    /// 从哈希集合中移除所有对。
     /// </summary>
     /// <remarks>
-    /// This method is not thread-safe. Do not call concurrently with any other method.
+    /// 此方法不是线程安全的。不要与任何其他方法并发调用。
     /// </remarks>
     public void Clear()
     {
@@ -161,7 +161,7 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PairHashSet"/> class.
+    /// 初始化 <see cref="PairHashSet"/> 类的新实例。
     /// </summary>
     public PairHashSet()
     {
@@ -205,8 +205,8 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static long ReadConcurrentId(Pair[] slots, int index)
     {
-        // ConcurrentAdd publishes IDs with an atomic 64-bit compare-exchange. Native
-        // 64-bit loads are atomic, but a regular long read may tear in a 32-bit process.
+        // ConcurrentAdd 通过原子 64 位比较交换发布 ID。原生
+        // 64 位加载是原子的，但普通的 long 读取在 32 位进程中可能发生撕裂。
         if (Environment.Is64BitProcess) return slots[index].ID;
         return Interlocked.Read(ref Unsafe.As<Pair, long>(ref slots[index]));
     }
@@ -226,10 +226,10 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Checks whether the hash set contains the specified pair.
+    /// 检查哈希集合是否包含指定的对。
     /// </summary>
-    /// <param name="pair">The pair to check.</param>
-    /// <returns><c>true</c> if the pair exists; otherwise, <c>false</c>.</returns>
+    /// <param name="pair">要检查的对。</param>
+    /// <returns>如果该对存在，则为 <c>true</c>；否则为 <c>false</c>。</returns>
     public bool Contains(Pair pair)
     {
         int hash = pair.GetHash();
@@ -238,12 +238,12 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Adds a pair to the hash set.
+    /// 向哈希集合中添加一个对。
     /// </summary>
-    /// <param name="pair">The pair to add.</param>
-    /// <returns><c>true</c> if the pair was added; <c>false</c> if it already exists.</returns>
+    /// <param name="pair">要添加的对。</param>
+    /// <returns>如果该对被添加，则为 <c>true</c>；如果它已存在，则为 <c>false</c>。</returns>
     /// <remarks>
-    /// This method is not thread-safe.
+    /// 此方法不是线程安全的。
     /// </remarks>
     public bool Add(Pair pair)
     {
@@ -269,21 +269,21 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     private readonly Jitter2.Parallelization.ReaderWriterLock rwLock = new();
 
     /// <summary>
-    /// Attempts to add a pair to the hash set in a thread-safe manner.
+    /// 以线程安全的方式尝试向哈希集合中添加一个对。
     /// </summary>
     /// <remarks>
-    /// Multiple threads may call <see cref="ConcurrentAdd"/> concurrently.
-    /// However, no other methods (including <see cref="Add"/>, <see cref="Remove(Pair)"/>,
-    /// <see cref="Clear"/>, or enumeration) may be called concurrently with this method.
+    /// 多个线程可以并发调用 <see cref="ConcurrentAdd"/>。
+    /// 但是，不得与此方法并发调用任何其他方法（包括 <see cref="Add"/>、<see cref="Remove(Pair)"/>、
+    /// <see cref="Clear"/> 或枚举）。
     /// </remarks>
-    /// <param name="pair">The pair to add.</param>
-    /// <returns><c>true</c> if the pair was added; <c>false</c> if it already exists.</returns>
+    /// <param name="pair">要添加的对。</param>
+    /// <returns>如果该对被添加，则为 <c>true</c>；如果它已存在，则为 <c>false</c>。</returns>
     public bool ConcurrentAdd(Pair pair)
     {
         int hash = pair.GetHash();
 
-        // Fast path: This is a *huge* optimization in case of frequent additions
-        // of already existing entries. Entirely bypassing any locks or synchronization.
+        // 快速路径：在频繁添加已存在条目时，这是一个*巨大*的优化。
+        // 完全绕过任何锁或同步。
         Pair[] fpSlots = Volatile.Read(ref Slots);
         _ = FindSlotConcurrent(fpSlots, hash, pair.ID, out long fpSlotId);
         if (fpSlotId == pair.ID) return false;
@@ -319,7 +319,7 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
 
                     try
                     {
-                        // Check if another thread already performed a resize.
+                        // 检查另一个线程是否已经执行过扩容。
                         if (Slots.Length < 2 * count)
                         {
                             Resize(PickSize(Slots.Length * 2));
@@ -337,10 +337,10 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Removes the pair at the specified slot index.
+    /// 移除指定槽索引处的对。
     /// </summary>
-    /// <param name="slot">The slot index.</param>
-    /// <returns><c>true</c> if a pair was removed; <c>false</c> if the slot was empty.</returns>
+    /// <param name="slot">槽索引。</param>
+    /// <returns>如果移除了一个对，则为 <c>true</c>；如果该槽为空，则为 <c>false</c>。</returns>
     public bool Remove(int slot)
     {
         int modder = Slots.Length - 1;
@@ -384,10 +384,10 @@ internal unsafe class PairHashSet : IEnumerable<PairHashSet.Pair>
     }
 
     /// <summary>
-    /// Removes the specified pair from the hash set.
+    /// 从哈希集合中移除指定的对。
     /// </summary>
-    /// <param name="pair">The pair to remove.</param>
-    /// <returns><c>true</c> if the pair was removed; <c>false</c> if it was not found.</returns>
+    /// <param name="pair">要移除的对。</param>
+    /// <returns>如果移除了该对，则为 <c>true</c>；如果未找到该对，则为 <c>false</c>。</returns>
     public bool Remove(Pair pair)
     {
         int hash = pair.GetHash();

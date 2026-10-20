@@ -254,8 +254,8 @@ public class EllipticalConeLimitTests
         var drawer = new BoundaryDrawer();
         cone.DebugDraw(drawer, new DebugDrawSettings { Segments = 64, ReferenceColor = 0x0000FFFF });
         Assert.That(drawer.Segments.Count, Is.GreaterThan(128));
-        // The drawer selects the boundary colors. Each endpoint lies on an ellipse on
-        // the unit sphere, or at the origin of a spoke.
+        // 绘制器负责选择边界颜色。每个端点位于单位球面上的一个椭圆上，
+        // 或位于某条辐射线的原点。
         foreach (var (from, to) in drawer.Segments)
         {
             foreach (JVector point in new[] { from, to })

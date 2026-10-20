@@ -13,8 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Drives body 2 toward a target orientation relative to body 1 using limited torque.
-/// Controls three angular degrees of freedom; translation remains free.
+/// 使用受限的力矩驱动刚体 2 朝向相对于刚体 1 的目标朝向。
+/// 控制三个角度自由度；平移保持自由。
 /// </summary>
 public unsafe class AngularServo : Constraint<AngularServo.AngularServoData>
 {
@@ -51,16 +51,16 @@ public unsafe class AngularServo : Constraint<AngularServo.AngularServoData>
     /// <inheritdoc />
     public override void ResetWarmStart() => Data.AccumulatedImpulse = JVector.Zero;
 
-    /// <summary>Initializes the servo with the current relative orientation as its target.</summary>
+    /// <summary>以当前相对朝向作为目标来初始化伺服。</summary>
     public void Initialize()
     {
         VerifyNotZero();
         Initialize(Body1.Orientation.Conjugate() * Body2.Orientation);
     }
 
-    /// <summary>Initializes a target orientation for body 2 relative to body 1.</summary>
-    /// <param name="targetRelativeOrientation">A normalized orientation in body 1's frame.</param>
-    /// <remarks>The bodies may start outside the target pose. Maximum torque defaults to zero.</remarks>
+    /// <summary>初始化刚体 2 相对于刚体 1 的目标朝向。</summary>
+    /// <param name="targetRelativeOrientation">刚体 1 坐标系下的归一化朝向。</param>
+    /// <remarks>刚体可以起始于目标位姿之外。最大力矩默认为零。</remarks>
     public void Initialize(JQuaternion targetRelativeOrientation)
     {
         VerifyNotZero();
@@ -75,10 +75,10 @@ public unsafe class AngularServo : Constraint<AngularServo.AngularServoData>
     }
 
     /// <summary>
-    /// Gets or sets body 2's target orientation relative to body 1. Identity aligns their local frames.
-    /// The value must be normalized. Changing it does not move either body.
+    /// 获取或设置刚体 2 相对于刚体 1 的目标朝向。取单位四元数时两者的局部坐标系对齐。
+    /// 该值必须归一化。修改它不会移动任一刚体。
     /// </summary>
-    /// <remarks>The servo uses the shortest rotation to the target orientation. Revolution counts are not supported.</remarks>
+    /// <remarks>伺服使用到目标朝向的最短旋转。不支持圈数计数。</remarks>
     public JQuaternion TargetRelativeOrientation
     {
         get => Data.TargetRelativeOrientation;
@@ -91,8 +91,8 @@ public unsafe class AngularServo : Constraint<AngularServo.AngularServoData>
         }
     }
 
-    /// <summary>Gets or sets the maximum total torque the servo can apply.</summary>
-    /// <value>Default is zero. Positive infinity allows unlimited torque.</value>
+    /// <summary>获取或设置伺服可施加的最大总力矩。</summary>
+    /// <value>默认为零。正无穷表示不限制力矩。</value>
     public Real MaximumTorque
     {
         get => Data.MaximumTorque;
@@ -103,23 +103,23 @@ public unsafe class AngularServo : Constraint<AngularServo.AngularServoData>
         }
     }
 
-    /// <summary>Gets or sets the softness (compliance) of the servo.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultAngularSoftness"/>.</value>
+    /// <summary>获取或设置伺服的柔软度（柔顺度）。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultAngularSoftness"/>。</value>
     public Real Softness
     {
         get => Data.Softness;
         set => Data.Softness = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets or sets how aggressively the servo corrects its position error.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultAngularBias"/>.</value>
+    /// <summary>获取或设置伺服修正其位置误差的强度。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultAngularBias"/>。</value>
     public Real Bias
     {
         get => Data.BiasFactor;
         set => Data.BiasFactor = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets the world-space angular impulse applied to body 1 in the last solved substep.</summary>
+    /// <summary>获取上一个已求解子步中施加到刚体 1 的世界空间角冲量。</summary>
     public JVector Impulse => JVector.TransposedTransform(Data.AccumulatedImpulse, Data.Jacobian);
 
     public static void PrepareForIterationAngularServo(ref ConstraintData constraint, in TimeStep timeStep)

@@ -17,12 +17,12 @@ using Jitter2.Dynamics.Constraints;
 using Jitter2.LinearMath;
 using Jitter2.Unmanaged;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+#pragma warning disable CS8618 // 退出构造函数时，不可为 null 的字段必须包含非 null 值。
 
 namespace Jitter2;
 
 /// <summary>
-/// Thrown when two body arguments are required to reference different bodies.
+/// 当两个刚体参数被要求引用不同的刚体时引发。
 /// </summary>
 public sealed class SameBodyException : ArgumentException
 {
@@ -56,46 +56,45 @@ public sealed class SameBodyException : ArgumentException
 }
 
 /// <summary>
-/// Represents a simulation environment that holds and manages the state of all simulation objects.
+/// 表示一个模拟环境，用于保存并管理所有模拟对象的状态。
 /// </summary>
 /// <remarks>
-/// A single <see cref="World"/> instance must not be stepped or modified concurrently from multiple
-/// external threads. Different worlds may be stepped concurrently with <c>multiThread: false</c>.
-/// Calls using <c>multiThread: true</c> are internally serialized across all worlds because they share
-/// the process-wide Jitter worker pool.
+/// 单个 <see cref="World"/> 实例不得从多个外部线程并发地步进或修改。不同的世界可以在
+/// <c>multiThread: false</c> 时并发步进。
+/// 使用 <c>multiThread: true</c> 的调用会在所有世界之间内部串行化，因为它们共享
+/// 进程级的 Jitter 工作线程池。
 /// </remarks>
 public sealed partial class World : IDisposable
 {
     /// <summary>
-    /// Controls how internal worker threads behave between calls to <see cref="Step(Real, bool)"/>.
+    /// 控制内部工作线程在两次 <see cref="Step(Real, bool)"/> 调用之间的行为。
     /// </summary>
     public enum ThreadModelType
     {
         /// <summary>
-        /// Worker threads may yield when the engine is idle. Lower background CPU usage.
+        /// 引擎空闲时工作线程可以让出。降低后台 CPU 占用。
         /// </summary>
         Regular,
 
         /// <summary>
-        /// Worker threads remain active between steps to reduce wake-up latency,
-        /// at the cost of higher background CPU usage.
+        /// 工作线程在两次步进之间保持活动，以减少唤醒延迟，
+        /// 代价是更高的后台 CPU 占用。
         /// </summary>
         Persistent
     }
 
     /// <summary>
-    /// Provides access to objects in unmanaged memory. This operation is potentially unsafe.
+    /// 提供对非托管内存中对象的访问。此操作可能不安全。
     /// </summary>
     /// <remarks>
-    /// The returned spans are backed by unmanaged memory and are only valid until the next
-    /// world modification that may resize internal buffers (e.g., creating or removing bodies,
-    /// constraints, contacts, or calling <see cref="Step"/>). Do not cache these spans.
-    /// Not safe to use concurrently with <see cref="Step(Real, bool)"/>.
+    /// 返回的 span 由非托管内存支撑，仅在下次可能调整内部缓冲区大小的世界修改之前有效
+    /// （例如创建或移除刚体、约束、接触，或调用 <see cref="Step"/>）。不要缓存这些 span。
+    /// 不得与 <see cref="Step(Real, bool)"/> 并发使用。
     /// </remarks>
     public readonly struct SpanData(World world)
     {
         /// <summary>
-        /// Returns the total amount of unmanaged memory allocated in bytes.
+        /// 返回已分配的非托管内存总量，单位为字节。
         /// </summary>
         public long TotalBytesAllocated =>
             world.memRigidBodies.TotalBytesAllocated +
@@ -103,40 +102,40 @@ public sealed partial class World : IDisposable
             world.memConstraints.TotalBytesAllocated +
             world.memSmallConstraints.TotalBytesAllocated;
 
-        /// <summary>Span over active (awake) rigid body data.</summary>
+        /// <summary>活动（唤醒）刚体数据的 span。</summary>
         public Span<RigidBodyData> ActiveRigidBodies => world.memRigidBodies.Active;
 
-        /// <summary>Span over inactive (sleeping) rigid body data.</summary>
+        /// <summary>非活动（休眠）刚体数据的 span。</summary>
         public Span<RigidBodyData> InactiveRigidBodies => world.memRigidBodies.Inactive;
 
-        /// <summary>Span over all rigid body data (active and inactive).</summary>
+        /// <summary>所有刚体数据（活动与非活动）的 span。</summary>
         public Span<RigidBodyData> RigidBodies => world.memRigidBodies.Elements;
 
-        /// <summary>Span over active contact data.</summary>
+        /// <summary>活动接触数据的 span。</summary>
         public Span<ContactData> ActiveContacts => world.memContacts.Active;
 
-        /// <summary>Span over inactive contact data.</summary>
+        /// <summary>非活动接触数据的 span。</summary>
         public Span<ContactData> InactiveContacts => world.memContacts.Inactive;
 
-        /// <summary>Span over all contact data (active and inactive).</summary>
+        /// <summary>所有接触数据（活动与非活动）的 span。</summary>
         public Span<ContactData> Contacts => world.memContacts.Elements;
 
-        /// <summary>Span over active constraint data.</summary>
+        /// <summary>活动约束数据的 span。</summary>
         public Span<ConstraintData> ActiveConstraints => world.memConstraints.Active;
 
-        /// <summary>Span over inactive constraint data.</summary>
+        /// <summary>非活动约束数据的 span。</summary>
         public Span<ConstraintData> InactiveConstraints => world.memConstraints.Inactive;
 
-        /// <summary>Span over all constraint data (active and inactive).</summary>
+        /// <summary>所有约束数据（活动与非活动）的 span。</summary>
         public Span<ConstraintData> Constraints => world.memConstraints.Elements;
 
-        /// <summary>Span over active small constraint data.</summary>
+        /// <summary>活动小型约束数据的 span。</summary>
         public Span<SmallConstraintData> ActiveSmallConstraints => world.memSmallConstraints.Active;
 
-        /// <summary>Span over inactive small constraint data.</summary>
+        /// <summary>非活动小型约束数据的 span。</summary>
         public Span<SmallConstraintData> InactiveSmallConstraints => world.memSmallConstraints.Inactive;
 
-        /// <summary>Span over all small constraint data (active and inactive).</summary>
+        /// <summary>所有小型约束数据（活动与非活动）的 span。</summary>
         public Span<SmallConstraintData> SmallConstraints => world.memSmallConstraints.Elements;
     }
 
@@ -146,114 +145,113 @@ public sealed partial class World : IDisposable
     private readonly PartitionedBuffer<SmallConstraintData> memSmallConstraints;
 
     /// <summary>
-    /// Delegate for per-step and per-substep callbacks.
+    /// 用于逐步和逐子步回调的委托。
     /// </summary>
-    /// <param name="timeStep">The full step and substep timing information.</param>
+    /// <param name="timeStep">完整的步与子步计时信息。</param>
     public delegate void WorldStep(TimeStep timeStep);
 
-    // Step callbacks.
+    // 步进回调。
 
     /// <summary>
-    /// Raised at the beginning of a simulation step, before any collision detection,
-    /// constraint solving, or integration is performed.
+    /// 在模拟步开始时引发，此时尚未执行任何碰撞检测、
+    /// 约束求解或积分。
     /// </summary>
     /// <remarks>
-    /// This event is invoked once per call to <see cref="Step"/> and receives the full
-    /// step and substep timing information. It can be used to apply external forces, modify bodies,
-    /// or gather per-step diagnostics before the simulation advances.
+    /// 每次调用 <see cref="Step"/> 时此事件引发一次，并接收完整的
+    /// 步与子步计时信息。可用于施加外力、修改刚体，
+    /// 或在模拟推进前收集逐步诊断信息。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event WorldStep? PreStep;
 
     /// <summary>
-    /// Raised at the end of a simulation step, after all substeps, collision handling,
-    /// and integration have completed.
+    /// 在模拟步结束时引发，此时所有子步、碰撞处理
+    /// 和积分均已完成。
     /// </summary>
     /// <remarks>
-    /// This event is invoked once per call to <see cref="Step"/> and receives the full
-    /// step and substep timing information. At this point, all body states represent the final results
-    /// of the step.
+    /// 每次调用 <see cref="Step"/> 时此事件引发一次，并接收完整的
+    /// 步与子步计时信息。此时所有刚体状态即为该步的
+    /// 最终结果。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event WorldStep? PostStep;
 
     /// <summary>
-    /// Raised at the beginning of each substep during a simulation step.
+    /// 在模拟步期间每个子步开始时引发。
     /// </summary>
     /// <remarks>
-    /// A simulation step may be divided into multiple substeps for stability.
-    /// This event is invoked once per substep and receives the full step and substep
-    /// timing information. It is called immediately before force integration
-    /// and constraint solving for the substep.
-    /// Do not perform topology-changing world modifications here (for example
-    /// adding or removing bodies, constraints, or contacts, or changing body
-    /// motion types).
+    /// 为提高稳定性，一个模拟步可划分为多个子步。
+    /// 此事件在每个子步引发一次，并接收完整的步与子步
+    /// 计时信息。它在子步的力积分
+    /// 和约束求解之前立即调用。
+    /// 不要在此处执行会改变拓扑的世界修改（例如
+    /// 添加或移除刚体、约束或接触，或修改刚体
+    /// 运动类型）。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event WorldStep? PreSubStep;
 
     /// <summary>
-    /// Raised at the end of each substep during a simulation step.
+    /// 在模拟步期间每个子步结束时引发。
     /// </summary>
     /// <remarks>
-    /// This event is invoked once per substep and receives the full step and substep timing information.
-    /// It is called after integration and constraint solving for the substep
-    /// have completed.
-    /// Do not perform topology-changing world modifications here (for example
-    /// adding or removing bodies, constraints, or contacts, or changing body
-    /// motion types).
+    /// 此事件在每个子步引发一次，并接收完整的步与子步计时信息。
+    /// 它在子步的积分和约束求解
+    /// 完成之后调用。
+    /// 不要在此处执行会改变拓扑的世界修改（例如
+    /// 添加或移除刚体、约束或接触，或修改刚体
+    /// 运动类型）。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event WorldStep? PostSubStep;
 
     /// <summary>
-    /// Raised when inactive non-static bodies in a simulation island are activated during a simulation step.
+    /// 当模拟岛中的非活动非静态刚体在模拟步期间被激活时引发。
     /// </summary>
     /// <remarks>
-    /// This event is invoked after the island's non-static bodies, contacts, constraints, and
-    /// shapes have been moved to the active partition. Island instances are internal
-    /// connectivity objects and may later split, merge, or be reused; copy any data you
-    /// need during the callback instead of caching the island reference.
-    /// Do not perform topology-changing world modifications here (for example
-    /// adding or removing bodies, constraints, or contacts, or changing body
-    /// motion types).
+    /// 此事件在岛的非静态刚体、接触、约束和
+    /// 形状被移动到活动分区之后调用。岛实例是内部
+    /// 连通性对象，之后可能拆分、合并或被复用；请在回调期间
+    /// 复制所需数据，而不要缓存岛引用。
+    /// 不要在此处执行会改变拓扑的世界修改（例如
+    /// 添加或移除刚体、约束或接触，或修改刚体
+    /// 运动类型）。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event Action<Island>? IslandActivated;
 
     /// <summary>
-    /// Raised when active non-static bodies in a simulation island are deactivated during a simulation step.
+    /// 当模拟岛中的活动非静态刚体在模拟步期间被停用时引发。
     /// </summary>
     /// <remarks>
-    /// This event is invoked after the island's non-static bodies, contacts, constraints, and
-    /// shapes have been moved to the inactive partition. Island instances are internal
-    /// connectivity objects and may later split, merge, or be reused; copy any data you
-    /// need during the callback instead of caching the island reference.
-    /// Do not perform topology-changing world modifications here (for example
-    /// adding or removing bodies, constraints, or contacts, or changing body
-    /// motion types).
+    /// 此事件在岛的非静态刚体、接触、约束和
+    /// 形状被移动到非活动分区之后调用。岛实例是内部
+    /// 连通性对象，之后可能拆分、合并或被复用；请在回调期间
+    /// 复制所需数据，而不要缓存岛引用。
+    /// 不要在此处执行会改变拓扑的世界修改（例如
+    /// 添加或移除刚体、约束或接触，或修改刚体
+    /// 运动类型）。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event Action<Island>? IslandDeactivated;
 
     /// <summary>
-    /// Raised after a constraint has been permanently removed from the world.
+    /// 在约束被永久从世界中移除之后引发。
     /// </summary>
     /// <remarks>
-    /// The event is raised for explicit removal as well as automatic removal caused by removing a
-    /// body or clearing the world. It is not raised when a constraint is disabled, when a body's
-    /// motion type changes, or when the world is disposed.
-    /// The constraint is invalid when the callback runs, but its <see cref="Constraint.Body1"/> and
-    /// <see cref="Constraint.Body2"/> references remain available.
+    /// 无论是显式移除，还是因移除刚体或清空世界而导致的自动移除，都会引发此事件。
+    /// 约束被禁用、刚体的运动类型改变或世界被释放时不会引发。
+    /// 回调运行时约束已无效，但其 <see cref="Constraint.Body1"/> 和
+    /// <see cref="Constraint.Body2"/> 引用仍然可用。
     /// </remarks>
     [CallbackThread(ThreadContext.MainThread)]
     public event Action<Constraint>? ConstraintRemoved;
 
     /// <summary>
-    /// Grants access to objects residing in unmanaged memory. This operation can be potentially unsafe. Use
-    /// the corresponding managed properties where possible to mitigate risk.
+    /// 授予对驻留在非托管内存中的对象的访问权限。此操作可能不安全。在可能的情况下
+    /// 请使用对应的托管属性以降低风险。
     /// </summary>
-    /// <exception cref="ObjectDisposedException">Thrown if this world has been disposed.</exception>
+    /// <exception cref="ObjectDisposedException">若此世界已被释放则引发。</exception>
     public SpanData RawData
     {
         get
@@ -266,8 +264,8 @@ public sealed partial class World : IDisposable
     private readonly ShardedDictionary<ArbiterKey, Arbiter> arbiters =
         new(Parallelization.ThreadPool.ThreadCountSuggestion);
 
-    // Accessed under lock (memContacts) during creation/rollback. Removal is exclusive:
-    // either during Step after collision workers finish, or between simulation steps.
+    // 在创建/回滚期间于锁（memContacts）内访问。移除是独占的：
+    // 要么在碰撞工作线程结束后的 Step 期间，要么在两次模拟步之间。
     private readonly Stack<Arbiter> arbiterPool = [];
 
     private readonly PartitionedSet<Island> islands = [];
@@ -277,21 +275,21 @@ public sealed partial class World : IDisposable
     private static ulong _idCounter;
 
     /// <summary>
-    /// Generates a unique ID.
+    /// 生成一个唯一 ID。
     /// </summary>
-    /// <returns>A monotonically increasing unique identifier.</returns>
+    /// <returns>一个单调递增的唯一标识符。</returns>
     public static ulong RequestId()
     {
         return Interlocked.Increment(ref _idCounter);
     }
 
     /// <summary>
-    /// Generates a range of unique IDs.
+    /// 生成一段范围的唯一 ID。
     /// </summary>
-    /// <param name="count">The number of IDs to generate.</param>
-    /// <returns>A tuple containing the minimum and maximum request IDs in the generated range. The upper
-    /// bound is exclusive.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when count is less than 1.</exception>
+    /// <param name="count">要生成的 ID 数量。</param>
+    /// <returns>一个元组，包含所生成范围内的最小和最大请求 ID。
+    /// 上限为排他边界。</returns>
+    /// <exception cref="ArgumentOutOfRangeException">当 count 小于 1 时引发。</exception>
     public static (ulong min, ulong max) RequestId(int count)
     {
         if (count < 1) throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than zero.");
@@ -301,47 +299,47 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Gets or sets the threading model used between calls to <see cref="Step(Real, bool)"/>.
+    /// 获取或设置两次 <see cref="Step(Real, bool)"/> 调用之间使用的线程模型。
     /// </summary>
     public ThreadModelType ThreadModel { get; set; } = ThreadModelType.Regular;
 
     /// <summary>
-    /// All collision islands in this world.
+    /// 此世界中的所有碰撞岛。
     /// </summary>
     public ReadOnlyPartitionedSet<Island> Islands => new(islands);
 
     /// <summary>
-    /// All rigid bodies in this world.
+    /// 此世界中的所有刚体。
     /// </summary>
     public ReadOnlyPartitionedSet<RigidBody> RigidBodies => new(bodies);
 
     /// <summary>
-    /// Access to the <see cref="DynamicTree"/> instance. Callers may manage their own proxies and
-    /// update shapes after changing their geometry. Jitter manages proxies for attached rigid body shapes.
+    /// 访问 <see cref="DynamicTree"/> 实例。调用方可以管理自己的代理，并在
+    /// 修改形状几何体后更新形状。Jitter 会为已附加的刚体形状管理代理。
     /// </summary>
     public DynamicTree DynamicTree { get; }
 
     /// <summary>
-    /// A fixed body, pinned to the world. Can be used to create constraints with.
+    /// 一个固定刚体，钉扎在世界中。可用于创建约束。
     /// </summary>
     public RigidBody NullBody { get; }
 
     /// <summary>
-    /// Specifies whether the deactivation mechanism of Jitter is enabled.
-    /// Does not activate inactive objects if set to false.
+    /// 指定是否启用 Jitter 的停用机制。
+    /// 设为 false 时不会激活非活动对象。
     /// </summary>
     public bool AllowDeactivation { get; set; } = true;
 
     /// <summary>
-    /// Gets or sets the number of iterations per substep for the constraint solver and velocity relaxation.
+    /// 获取或设置约束求解器和速度松弛每个子步的迭代次数。
     /// </summary>
     /// <remarks>
-    /// Higher solver iterations improve constraint accuracy at the cost of performance.
-    /// Relaxation iterations help reduce velocity errors after solving.
-    /// Default value: (solver: 6, relaxation: 4).
+    /// 更高的求解器迭代次数可提高约束精度，但会牺牲性能。
+    /// 松弛迭代有助于减少求解后的速度误差。
+    /// 默认值：(solver: 6, relaxation: 4)。
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown if <c>solver</c> is less than 1 or <c>relaxation</c> is negative.
+    /// 若 <c>solver</c> 小于 1 或 <c>relaxation</c> 为负则引发。
     /// </exception>
     public (int solver, int relaxation) SolverIterations
     {
@@ -368,12 +366,12 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// The number of substeps for each call to <see cref="World.Step(Real, bool)"/>.
-    /// Sub-stepping is deactivated when set to one.
-    /// Default value: 1.
+    /// 每次调用 <see cref="World.Step(Real, bool)"/> 时的子步数量。
+    /// 设为 1 时停用子步。
+    /// 默认值：1。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the assigned value is less than one.
+    /// 当所赋的值小于 1 时引发。
     /// </exception>
     public int SubstepCount
     {
@@ -391,8 +389,8 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Default gravity, see also <see cref="RigidBody.AffectedByGravity"/>.
-    /// Default value: (0, -9.81, 0).
+    /// 默认重力，另请参见 <see cref="RigidBody.AffectedByGravity"/>。
+    /// 默认值：(0, -9.81, 0)。
     /// </summary>
     public JVector Gravity
     {
@@ -404,21 +402,20 @@ public sealed partial class World : IDisposable
         }
     }
 
-    // Make this global since it is used by nearly every method called
-    // in World.Step.
+    // 将其设为全局，因为 World.Step 中调用的几乎每个方法都会用到它。
     private JVector gravity = new(0, -(Real)9.81, 0);
     private int solverIterations = 6;
     private int velocityRelaxations = 4;
     private int substeps = 1;
 
     private TimeStep timeStep = new((Real)0.01);
-    // The dt used by the last broadphase update; before the first Step, allow a conservative sweep.
+    // 最近一次宽相更新所用的 dt；在首次 Step 之前，允许进行一次保守的扫掠。
     private Real broadphaseStepDt = (Real)0.1;
 
     internal Real BroadphaseStepDt => broadphaseStepDt;
 
     /// <summary>
-    /// Creates an instance of the World class.
+    /// 创建 World 类的实例。
     /// </summary>
     public World()
     {
@@ -441,8 +438,8 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Default filter function for the DynamicTree. Rejects two <see cref="RigidBodyShape"/> proxies
-    /// attached to the same body; accepts other proxy pairs.
+    /// DynamicTree 的默认过滤器函数。拒绝两个附加到同一刚体的 <see cref="RigidBodyShape"/> 代理；
+    /// 接受其他代理对。
     /// </summary>
     public static bool DefaultDynamicTreeFilter(IDynamicTreeProxy proxyA, IDynamicTreeProxy proxyB)
     {
@@ -455,14 +452,14 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Removes all entities from the simulation world. Also clears all proxies from the dynamic tree,
-    /// including any user-added proxies not owned by the world.
+    /// 从模拟世界中移除所有实体。同时清除动态树中的所有代理，
+    /// 包括不属于该世界的用户自行添加的代理。
     /// </summary>
     public void Clear()
     {
         ThrowIfDisposed();
 
-        // create a copy, since we are going to modify the list
+        // 创建副本，因为我们要修改列表
         Stack<RigidBody> bodyStack = new(bodies);
         while (bodyStack.Count > 0) Remove(bodyStack.Pop());
 
@@ -471,30 +468,30 @@ public sealed partial class World : IDisposable
             NullBody.RemoveShapes(NullBody.Shapes, MassInertiaUpdateMode.Preserve);
         }
 
-        // Left-over shapes not associated with a rigid body.
+        // 未与任何刚体关联的剩余形状。
         Stack<IDynamicTreeProxy> proxies = new(DynamicTree.Proxies);
         while (proxies.Count > 0) DynamicTree.RemoveProxy(proxies.Pop());
 
     }
 
     /// <summary>
-    /// Reduces excess capacity in internal world storage.
+    /// 缩减世界内部存储中的多余容量。
     /// </summary>
     /// <remarks>
-    /// This method trims world-level sets, broadphase scratch storage, island pools, deterministic
-    /// solver scratch containers, and per-body/per-island collection backing storage.
+    /// 此方法会修剪世界级别的集合、宽相临时存储、岛池、确定性
+    /// 求解器临时容器，以及每个刚体/每个岛的集合底层存储。
     ///
     /// <para>
-    /// Existing bodies, constraints, contacts, and arbiters remain valid. Unmanaged simulation
-    /// buffers are not compacted by this method.
+    /// 现有刚体、约束、接触和仲裁器保持有效。此方法不会压缩
+    /// 非托管模拟缓冲区。
     /// </para>
     ///
     /// <para>
-    /// Treat trimming as an exclusive maintenance operation. Do not call it concurrently with
-    /// <see cref="Step(Real, bool)"/>, contact registration, body/constraint/shape changes, or broadphase queries.
+    /// 应将修剪视为独占的维护操作。不要与 <see cref="Step(Real, bool)"/>、
+    /// 接触注册、刚体/约束/形状修改或宽相查询并发调用。
     /// </para>
     /// </remarks>
-    /// <exception cref="ObjectDisposedException">Thrown if this world has been disposed.</exception>
+    /// <exception cref="ObjectDisposedException">若此世界已被释放则引发。</exception>
     public void Trim()
     {
         ThrowIfDisposed();
@@ -536,14 +533,14 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Removes the specified body from the world. This operation also automatically discards any associated contacts
-    /// and constraints.
+    /// 从世界中移除指定的刚体。此操作还会自动丢弃所有关联的接触
+    /// 和约束。
     /// </summary>
-    /// <param name="body">The rigid body to remove.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="body"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="body"/> does not belong to this world.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if <paramref name="body"/> has already been removed.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown if this world has been disposed.</exception>
+    /// <param name="body">要移除的刚体。</param>
+    /// <exception cref="ArgumentNullException">若 <paramref name="body"/> 为 <see langword="null"/> 则引发。</exception>
+    /// <exception cref="ArgumentException">若 <paramref name="body"/> 不属于此世界则引发。</exception>
+    /// <exception cref="InvalidOperationException">若 <paramref name="body"/> 已被移除则引发。</exception>
+    /// <exception cref="ObjectDisposedException">若此世界已被释放则引发。</exception>
     public void Remove(RigidBody body)
     {
         ThrowIfDisposed();
@@ -557,9 +554,9 @@ public sealed partial class World : IDisposable
         if (!body.IsValid)
             throw new InvalidOperationException("The body has already been removed from this world.");
 
-        // No need to copy the hashset content first. Removing while iterating does not invalidate
-        // the enumerator any longer, see https://github.com/dotnet/runtime/pull/37180
-        // This comes in very handy for us.
+        // 无需先复制 hashset 的内容。边迭代边移除已不再
+        // 使枚举器失效，参见 https://github.com/dotnet/runtime/pull/37180
+        // 这对我们非常方便。
 
         foreach (var constraint in body.InternalConstraints)
         {
@@ -585,7 +582,7 @@ public sealed partial class World : IDisposable
 
         memRigidBodies.Free(body.Handle);
 
-        // We must be our own island.
+        // 我们必须是自己的岛。
         Debug.Assert(body.InternalIsland is { InternalBodies.Count: 1 });
 
         body.Handle = JHandle<RigidBodyData>.Zero;
@@ -598,16 +595,16 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Removes a specific constraint from the world. For temporary deactivation of constraints, consider using the
-    /// <see cref="Constraint.IsEnabled"/> property.
+    /// 从世界中移除指定的约束。如需临时停用约束，请考虑使用
+    /// <see cref="Constraint.IsEnabled"/> 属性。
     /// </summary>
-    /// <param name="constraint">The constraint to be removed.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="constraint"/> is <see langword="null"/>.</exception>
+    /// <param name="constraint">要移除的约束。</param>
+    /// <exception cref="ArgumentNullException">若 <paramref name="constraint"/> 为 <see langword="null"/> 则引发。</exception>
     /// <exception cref="ArgumentException">
-    /// Thrown if <paramref name="constraint"/> does not belong to this world.
+    /// 若 <paramref name="constraint"/> 不属于此世界则引发。
     /// </exception>
-    /// <exception cref="InvalidOperationException">Thrown if the constraint has already been removed.</exception>
-    /// <exception cref="ObjectDisposedException">Thrown if this world has been disposed.</exception>
+    /// <exception cref="InvalidOperationException">若该约束已被移除则引发。</exception>
+    /// <exception cref="ObjectDisposedException">若此世界已被释放则引发。</exception>
     public void Remove(Constraint constraint)
     {
         ThrowIfDisposed();
@@ -638,14 +635,14 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Removes a particular arbiter from the world.
+    /// 从世界中移除特定的仲裁器。
     /// </summary>
-    /// <param name="arbiter">The arbiter to remove.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="arbiter"/> is <see langword="null"/>.</exception>
+    /// <param name="arbiter">要移除的仲裁器。</param>
+    /// <exception cref="ArgumentNullException">若 <paramref name="arbiter"/> 为 <see langword="null"/> 则引发。</exception>
     /// <exception cref="ArgumentException">
-    /// Thrown if <paramref name="arbiter"/> does not belong to this world.
+    /// 若 <paramref name="arbiter"/> 不属于此世界则引发。
     /// </exception>
-    /// <exception cref="ObjectDisposedException">Thrown if this world has been disposed.</exception>
+    /// <exception cref="ObjectDisposedException">若此世界已被释放则引发。</exception>
     public void Remove(Arbiter arbiter)
     {
         ThrowIfDisposed();
@@ -688,11 +685,11 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Marks a body to be activated at the start of the next step.
+    /// 标记一个刚体在下一步开始时被激活。
     /// </summary>
-    /// <param name="body">The body to activate.</param>
-    /// <param name="wakeUpStatic">Set to true when the intention is to move a static
-    /// body or to switch from another MotionType to static. This then activates all connected bodies.</param>
+    /// <param name="body">要激活的刚体。</param>
+    /// <param name="wakeUpStatic">当意图是移动静态刚体，或从其他 MotionType 切换为静态时，
+    /// 设为 true。此时会激活所有相连的刚体。</param>
     internal void ActivateBodyNextStep(RigidBody body, bool wakeUpStatic = false)
     {
         body.InternalSleepTime = 0;
@@ -720,9 +717,9 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Removes contacts that connect two non-dynamic bodies.
+    /// 移除连接两个非动态刚体的接触。
     /// </summary>
-    /// <param name="body">The body whose non-dynamic contacts should be removed.</param>
+    /// <param name="body">应移除其非动态接触的刚体。</param>
     internal void RemoveStaticStaticContacts(RigidBody body)
     {
         foreach (var arbiter in body.InternalContacts)
@@ -736,8 +733,8 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Keeps a constraint in the solver's active partition only while a dynamic endpoint is awake.
-    /// This does not change the constraint's enabled state or its island connections.
+    /// 仅当动态端点处于唤醒状态时，才让约束保留在求解器的活动分区中。
+    /// 这不会改变约束的启用状态或其岛连接。
     /// </summary>
     internal void UpdateConstraintActivation(Constraint constraint)
     {
@@ -759,9 +756,9 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Rebuilds island connections from the body's existing contacts and constraints.
+    /// 根据刚体现有的接触和约束重建岛连接。
     /// </summary>
-    /// <param name="body">The body whose connections should be rebuilt.</param>
+    /// <param name="body">应重建其连接的刚体。</param>
     internal void BuildConnectionsFromExistingContacts(RigidBody body)
     {
         foreach (var constraint in body.InternalConstraints)
@@ -776,9 +773,9 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Removes all island connections for a body.
+    /// 移除刚体的所有岛连接。
     /// </summary>
-    /// <param name="body">The body whose connections should be removed.</param>
+    /// <param name="body">应移除其连接的刚体。</param>
     internal void RemoveConnections(RigidBody body)
     {
         while (body.InternalConnections.Count > 0)
@@ -791,25 +788,25 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Marks a body to be deactivated at the start of the next step.
+    /// 标记一个刚体在下一步开始时被停用。
     /// </summary>
-    /// <param name="body">The body to deactivate.</param>
+    /// <param name="body">要停用的刚体。</param>
     internal void DeactivateBodyNextStep(RigidBody body)
     {
         body.InternalSleepTime = Real.PositiveInfinity;
     }
 
     /// <summary>
-    /// Immediately deactivates the specified island and clears motion state for all bodies in it.
+    /// 立即停用指定的岛，并清除其中所有刚体的运动状态。
     /// </summary>
     /// <remarks>
-    /// This operation ignores <see cref="AllowDeactivation"/> and does not wait for the next
-    /// simulation step. Dynamic and kinematic bodies in the island have their linear and angular
-    /// velocities, queued forces, queued torques, and force-derived velocity deltas set to zero.
+    /// 此操作忽略 <see cref="AllowDeactivation"/>，且不等待下一个
+    /// 模拟步。岛中的动态和运动学刚体的线速度与角速度、
+    /// 排队中的力、排队中的力矩以及由力引起的速度增量都会被置零。
     /// </remarks>
-    /// <param name="island">The island to deactivate.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="island"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="island"/> does not belong to this world.</exception>
+    /// <param name="island">要停用的岛。</param>
+    /// <exception cref="ArgumentNullException">若 <paramref name="island"/> 为 <see langword="null"/> 则引发。</exception>
+    /// <exception cref="ArgumentException">若 <paramref name="island"/> 不属于此世界则引发。</exception>
     public void ForceSleepIsland(Island island)
     {
         ThrowIfDisposed();
@@ -846,20 +843,20 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Constructs a constraint of the specified type. After creation, initialize the constraint
-    /// by calling its <c>Initialize</c> method.
+    /// 构造指定类型的约束。创建后，通过调用其 <c>Initialize</c> 方法
+    /// 初始化该约束。
     /// </summary>
-    /// <typeparam name="T">The specific type of constraint to create.</typeparam>
-    /// <param name="body1">The first rigid body involved in the constraint.</param>
-    /// <param name="body2">The second rigid body involved in the constraint.</param>
-    /// <returns>A new instance of the specified constraint type, already registered with the world.</returns>
+    /// <typeparam name="T">要创建的约束的具体类型。</typeparam>
+    /// <param name="body1">参与该约束的第一个刚体。</param>
+    /// <param name="body2">参与该约束的第二个刚体。</param>
+    /// <returns>指定约束类型的新实例，且已向世界注册。</returns>
     /// <exception cref="ArgumentException">
-    /// Thrown if either body does not belong to this world.
+    /// 若任一刚体不属于此世界则引发。
     /// </exception>
     /// <exception cref="SameBodyException">
-    /// Thrown if <paramref name="body1"/> and <paramref name="body2"/> are the same.
+    /// 若 <paramref name="body1"/> 和 <paramref name="body2"/> 相同则引发。
     /// </exception>
-    /// <exception cref="PartitionedBuffer{T}.MaximumSizeException">Raised when the constraint buffer maximum size is exceeded.</exception>
+    /// <exception cref="PartitionedBuffer{T}.MaximumSizeException">当超出约束缓冲区最大大小时引发。</exception>
     public T CreateConstraint<T>(RigidBody body1, RigidBody body2) where T : Constraint, new()
     {
         ThrowIfDisposed();
@@ -898,9 +895,9 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Marks an island as active and moves it to the active partition.
+    /// 将岛标记为活动，并将其移动到活动分区。
     /// </summary>
-    /// <param name="island">The island to activate.</param>
+    /// <param name="island">要激活的岛。</param>
     private void AddToActiveList(Island island)
     {
         bool wasActive = islands.IsActive(island);
@@ -936,10 +933,10 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Creates and adds a new rigid body to the simulation world.
+    /// 创建新的刚体并将其添加到模拟世界。
     /// </summary>
-    /// <returns>A newly created instance of <see cref="RigidBody"/>.</returns>
-    /// <exception cref="PartitionedBuffer{T}.MaximumSizeException">Raised when the rigid-body buffer maximum size is exceeded.</exception>
+    /// <returns>新创建的 <see cref="RigidBody"/> 实例。</returns>
+    /// <exception cref="PartitionedBuffer{T}.MaximumSizeException">当超出刚体缓冲区最大大小时引发。</exception>
     public RigidBody CreateRigidBody()
     {
         ThrowIfDisposed();
@@ -958,7 +955,7 @@ public sealed partial class World : IDisposable
     private bool disposed;
 
     /// <summary>
-    /// Gets a value indicating whether this world has been disposed.
+    /// 获取一个值，指示此世界是否已被释放。
     /// </summary>
     public bool IsDisposed => disposed;
 
@@ -968,11 +965,11 @@ public sealed partial class World : IDisposable
     }
 
     /// <summary>
-    /// Releases all unmanaged memory buffers used by this simulation world.
+    /// 释放此模拟世界使用的所有非托管内存缓冲区。
     /// </summary>
     /// <remarks>
-    /// After disposal, the world instance is unusable. All bodies, constraints, and contacts
-    /// become invalid. Calling <see cref="Dispose"/> multiple times is safe.
+    /// 释放后，世界实例不可再使用。所有刚体、约束和接触
+    /// 都将失效。多次调用 <see cref="Dispose"/> 是安全的。
     /// </remarks>
     public void Dispose()
     {

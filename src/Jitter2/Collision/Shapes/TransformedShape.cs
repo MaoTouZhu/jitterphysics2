@@ -11,7 +11,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a shape wrapper defined by an original shape and an affine transformation (translation and linear map).
+/// 表示由原始形状和仿射变换（平移和线性映射）定义的形状包装器。
 /// </summary>
 public class TransformedShape : RigidBodyShape
 {
@@ -51,17 +51,16 @@ public class TransformedShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Constructs a transformed shape through an affine transformation defined by
-    /// a linear map and a translation.
+    /// 通过由线性映射和平移定义的仿射变换构造一个变换形状。
     /// </summary>
-    /// <param name="shape">The shape to transform.</param>
-    /// <param name="translation">The translation component of the affine transform.</param>
-    /// <param name="transform">The linear component of the affine transform.</param>
+    /// <param name="shape">要变换的形状。</param>
+    /// <param name="translation">仿射变换的平移分量。</param>
+    /// <param name="transform">仿射变换的线性分量。</param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="shape"/> is <see langword="null"/>.
+    /// 当 <paramref name="shape"/> 为 <see langword="null"/> 时抛出。
     /// </exception>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="translation"/> or <paramref name="transform"/> contains a non-finite value.
+    /// 当 <paramref name="translation"/> 或 <paramref name="transform"/> 包含非有限值时抛出。
     /// </exception>
     public TransformedShape(RigidBodyShape shape, in JVector translation, in JMatrix transform)
     {
@@ -76,7 +75,7 @@ public class TransformedShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Constructs a transformed shape with a translation (offset), assuming identity rotation/scale.
+    /// 使用平移（偏移）构造变换形状，假定旋转/缩放为单位变换。
     /// </summary>
     public TransformedShape(RigidBodyShape shape, JVector translation) :
         this(shape, translation, JMatrix.Identity)
@@ -84,8 +83,8 @@ public class TransformedShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Constructs a transformed shape with a linear transformation (rotation, scale, or shear),
-    /// assuming zero translation.
+    /// 使用线性变换（旋转、缩放或剪切）构造变换形状，
+    /// 假定平移为零。
     /// </summary>
     public TransformedShape(RigidBodyShape shape, JMatrix transform) :
         this(shape, JVector.Zero, transform)
@@ -93,12 +92,12 @@ public class TransformedShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets the original shape that is being transformed.
+    /// 获取被变换的原始形状。
     /// </summary>
     public RigidBodyShape OriginalShape { get; }
 
     /// <summary>
-    /// Gets or sets the translation applied to the shape.
+    /// 获取或设置应用于形状的平移。
     /// </summary>
     public JVector Translation
     {
@@ -125,7 +124,7 @@ public class TransformedShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the linear transformation (rotation, scale, or shear) applied to the shape.
+    /// 获取或设置应用于形状的线性变换（旋转、缩放或剪切）。
     /// </summary>
     public JMatrix Transformation
     {
@@ -161,7 +160,7 @@ public class TransformedShape : RigidBodyShape
     {
         if (type == TransformationType.General)
         {
-            // just get the bounding box from the support map
+            // 直接从支撑映射获取包围盒
             base.CalculateBoundingBox(orientation, position, out box);
         }
         else
@@ -184,8 +183,8 @@ public class TransformedShape : RigidBodyShape
     {
         OriginalShape.CalculateMassInertia(out JSymmetricMatrix originalInertia, out JVector originalCom, out mass);
 
-        // The source inertia is about its local origin. Move it to the center of mass
-        // before transforming, so an existing offset is not counted a second time.
+        // 源惯性是相对于其局部原点的。在变换之前先将其移到质心，
+        // 以免已有的偏移被重复计算一次。
         JSymmetricMatrix originalParallelAxis = mass *
             (JSymmetricMatrix.Identity * originalCom.LengthSquared() - JSymmetricMatrix.Outer(originalCom));
         JSymmetricMatrix centralInertia = originalInertia - originalParallelAxis;
@@ -195,19 +194,19 @@ public class TransformedShape : RigidBodyShape
         Real det = MathR.Abs(transformation.Determinant());
         mass *= det;
 
-        // The inertia tensor I is related to the second moment matrix C by: I = trace(C)·E - C
-        // Under transformation T, the central second moment transforms as: C' = |det(T)| · T · C · Tᵀ
-        // We recover C from I: C = (trace(I)/2)·E - I
+        // 惯性张量 I 与二阶矩矩阵 C 的关系为：I = trace(C)·E - C
+        // 在变换 T 下，中心二阶矩按如下方式变换：C' = |det(T)| · T · C · Tᵀ
+        // 我们从 I 反推 C：C = (trace(I)/2)·E - I
         Real halfTrace = centralInertia.Trace() * (Real)0.5;
         JSymmetricMatrix secondMoment = halfTrace * JSymmetricMatrix.Identity - centralInertia;
 
-        // Transform second moment matrix
+        // 变换二阶矩矩阵
         JSymmetricMatrix transformedSecondMoment = det * JSymmetricMatrix.Transform(secondMoment, transformation);
 
-        // Convert back to inertia tensor
+        // 转换回惯性张量
         inertia = transformedSecondMoment.Trace() * JSymmetricMatrix.Identity - transformedSecondMoment;
 
-        // Move the transformed inertia from its center of mass to the local origin.
+        // 将变换后的惯性从其质心移到局部原点。
         JSymmetricMatrix pat = mass * (JSymmetricMatrix.Identity * com.LengthSquared() - JSymmetricMatrix.Outer(com));
         inertia += pat;
     }

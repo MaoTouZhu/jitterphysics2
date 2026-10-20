@@ -1,46 +1,46 @@
-- name: Welcome
+- name: 欢迎
   href: introduction.md
-- name: Quickstart
+- name: 快速上手
   expanded: true
   items:
-    - name: Boxes
+    - name: 盒子
       expanded: true
       items:
-        - name: Project Setup
+        - name: 项目搭建
           href: tutorials/boxes/project-setup.md
-        - name: Render Loop
+        - name: 渲染循环
           href: tutorials/boxes/render-loop.md
-        - name: Hello World
+        - name: 你好，世界
           href: tutorials/boxes/hello-world.md
-    - name: Teapots
+    - name: 茶壶
       expanded: true
       items:
-        - name: Project Setup
+        - name: 项目搭建
           href: tutorials/teapots/project-setup.md
-        - name: Hull Sampling
+        - name: 凸包采样
           href: tutorials/teapots/hull-sampling.md
-        - name: Hello World
+        - name: 你好，世界
           href: tutorials/teapots/hello-world.md
-        - name: Aftermath
+        - name: 后续
           href: tutorials/teapots/aftermath.md
-- name: Overview
+- name: 概览
   expanded: true
   items:
-    - name: General
+    - name: 通用
       href: documentation/general.md
-    - name: World
+    - name: 世界
       href: documentation/world.md
-    - name: Rigid Bodies
+    - name: 刚体
       href: documentation/bodies.md
-    - name: Shapes
+    - name: 形状
       href: documentation/shapes.md
-    - name: Arbiters
+    - name: 仲裁器
       href: documentation/arbiters.md
-    - name: Constraints
+    - name: 约束
       href: documentation/constraints.md
-    - name: Dynamic Tree
+    - name: 动态树
       href: documentation/dynamictree.md
-    - name: Collision Filters
+    - name: 碰撞过滤器
       href: documentation/filters.md
-- name: Changelog
+- name: 更新日志
   href: changelog.md

@@ -2,35 +2,34 @@ using JitterDemo.Renderer.OpenGL;
 
 namespace JitterDemo.Renderer;
 
-/// Describes how a surface is shaded by the lit shader. Each field is independent:
-/// the final fragment color mixes vertex-color, a flat tint, and optional texture
-/// according to the two weight scalars.
+/// 描述光照着色器如何对表面进行着色。每个字段彼此独立：
+/// 最终片元颜色根据两个权重标量混合顶点颜色、无纹理的色调以及可选纹理。
 public struct Material
 {
-    /// Uniform color added when VertexColorWeight &lt; 1.
+    /// 当 VertexColorWeight &lt; 1 时叠加的固定颜色。
     public Vector3 Tint;
 
-    /// Specular reflection color.
+    /// 镜面反射颜色。
     public Vector3 Specular;
 
-    /// Specular exponent.
+    /// 镜面反射指数。
     public float Shininess;
 
-    /// Alpha multiplier applied to the final color.
+    /// 应用于最终颜色的透明度乘数。
     public float Alpha;
 
-    /// Ambient = VertexColorWeight * vertexInstanceColor + (1 - VertexColorWeight) * Tint.
-    /// 0 = use Tint only, 1 = use per-instance color only.
+    /// Ambient = VertexColorWeight * vertexInstanceColor + (1 - VertexColorWeight) * Tint。
+    /// 0 = 仅使用 Tint，1 = 仅使用逐实例颜色。
     public float VertexColorWeight;
 
-    /// Diffuse = (1 - TextureWeight) * flatGrey + TextureWeight * sampleTexture.
-    /// 0 = flat, 1 = fully textured.
+    /// Diffuse = (1 - TextureWeight) * flatGrey + TextureWeight * sampleTexture。
+    /// 0 = 无纹理，1 = 完全使用纹理。
     public float TextureWeight;
 
-    /// If true the vertex normal is flipped before lighting (used for two-sided draws).
+    /// 若为 true，则在光照前翻转顶点法线（用于双面绘制）。
     public bool FlipNormals;
 
-    /// Sampled when TextureWeight &gt; 0. May be null only if TextureWeight = 0.
+    /// 当 TextureWeight &gt; 0 时进行采样。仅当 TextureWeight = 0 时可以为 null。
     public Texture2D? Texture;
 
     public static Material Default => new()

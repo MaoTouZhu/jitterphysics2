@@ -2,7 +2,7 @@ namespace JitterTests.Constraints;
 
 public class MotorTimeStepTests
 {
-    // Keep the target unreachable so acceleration is determined by the force/torque cap.
+    // 让目标速度不可达，从而加速度由力/力矩上限决定。
     [TestCase(SolveMode.Regular, false)]
     [TestCase(SolveMode.Regular, true)]
     [TestCase(SolveMode.Deterministic, false)]

@@ -4,10 +4,9 @@ using JitterDemo.Renderer.OpenGL;
 namespace JitterDemo.Renderer;
 
 /// <summary>
-/// Cascaded shadow maps with a configurable number of cascades and shadow-map resolution.
-/// Computes per-cascade light matrices by fitting an orthographic projection to the camera
-/// frustum slice, renders each cascade into a depth texture, and binds everything ready
-/// for the lit pass.
+/// 级联阴影贴图，级联数量和阴影贴图分辨率均可配置。
+/// 通过把正交投影拟合到相机视锥切片来计算每级的光照矩阵，把每级渲染到
+/// 深度纹理，并绑定好全部资源以供光照通道使用。
 /// </summary>
 public sealed class ShadowCaster
 {
@@ -19,7 +18,7 @@ public sealed class ShadowCaster
     private readonly Framebuffer[] depthFramebuffers = new Framebuffer[CascadeCount];
     private readonly Matrix4[] lightMatrices = new Matrix4[CascadeCount];
 
-    /// Linear view-space ranges [near, far] for each cascade in cascade-order.
+    /// 每个级联在线性视图空间中的范围 [near, far]，按级联顺序排列。
     public float[] CascadeSplits { get; set; } = { 20f, 60f };
 
     public Vector3 LightDirection { get; set; } = Vector3.Normalize(new Vector3(1, 2, 1));
@@ -51,9 +50,8 @@ public sealed class ShadowCaster
     public ReadOnlySpan<Matrix4> LightMatrices => lightMatrices;
 
     /// <summary>
-    /// Renders the shadow cascades. Calls the supplied <paramref name="drawCallback"/>
-    /// once per cascade after binding the framebuffer and setting the uniform light
-    /// matrix.
+    /// 渲染阴影级联。在绑定帧缓冲并设置光照矩阵 uniform 之后，对每个级联
+    /// 调用一次传入的 <paramref name="drawCallback"/>。
     /// </summary>
     public void Render(Camera camera, int viewportW, int viewportH, Action<Shader> drawCallback)
     {
@@ -73,12 +71,12 @@ public sealed class ShadowCaster
 
         Framebuffer.Default.Bind();
 
-        // Leave the depth textures bound in units [0..CascadeCount-1] so the lit pass
-        // can just sample from them.
+        // 将深度纹理保留在 [0..CascadeCount-1] 号纹理单元上，这样光照通道
+        // 可以直接从中采样。
         for (uint i = 0; i < CascadeCount; i++) DepthMaps[i].Bind(i);
     }
 
-    /// Uploads the cascade matrices, splits, and sun direction to the supplied lit shader.
+    /// 把级联矩阵、分割距离和太阳方向上传到指定的光照着色器。
     public void BindToLitShader(Shader lit)
     {
         for (int i = 0; i < CascadeCount; i++)
@@ -129,7 +127,7 @@ public sealed class ShadowCaster
             min.Z = Math.Min(min.Z, t.Z); max.Z = Math.Max(max.Z, t.Z);
         }
 
-        // Pull the near/far planes back so casters outside the frustum still appear in shadow.
+        // 将近平面和远平面向外扩展，使视锥之外的投射者仍能出现在阴影中。
         const float zMult = 3f;
         min.Z = min.Z < 0 ? min.Z * zMult : min.Z / zMult;
         max.Z = max.Z < 0 ? max.Z / zMult : max.Z * zMult;

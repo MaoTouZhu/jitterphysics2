@@ -22,7 +22,7 @@ PhysicsThreads.Instance.ChangeThreadCount(threads);
 
 try
 {
-    // Warm the same code paths, then measure a fresh scene from simulation time zero.
+    // 预热相同的代码路径，然后从模拟时间零点开始测量一个全新场景。
     if (warmup > 0)
     {
         using var warmScene = new Scene(sceneName, iterations, relaxations, substeps);
@@ -61,7 +61,7 @@ try
         long start = Stopwatch.GetTimestamp();
         world.Step(dt, multiThread);
         stepMs[i] = Stopwatch.GetElapsedTime(start).TotalMilliseconds;
-        // Preallocated observations, outside the timed region; serialize after measurement.
+        // 预分配观测数据，位于计时区域之外；测量完成后再序列化。
         var data = world.RawData;
         activeBodies[i] = data.ActiveRigidBodies.Length;
         contacts[i] = data.ActiveContacts.Length;

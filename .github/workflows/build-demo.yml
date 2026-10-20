@@ -1,4 +1,4 @@
-name: Build Demo
+name: 构建演示
 
 on:
   push:
@@ -17,13 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore dependencies
+      - name: 还原依赖
         run: dotnet restore
 
-      - name: Build
+      - name: 构建
         run: dotnet build --configuration Release --no-restore

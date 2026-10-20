@@ -11,18 +11,18 @@ using System.Runtime.CompilerServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Provides mathematical helper methods for linear algebra and physics calculations.
+/// 为线性代数与物理计算提供数学辅助方法。
 /// </summary>
 public static class MathHelper
 {
     /// <summary>
-    /// Gets the sign of <paramref name="value"/> purely from its IEEE-754 sign bit.
+    /// 仅根据 IEEE-754 符号位获取 <paramref name="value"/> 的符号。
     /// </summary>
-    /// <param name="value">The number to test.</param>
+    /// <param name="value">要测试的数值。</param>
     /// <returns>
-    /// <c>+1</c> when the sign bit is clear (positive, +0, or a positive-sign NaN),
-    /// <c>-1</c> when the sign bit is set (negative, −0, or a negative-sign NaN).
-    /// Never returns <c>0</c>, unlike <see cref="Math.Sign(float)"/>.
+    /// 当符号位为 0 时返回 <c>+1</c>（正数、+0 或正号 NaN），
+    /// 当符号位为 1 时返回 <c>-1</c>（负数、−0 或负号 NaN）。
+    /// 与 <see cref="Math.Sign(float)"/> 不同，该方法从不返回 <c>0</c>。
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SignBit(float value)
@@ -38,12 +38,11 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Calculates the rotation quaternion corresponding to the given angular velocity using
-    /// deterministic trigonometric approximations.
+    /// 使用确定性的三角函数近似，计算与给定角速度对应的旋转四元数。
     /// </summary>
-    /// <param name="omega">The angular velocity vector in radians per second.</param>
-    /// <param name="dt">The time step in seconds.</param>
-    /// <returns>A unit quaternion representing the rotation.</returns>
+    /// <param name="omega">角速度向量，单位为弧度每秒。</param>
+    /// <param name="dt">时间步，单位为秒。</param>
+    /// <returns>表示该旋转的单位四元数。</returns>
     public static JQuaternion RotationQuaternion(in JVector omega, Real dt)
     {
         Real angle = omega.Length();
@@ -51,10 +50,10 @@ public static class MathHelper
 
         if (theta < (Real)1e-3)
         {
-            // Exact rotation: (omega * sin(theta/2) / |omega|, cos(theta/2)).
-            // For small theta, the vector scale is dt/2 * (1 - theta^2/24)
-            // and the scalar part is 1 - theta^2/8 (Taylor expansions).
-            // Using theta^2 avoids forming dt^3, which can overflow in a long sweep.
+            // 精确旋转：(omega * sin(theta/2) / |omega|, cos(theta/2))。
+            // 对于较小的 theta，向量缩放为 dt/2 * (1 - theta^2/24)，
+            // 标量部分为 1 - theta^2/8（泰勒展开）。
+            // 使用 theta^2 可以避免构造 dt^3，后者在长扫掠中可能溢出。
             Real theta2 = theta * theta;
             Real smallAngleScale = (Real)0.5 * dt * ((Real)1.0 - theta2 / (Real)24.0);
             JVector.Multiply(omega, smallAngleScale, out var smallAngleAxis);
@@ -78,11 +77,11 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Checks if matrix is a pure rotation matrix.
+    /// 检查矩阵是否为纯旋转矩阵。
     /// </summary>
-    /// <param name="matrix">The matrix to check.</param>
-    /// <param name="epsilon">The tolerance for floating-point comparisons.</param>
-    /// <returns><see langword="true"/> if the matrix is orthonormal with determinant 1; otherwise, <see langword="false"/>.</returns>
+    /// <param name="matrix">要检查的矩阵。</param>
+    /// <param name="epsilon">浮点比较的容差。</param>
+    /// <returns>如果矩阵是行列式为 1 的正交矩阵，则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool IsRotationMatrix(in JMatrix matrix, Real epsilon = (Real)1e-06)
     {
         JMatrix delta = JMatrix.MultiplyTransposed(matrix, matrix) - JMatrix.Identity;
@@ -96,12 +95,12 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Checks if all entries of a vector are close to zero.
+    /// 检查向量的所有分量是否都接近零。
     /// </summary>
-    /// <param name="vector">The vector to check.</param>
-    /// <param name="epsilon">The tolerance for each component.</param>
-    /// <returns><see langword="true"/> if no component has an absolute value greater than or equal to epsilon;
-    /// NaN components also satisfy this test.</returns>
+    /// <param name="vector">要检查的向量。</param>
+    /// <param name="epsilon">每个分量的容差。</param>
+    /// <returns>如果没有任何分量的绝对值大于或等于 epsilon，则返回 <see langword="true"/>；
+    /// NaN 分量也满足该测试。</returns>
     public static bool IsZero(in JVector vector, Real epsilon = (Real)1e-6)
     {
         return !(MathR.Abs(vector.X) >= epsilon) &&
@@ -110,23 +109,22 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Checks if a value is close to zero.
+    /// 检查数值是否接近零。
     /// </summary>
-    /// <param name="value">The value to check.</param>
-    /// <param name="epsilon">The tolerance.</param>
-    /// <returns><see langword="true"/> if the absolute value is less than epsilon; otherwise, <see langword="false"/>.</returns>
+    /// <param name="value">要检查的数值。</param>
+    /// <param name="epsilon">容差。</param>
+    /// <returns>如果绝对值小于 epsilon，则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool IsZero(Real value, Real epsilon = (Real)1e-6)
     {
         return MathR.Abs(value) < epsilon;
     }
 
     /// <summary>
-    /// Checks if all entries of a matrix are close to zero.
+    /// 检查矩阵的所有元素是否都接近零。
     /// </summary>
-    /// <param name="matrix">The matrix to check.</param>
-    /// <param name="epsilon">The tolerance for each element.</param>
-    /// <returns><see langword="true"/> if all rows satisfy <see cref="IsZero(in JVector, Real)"/>,
-    /// including rows with NaN components.</returns>
+    /// <param name="matrix">要检查的矩阵。</param>
+    /// <param name="epsilon">每个元素的容差。</param>
+    /// <returns>如果所有行都满足 <see cref="IsZero(in JVector, Real)"/>（包括包含 NaN 分量的行），则返回 <see langword="true"/>。</returns>
     public static bool UnsafeIsZero(ref JMatrix matrix, Real epsilon = (Real)1e-6)
     {
         if (!IsZero(matrix.UnsafeGet(0), epsilon)) return false;
@@ -136,11 +134,11 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Approximates <c>M^(-1/2)</c> for a symmetric positive-definite matrix using Jacobi iterations.
+    /// 使用 Jacobi 迭代近似计算对称正定矩阵的 <c>M^(-1/2)</c>。
     /// </summary>
-    /// <param name="m">The symmetric positive-definite input matrix.</param>
-    /// <param name="sweeps">The number of Jacobi iterations.</param>
-    /// <returns>The approximate inverse square root of <c>M</c>.</returns>
+    /// <param name="m">对称正定输入矩阵。</param>
+    /// <param name="sweeps">Jacobi 迭代次数。</param>
+    /// <returns><c>M</c> 的近似逆平方根。</returns>
     public static JMatrix InverseSquareRoot(JMatrix m, int sweeps = 2)
     {
         Unsafe.SkipInit(out JMatrix r);
@@ -193,13 +191,13 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Calculates an orthonormal vector to the given vector.
+    /// 计算与给定向量正交的单位向量。
     /// </summary>
     /// <remarks>
-    /// The input vector must be non-zero. Debug builds assert this condition.
+    /// 输入向量必须非零。调试版本会断言该条件。
     /// </remarks>
-    /// <param name="vec">The input vector (must be non-zero, does not need to be normalized).</param>
-    /// <returns>A unit vector orthogonal to the input.</returns>
+    /// <param name="vec">输入向量（必须非零，无需归一化）。</param>
+    /// <returns>与输入正交的单位向量。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JVector CreateOrthonormal(in JVector vec)
     {
@@ -254,11 +252,11 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Verifies whether the columns of the given matrix constitute an orthonormal basis.
+    /// 验证给定矩阵的各列是否构成正交基。
     /// </summary>
-    /// <param name="matrix">The input matrix to check.</param>
-    /// <param name="epsilon">The tolerance for floating-point comparisons.</param>
-    /// <returns><see langword="true"/> if the columns are mutually perpendicular and have unit length; otherwise, <see langword="false"/>.</returns>
+    /// <param name="matrix">要检查的输入矩阵。</param>
+    /// <param name="epsilon">浮点比较的容差。</param>
+    /// <returns>如果各列相互垂直且长度均为单位长度，则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool CheckOrthonormalBasis(in JMatrix matrix, Real epsilon = (Real)1e-6)
     {
         JMatrix delta = JMatrix.MultiplyTransposed(matrix, matrix) - JMatrix.Identity;
@@ -266,18 +264,17 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Computes an approximate Moore-Penrose pseudoinverse of a symmetric,
-    /// positive-semidefinite 3x3 matrix, such as a joint's inverse effective mass.
+    /// 计算对称半正定 3x3 矩阵（例如关节的逆有效质量）的近似
+    /// Moore-Penrose 伪逆。
     /// </summary>
-    /// <param name="matrix">A finite, symmetric, positive-semidefinite matrix.</param>
-    /// <returns>The inverse on responsive directions, with zero response on discarded directions.</returns>
+    /// <param name="matrix">一个有限、对称、半正定的矩阵。</param>
+    /// <returns>可响应方向上的逆，被舍弃方向上的响应为零。</returns>
     /// <remarks>
-    /// Uses the ordinary inverse when the normalized determinant is sufficiently large.
-    /// Otherwise, Jacobi diagonalization retains eigenvalues greater than a normalized
-    /// tolerance of 1e-6 in single precision or 1e-12 in double precision. The normalization
-    /// uses the largest absolute diagonal entry. A zero matrix produces a zero pseudoinverse.
-    /// Symmetry and positive semidefiniteness are assumed and are not validated.
-    /// Compute this during constraint preparation and cache the result for solver iterations.
+    /// 当归一化行列式足够大时，使用普通逆。
+    /// 否则，Jacobi 对角化会保留大于归一化容差的特征值，单精度为 1e-6，
+    /// 双精度为 1e-12。归一化使用最大的绝对对角元素。零矩阵产生零伪逆。
+    /// 对称性与半正定性是假定条件，不做校验。
+    /// 请在约束准备阶段计算该值，并缓存结果供求解器迭代使用。
     /// </remarks>
     public static JMatrix PseudoInverseSymmetric(in JMatrix matrix)
     {
@@ -301,7 +298,7 @@ public static class MathHelper
         };
         Span<Real> basis = stackalloc Real[9] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
 
-        // Jacobi rotations diagonalize the symmetric matrix without trigonometric functions.
+        // Jacobi 旋转可以在不使用三角函数的情况下对角化对称矩阵。
         for (int sweep = 0; sweep < 8; sweep++)
         {
             bool changed = JacobiRotate(a, basis, 0, 1, tolerance);
@@ -324,7 +321,7 @@ public static class MathHelper
         return result.ToMatrix();
     }
 
-    /// <summary>Inverts a constraint response block, retaining independent rows at different scales.</summary>
+    /// <summary>求约束响应块的逆，并以不同尺度保留相互独立的行。</summary>
     internal static JMatrix InverseSymmetric(in JMatrix matrix)
     {
         Real tolerance = Precision.IsDoublePrecision ? (Real)1e-12 : (Real)1e-6;
@@ -332,8 +329,8 @@ public static class MathHelper
         if (matrix.Determinant() / diagonalProduct > tolerance &&
             JMatrix.Inverse(matrix, out JMatrix inverse)) return inverse;
 
-        // Equilibrate the rows before identifying dependent directions. A small but
-        // independent row must not disappear merely because another row is much stronger.
+        // 在识别相关方向之前先对各行做均衡。一个数值很小但相互独立的行
+        // 不应仅仅因为另一行强得多就消失。
         Real x = matrix.M11 > 0 ? MathR.Sqrt(matrix.M11) : 0;
         Real y = matrix.M22 > 0 ? MathR.Sqrt(matrix.M22) : 0;
         Real z = matrix.M33 > 0 ? MathR.Sqrt(matrix.M33) : 0;
@@ -341,29 +338,29 @@ public static class MathHelper
         Real xy = x > 0 && y > 0 ? matrix.M12 / x / y : 0;
         Real xz = x > 0 && z > 0 ? matrix.M13 / x / z : 0;
         Real yz = y > 0 && z > 0 ? matrix.M23 / y / z : 0;
-        // Zero rows have no coupling. A unit diagonal lets an independent bilateral
-        // block use the ordinary inverse; its artificial response is removed below.
+        // 零行没有耦合。单位对角元让独立的双边
+        // 块可以使用普通逆；其人为响应会在下面被移除。
         JMatrix normalized = new(1, xy, xz, xy, 1, yz, xz, yz, 1);
         JMatrix response = PseudoInverseSymmetric(normalized);
         xy = x > 0 && y > 0 ? response.M12 / x / y : 0;
         xz = x > 0 && z > 0 ? response.M13 / x / z : 0;
         yz = y > 0 && z > 0 ? response.M23 / y / z : 0;
 
-        // This is a generalized inverse in the equilibrated row metric; the public
-        // pseudoinverse retains its Moore-Penrose definition in the original metric.
+        // 这是均衡行度量下的广义逆；公开的
+        // 伪逆在原始度量下保持其 Moore-Penrose 定义。
         JMatrix result = new(
             x > 0 ? response.M11 / x / x : 0,
             xy, xz, xy,
             y > 0 ? response.M22 / y / y : 0,
             yz, xz, yz,
             z > 0 ? response.M33 / z / z : 0);
-        // An unrepresentable inverse must not introduce infinities into the solver.
+        // 无法表示的逆不得向求解器引入无穷大。
         return Real.IsFinite(result.M11) && Real.IsFinite(result.M12) && Real.IsFinite(result.M13) &&
                Real.IsFinite(result.M22) && Real.IsFinite(result.M23) && Real.IsFinite(result.M33)
             ? result : JMatrix.Zero;
     }
 
-    /// <summary>Packs the inverse of the first two response rows as (M11, M12, M22).</summary>
+    /// <summary>将前两个响应行的逆打包为 (M11, M12, M22)。</summary>
     internal static JVector InverseBilateralBlock(in JMatrix matrix)
     {
         JMatrix block = new(matrix.M11, matrix.M12, 0, matrix.M12, matrix.M22, 0, 0, 0, 0);
@@ -406,11 +403,11 @@ public static class MathHelper
     }
 
     /// <summary>
-    /// Determines whether the length of the given vector is zero or close to zero.
+    /// 判断给定向量的长度是否为零或接近零。
     /// </summary>
-    /// <param name="v">The vector to evaluate.</param>
-    /// <param name="epsilonSq">Threshold for squared magnitude.</param>
-    /// <returns><see langword="true"/> if the squared length is less than <paramref name="epsilonSq"/>; otherwise, <see langword="false"/>.</returns>
+    /// <param name="v">要评估的向量。</param>
+    /// <param name="epsilonSq">平方幅值的阈值。</param>
+    /// <returns>如果平方长度小于 <paramref name="epsilonSq"/>，则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public static bool CloseToZero(in JVector v, Real epsilonSq = (Real)1e-16)
     {
         return v.LengthSquared() < epsilonSq;

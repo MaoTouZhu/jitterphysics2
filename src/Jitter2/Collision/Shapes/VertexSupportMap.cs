@@ -13,7 +13,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Implements a SIMD accelerated support map for a set of vertices.
+/// 为一组顶点实现 SIMD 加速的支撑映射。
 /// </summary>
 public struct VertexSupportMap : ISupportMappable, IEquatable<VertexSupportMap>
 {
@@ -21,11 +21,11 @@ public struct VertexSupportMap : ISupportMappable, IEquatable<VertexSupportMap>
     private JVector center;
 
     /// <summary>
-    /// Initializes a new support map from a set of vertices.
+    /// 从一组顶点初始化新的支撑映射。
     /// </summary>
-    /// <param name="vertices">The vertices defining the convex hull.</param>
+    /// <param name="vertices">定义凸包的一组顶点。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="vertices"/> is empty.
+    /// 当 <paramref name="vertices"/> 为空时抛出。
     /// </exception>
     public VertexSupportMap(ReadOnlySpan<JVector> vertices)
     {
@@ -101,7 +101,7 @@ public struct VertexSupportMap : ISupportMappable, IEquatable<VertexSupportMap>
             Real d2 = sum.GetElement(2);
             Real d3 = sum.GetElement(3);
 
-            // Use the same "last maximum wins" tie-break as the scalar path.
+            // 使用与标量路径相同的“最后一个最大值胜出”平局裁决规则。
             if (d0 >= maxDotProduct) { maxDotProduct = d0; index = i + 0; }
             if (d1 >= maxDotProduct) { maxDotProduct = d1; index = i + 1; }
             if (d2 >= maxDotProduct) { maxDotProduct = d2; index = i + 2; }

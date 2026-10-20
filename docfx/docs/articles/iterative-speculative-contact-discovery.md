@@ -1,107 +1,107 @@
-# Iterative Speculative Contact Discovery (ISCD)
+# 迭代推测接触发现（ISCD）
 
-Speculative contacts prevent tunneling by creating a contact before two shapes actually touch. This works well until the contact impulse changes the motion in a way that the original collision query did not examine. An off-center impulse, for example, can make a body rotate into another collision during the same timestep.
+推测接触通过在两个形状真正接触之前就创建接触来防止隧穿。只要接触冲量没有以原始碰撞查询未曾考察的方式改变运动，这种方法就工作得很好。例如，一个偏心冲量可能使刚体在同一个时间步内旋转着撞入另一次碰撞。
 
-The method explored here repeats collision detection after such an impulse. This article uses the name **Iterative Speculative Contact Discovery (ISCD)** for that approach: detect a speculative contact, apply its impulse, then detect again using the updated velocities.
+本文探讨的方法会在这样的冲量之后重复进行碰撞检测。本文用名称 **迭代推测接触发现（Iterative Speculative Contact Discovery，ISCD）** 来称呼这种做法：检测一个推测接触，施加其冲量，然后用更新后的速度再次检测。
 
-The discussion assumes a standard impulse-based rigid-body solver. An experimental implementation is available in [CcdSolver.cs](https://github.com/notgiven688/jitterphysics2/blob/main/src/JitterDemo/Demos/Misc/CcdSolver.cs), and an interactive example appears below.
+讨论假设使用标准的基于冲量的刚体求解器。一个实验性实现见 [CcdSolver.cs](https://github.com/notgiven688/jitterphysics2/blob/main/src/JitterDemo/Demos/Misc/CcdSolver.cs)，文末还有一个交互式示例。
 
-The examples and interactive demo in this article use speculative contacts with angular response. Jitter's built-in `EnableSpeculativeContacts` mode is [linear-only](../documentation/bodies.md#speculative-contacts): it predicts translation and applies only linear impulses. The ISCD experiment explores an alternative that retains angular response.
+本文中的示例和交互式演示使用带角度响应的推测接触。Jitter 内置的 `EnableSpeculativeContacts` 模式是[仅线性的](../documentation/bodies.md#speculative-contacts)：它预测平移并且只施加线性冲量。ISCD 实验则探索一种保留角度响应的替代方案。
 
-## A contact before contact
+## 接触之前的接触
 
-Consider a ball whose surface is 10 units away from a thin wall. During the next timestep, its velocity would carry it 20 units. The ball starts on one side of the wall and ends on the other, so discrete overlap tests at the start and end of the step find nothing. The ball tunnels through the wall.
+考虑一个球，其表面距离一堵薄墙 10 个单位。在下一个时间步中，它的速度会把它带出 20 个单位。球从墙的一侧开始，最终到了另一侧，因此在步长开始和结束时进行的离散重叠测试都发现不了问题。球隧穿了墙。
 
-Continuous collision detection (CCD) finds the crossing by **sweeping** the ball along its predicted path. The sweep reports where the surfaces would first touch. It does not move the ball and it does not change its velocity; it only detects the future collision.
+连续碰撞检测（CCD）通过沿预测路径**扫掠**球来找到穿越点。扫掠会报告两个表面最初接触的位置。它不移动球，也不改变其速度；它只检测未来的碰撞。
 
-A **speculative contact** turns that prediction into a constraint for the impulse solver. Unlike a regular contact, its two contact points are still separated. The constraint allows the ball to close the 10-unit gap during this timestep, but not to travel through the wall. The solver applies an impulse that removes the excess closing velocity.
+**推测接触**把这一预测转化为冲量求解器的一条约束。与普通接触不同，它的两个接触点仍然彼此分离。该约束允许球在这个时间步内消除 10 个单位的间隙，但不允许它穿过墙。求解器施加一个冲量，消除多余的接近速度。
 
 <figure class="ccd-figure">
-  <img src="images/speculative-contact.svg" width="680" height="380" alt="Two predictions from the same starting position. At the original speed, a ball passes through a thin wall. After a speculative contact reduces its speed, the predicted ball ends at the wall. The contact is represented by one point on the ball and one on the wall at the sweep origin.">
-  <figcaption>Both rows start at the same position. The dashed circle shows the predicted position at the end of the step. After the speculative impulse, the prediction ends at the wall instead of passing through it. Bounce is omitted.</figcaption>
+  <img src="images/speculative-contact.svg" width="680" height="380" alt="从同一初始位置出发的两种预测。在原速度下，球会穿过一堵薄墙。推测接触降低其速度后，预测的球最终停在墙处。该接触由球上的一个点和墙上的一个点表示，这两个点位于扫掠起点。">
+  <figcaption>两行都从同一位置开始。虚线圆表示步长结束时的预测位置。经过推测冲量后，预测结果停在墙处，而不是穿过去。图中省略了反弹。</figcaption>
 </figure>
 
-The two markers in the figure are the contact points, one on each shape. They are stored at the current poses of the bodies, which is why there is still a gap between them. Together with the contact normal, they give the solver the separation $d$. For a timestep $\Delta t$, the contact may close at no more than $d / \Delta t$. Any faster approach would make the separation negative before the step ends.
+图中的两个标记就是接触点，每个形状上各一个。它们存储于刚体当前的位姿，因此二者之间仍有间隙。它们与接触法线一起，为求解器提供了分离距离 $d$。对于时间步 $\Delta t$，接触的闭合速度不能超过 $d / \Delta t$。任何更快的接近都会使分离距离在步长结束前变为负值。
 
-That is the essential difference from an ordinary contact: an ordinary contact assumes the shapes are already touching or overlapping, while a speculative contact constrains them while they are still separated. For background on speculative contacts and other approaches to tunneling, see [Erin Catto's 2013 talk, *Continuous Collision*](https://box2d.org/files/ErinCatto_ContinuousCollision_GDC2013.pdf).
+这就是它与普通接触的本质区别：普通接触假定形状已经接触或重叠，而推测接触在形状仍然分离时对它们施加约束。关于推测接触以及应对隧穿的其他方法的背景资料，参见 [Erin Catto 2013 年的演讲 *Continuous Collision*](https://box2d.org/files/ErinCatto_ContinuousCollision_GDC2013.pdf)。
 
-## The response changes the prediction
+## 响应改变了预测
 
-Now replace the ball with a slightly tilted box. The box moves straight toward the wall and has no angular velocity. Corner A is closest, so the sweep finds a collision there and creates a speculative contact.
+现在把球换成一个略微倾斜的盒子。盒子径直朝墙移动，且没有角速度。角 A 离墙最近，因此扫掠在那里发现碰撞，并创建一个推测接触。
 
-The solver applies an impulse at A. Because A is offset from the center of mass, the impulse changes both the linear and angular velocity of the box. It slows A's approach, but it also starts rotating corner B toward the wall.
+求解器在 A 处施加一个冲量。由于 A 偏离质心，该冲量同时改变了盒子的线速度和角速度。它减慢了 A 的接近，但也使角 B 开始朝墙旋转。
 
-The velocity of any point on a rigid body is
+刚体上任意一点的速度为
 
 $$
 v_p = v + \omega \times r,
 $$
 
-where $v$ is its linear velocity, $\omega$ its angular velocity, and $r$ points from the center of mass to the point. The impulse at A changes both $v$ and $\omega$, so it also changes the velocity at B.
+其中 $v$ 是线速度，$\omega$ 是角速度，$r$ 从质心指向该点。A 处的冲量同时改变 $v$ 和 $\omega$，因此它也改变了 B 处的速度。
 
-The new motion is shown below. A now reaches the wall as intended, but B rotates into it. The first sweep could not find this second collision because the box was not rotating until the solver responded at A.
-
-<figure class="ccd-figure">
-  <img src="images/box-speculative-contact.svg" width="680" height="640" alt="A slightly tilted box approaches the same wall as the ball. The first sweep finds corner A, represented by one point on the box and one on the wall. A speculative push at A slows the box and starts it turning. In the new prediction A remains at the wall, but the box rotates into the obstacle.">
-  <figcaption>The solid box is the starting pose in both rows. The lower dashed box is the end-of-step prediction after the impulse at A. The overlap at B is highlighted in red, but no contact has been created there yet.</figcaption>
-</figure>
-
-More solver iterations at A cannot fix this. The solver only knows about the contact at A; it cannot create the missing contact at B. Collision detection has to run again.
-
-A simple workaround is to omit angular response from speculative contacts and change only linear velocity. Jitter's built-in speculative contacts use this approach and also ignore angular surface velocity in the speculative constraint. That avoids the new collision in this example, but it also removes the physically expected rotation from an off-center speculative impact. It does not freeze the body's rotation or protect against tunneling caused by rotation from other sources.
-
-## Respond, then detect again
-
-ISCD keeps the angular response and repeats collision detection with the velocities produced by the solver.
-
-During this discovery process, the bodies are not advanced. Their positions and orientations remain at the start of the timestep; only their linear and angular velocities change. Every sweep predicts the same upcoming timestep from the same starting poses.
-
-For the box, the sequence is:
-
-1. Sweep using the original velocities and create the speculative contact at A.
-2. Apply a solver iteration at A. The resulting impulse changes the box's linear and angular velocity.
-3. Sweep again from the original pose, now using the updated velocities. This sweep finds B and adds a second contact.
-
-In short:
-
-> **detect A → solve {A} → detect B → solve {A, B} → solve {A, B} again…**
-
-Each solver pass includes every contact discovered so far. The contact at A therefore remains active when B is added, and the response at B can correct the impulse at A. Because that response may change the predicted motion again, discovery continues for a fixed number of passes.
+新的运动如下所示。A 现在按预期到达墙，但 B 却旋转着撞了进去。第一次扫掠无法发现这第二次碰撞，因为在求解器于 A 处作出响应之前，盒子并没有旋转。
 
 <figure class="ccd-figure">
-  <img src="images/iterative-speculative-contact-discovery.svg" width="680" height="650" alt="Three-stage diagram of iterative speculative contact discovery. The first sweep predicts contact A, represented by one point on the box and one on the wall. A local response changes the box's velocity. A second sweep predicts the paired points of contact B while A remains registered.">
-  <figcaption>Detect A, respond at A, then detect B. In the final panel, both contacts are known. The dashed box is the prediction that revealed B, not the final pose after both contacts have been solved.</figcaption>
+  <img src="images/box-speculative-contact.svg" width="680" height="640" alt="一个略微倾斜的盒子像球一样接近同一堵墙。第一次扫掠找到角 A，由盒子上的一个点和墙上的一个点表示。在 A 处的推测推力减慢了盒子并使其开始转动。在新的预测中，A 仍停在墙处，但盒子旋转着撞入障碍物。">
+  <figcaption>两行中的实线盒都是起始位姿。下方的虚线盒是在 A 处施加冲量后对步长结束时的预测。B 处的重叠用红色标出，但那里还没有创建任何接触。</figcaption>
 </figure>
 
-The sweep's time of impact is used to select the next predicted contact. It does not create a substep and the simulation is not advanced to that time. After each response, the next sweep starts from the original poses and covers the full timestep again.
+在 A 处增加求解器迭代无法解决这个问题。求解器只知道 A 处的接触；它无法创建 B 处缺失的接触。碰撞检测必须再次运行。
 
-### Solving the contacts together
+一个简单的变通办法是从推测接触中去掉角度响应，只改变线速度。Jitter 内置的推测接触就采用这种做法，并且在推测约束中忽略角度表面速度。这避免了本例中的新碰撞，但也丢弃了偏心推测撞击在物理上应有的旋转。它既不会冻结刚体的旋转，也无法防止由其他来源的旋转所导致的隧穿。
 
-The impulses applied during discovery are used to expose further contacts. Once discovery ends, the normal world solver resolves all collected contacts together with the other contacts and joints in the world.
+## 先响应，再检测
 
-At this point A and B are coupled. An impulse at B changes the velocity at A, and a later solver iteration can update the impulse at A in response. The bodies are integrated only after this solve is complete.
+ISCD 保留角度响应，并用求解器产生的速度重复碰撞检测。
 
-## Interactive example
+在这个发现过程中，刚体不会被推进。它们的位置和朝向保持在时间步开始时的状态；只有线速度和角速度发生变化。每次扫掠都从相同的起始位姿预测同一个即将到来的时间步。
 
-The newly discovered contact does not have to involve the same pair of shapes. In this demo, a fast sphere approaches the upper half of a thin panel from the left. The panel is pinned at its center of mass, so it can rotate but cannot translate. A second sphere rests close to its lower half.
+对于盒子，序列如下：
 
-The demo uses a standard impulse solver with a fixed $1/30$-second step. Compare the three methods:
+1. 使用原始速度进行扫掠，并在 A 处创建推测接触。
+2. 在 A 处执行一次求解器迭代。产生的冲量改变了盒子的线速度和角速度。
+3. 从原始位姿再次扫掠，此时使用更新后的速度。这次扫掠找到 B，并添加第二个接触。
 
-- **1. Standard Solver:** the incoming sphere tunnels through the panel because the sampled poses never overlap.
-- **2. Speculative Contacts:** the sweep finds the first contact and prevents the sphere from passing through the panel. Its impulse rotates the panel into the lower sphere, but that new collision is never detected.
-- **3. ISCD - four passes:** after responding to the first contact, another sweep finds the contact between the panel and the lower sphere. The main solver then resolves both contacts during the same timestep.
+简而言之：
 
-Use **Pause** and **Step 1/30 s** to inspect individual timesteps. The dashed outlines show the end-of-step poses predicted from the current velocities.
+> **检测 A → 求解 {A} → 检测 B → 求解 {A, B} → 再次求解 {A, B}……**
 
-<iframe class="ccd-demo" src="iscd-demo.html" width="760" height="610" loading="lazy" title="Interactive demonstration of iterative speculative contact discovery"></iframe>
+每次求解器遍历都包含目前为止发现的所有接触。因此，当 B 被添加时，A 处的接触仍然有效，而 B 处的响应可以修正 A 处的冲量。由于该响应可能再次改变预测的运动，发现过程会持续固定的遍历次数。
 
-## What still needs care
+<figure class="ccd-figure">
+  <img src="images/iterative-speculative-contact-discovery.svg" width="680" height="650" alt="迭代推测接触发现的三阶段示意图。第一次扫掠预测出接触 A，由盒子上的一个点和墙上的一个点表示。一次局部响应改变了盒子的速度。第二次扫掠在 A 仍保持注册的同时预测出接触 B 的一对点。">
+  <figcaption>检测 A，在 A 处响应，然后检测 B。在最后一个面板中，两个接触都已知。虚线盒是揭示出 B 的那次预测，而不是两个接触都求解后的最终位姿。</figcaption>
+</figure>
 
-Every additional pass costs another set of sweeps. In practice, ISCD can be enabled only for bodies that are expected to move fast enough to need it. Discovery must also follow bodies whose velocities change through contact. The panel in the demo begins at rest, for example, but has to be swept after the first sphere makes it rotate.
+扫掠得到的碰撞时间用于选择下一个预测接触。它不会创建子步，模拟也不会推进到该时刻。每次响应之后，下一次扫掠都从原始位姿开始，并再次覆盖整个时间步。
 
-ISCD is iterative and approximate. Its result can depend on discovery order, pass count, solver convergence, sweep accuracy, and whether the contact geometry is refreshed. The final world solve can change the velocities again, so a fixed discovery budget cannot guarantee that every required contact has been found.
+### 一起求解接触
 
-*Disclosure: This article was written with the help of AI. The ISCD idea itself came from the author, not the AI; no claim is made that similar methods have not appeared elsewhere.*
+发现过程中施加的冲量用于暴露出更多接触。发现过程结束后，常规的世界求解器会将收集到的所有接触与世界中的其他接触和关节一起求解。
+
+此时 A 与 B 是耦合的。B 处的冲量会改变 A 处的速度，之后的一次求解器迭代可以相应地更新 A 处的冲量。只有在这次求解完成后，才会对刚体进行积分。
+
+## 交互式示例
+
+新发现的接触不必涉及同一对形状。在本演示中，一个快速运动的球体从左侧接近一块薄板的上半部分。薄板被固定在其质心处，因此可以旋转但不能平移。第二个球体静止在靠近薄板下半部分的位置。
+
+该演示使用标准的冲量求解器，步长固定为 $1/30$ 秒。比较以下三种方法：
+
+- **1. 标准求解器：** 由于采样位姿从不重叠，入射的球体会隧穿薄板。
+- **2. 推测接触：** 扫掠找到第一个接触，阻止球体穿过薄板。其冲量使薄板旋转着撞向下方球体，但这次新碰撞从未被检测到。
+- **3. ISCD - 四次遍历：** 在响应第一个接触之后，另一次扫掠发现了薄板与下方球体之间的接触。随后主求解器在同一个时间步内求解这两个接触。
+
+使用 **暂停** 和 **步进 1/30 秒** 来检查单个时间步。虚线轮廓显示根据当前速度预测的步长结束位姿。
+
+<iframe class="ccd-demo" src="iscd-demo.html" width="760" height="610" loading="lazy" title="迭代推测接触发现的交互式演示"></iframe>
+
+## 仍需注意的问题
+
+每多一次遍历，就多一组扫掠的开销。在实践中，ISCD 可以只对预计运动足够快、确实需要它的刚体启用。发现过程还必须跟踪那些因接触而改变速度的刚体。例如，演示中的薄板开始时静止，但在第一个球体使其旋转之后，就必须对它进行扫掠。
+
+ISCD 是迭代且近似的。其结果可能取决于发现顺序、遍历次数、求解器收敛性、扫掠精度以及接触几何是否被刷新。最终的世界求解可能再次改变速度，因此固定的发现预算无法保证已找到所有必需的接触。
+
+*声明：本文是在 AI 的帮助下撰写的。ISCD 这一想法本身来自作者，而非 AI；作者并不声称此前没有出现过类似方法。*
 
 <style>
 .ccd-figure { margin: 1.5rem 0; }

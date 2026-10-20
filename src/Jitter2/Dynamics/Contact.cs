@@ -15,110 +15,109 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics;
 
 /// <summary>
-/// Holds up to four <see cref="Contact"/> structs for a single shape-to-shape collision.
+/// 为单次形状对形状的碰撞保存最多四个 <see cref="Contact"/> 结构。
 /// </summary>
 /// <remarks>
 /// <para>
-/// This structure is stored in unmanaged memory and accessed via <see cref="Arbiter.Handle"/>.
-/// The <see cref="UsageMask"/> bitfield indicates which of the four contact slots are active.
+/// 此结构存储在非托管内存中，并通过 <see cref="Arbiter.Handle"/> 访问。
+/// <see cref="UsageMask"/> 位域指示四个接触槽中哪些处于活动状态。
 /// </para>
 /// <para>
-/// The returned data is valid only while the associated arbiter exists and must not be accessed
-/// concurrently with <see cref="World.Step(Real, bool)"/>. Do not cache references to this structure.
+/// 仅当关联的仲裁器存在时，返回的数据才有效，且不得与 <see cref="World.Step(Real, bool)"/> 并发访问。
+/// 不要缓存对此结构的引用。
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public struct ContactData
 {
     /// <summary>
-    /// Specifies which velocity components the solver should update for each body.
+    /// 指定求解器应为每个刚体更新哪些速度分量。
     /// </summary>
     [Flags]
     public enum SolveMode
     {
-        /// <summary>No velocity updates.</summary>
+        /// <summary>不更新速度。</summary>
         None = 0,
-        /// <summary>Update linear velocity of body 1.</summary>
+        /// <summary>更新刚体 1 的线速度。</summary>
         LinearBody1 = 1 << 0,
-        /// <summary>Update angular velocity of body 1.</summary>
+        /// <summary>更新刚体 1 的角速度。</summary>
         AngularBody1 = 1 << 1,
-        /// <summary>Update linear velocity of body 2.</summary>
+        /// <summary>更新刚体 2 的线速度。</summary>
         LinearBody2 = 1 << 2,
-        /// <summary>Update angular velocity of body 2.</summary>
+        /// <summary>更新刚体 2 的角速度。</summary>
         AngularBody2 = 1 << 3,
-        /// <summary>Update both linear and angular velocity of body 1.</summary>
+        /// <summary>同时更新刚体 1 的线速度和角速度。</summary>
         FullBody1 = LinearBody1 | AngularBody1,
-        /// <summary>Update both linear and angular velocity of body 2.</summary>
+        /// <summary>同时更新刚体 2 的线速度和角速度。</summary>
         FullBody2 = LinearBody2 | AngularBody2,
-        /// <summary>Update linear velocities of both bodies.</summary>
+        /// <summary>更新两个刚体的线速度。</summary>
         Linear = LinearBody1 | LinearBody2,
-        /// <summary>Update angular velocities of both bodies.</summary>
+        /// <summary>更新两个刚体的角速度。</summary>
         Angular = AngularBody1 | AngularBody2,
-        /// <summary>Update all velocity components of both bodies.</summary>
+        /// <summary>更新两个刚体的所有速度分量。</summary>
         Full = Linear | Angular,
     }
 
-    /// <summary>Bit mask for contact slot 0.</summary>
+    /// <summary>接触槽 0 的位掩码。</summary>
     public const uint MaskContact0 = 0b0001;
-    /// <summary>Bit mask for contact slot 1.</summary>
+    /// <summary>接触槽 1 的位掩码。</summary>
     public const uint MaskContact1 = 0b0010;
-    /// <summary>Bit mask for contact slot 2.</summary>
+    /// <summary>接触槽 2 的位掩码。</summary>
     public const uint MaskContact2 = 0b0100;
-    /// <summary>Bit mask for contact slot 3.</summary>
+    /// <summary>接触槽 3 的位掩码。</summary>
     public const uint MaskContact3 = 0b1000;
 
-    /// <summary>Bit mask indicating all four contact slots are in use.</summary>
+    /// <summary>表示全部四个接触槽都在使用的位掩码。</summary>
     public const uint MaskContactAll = MaskContact0 | MaskContact1 | MaskContact2 | MaskContact3;
 
-    // Accessed in unsafe code.
+    // 在 unsafe 代码中访问。
 #pragma warning disable CS0649
     internal int _internal;
 #pragma warning restore CS0649
 
     /// <summary>
-    /// The low nibble indicates which contacts are currently intact (bit set) or broken (bit unset).
-    /// The next nibble indicates which contacts were intact or broken during the solving phase.
+    /// 低半字节表示当前哪些接触完好（位已设置）或已断开（位未设置）。
+    /// 接下来的半字节表示求解阶段哪些接触完好或已断开。
     /// </summary>
     /// <example>
-    /// A sphere may slide down a ramp. Within one timestep Jitter may detect the collision, create the contact,
-    /// solve the contact, integrate velocities and positions and then consider the contact as broken, since the
-    /// movement orthogonal to the contact normal exceeds a threshold. This results in no intact contact before calling
-    /// <see cref="World.Step(Real, bool)"/> and no intact contact after the call. However, the corresponding bit for the
-    /// solver-phase will be set in this scenario.
+    /// 球体可能沿斜面下滑。在一个时间步内，Jitter 可能检测到碰撞、创建接触、求解接触、
+    /// 对速度和位置进行积分，然后认为该接触已断开，因为沿与接触法线正交方向的移动超过了阈值。
+    /// 因此，调用 <see cref="World.Step(Real, bool)"/> 之前和之后都没有完好的接触。
+    /// 不过在此情形下，求解阶段的对应位仍会被设置。
     /// </example>
     public uint UsageMask;
 
-    /// <summary>Handle to the first body's simulation data.</summary>
+    /// <summary>指向第一个刚体模拟数据的句柄。</summary>
     public JHandle<RigidBodyData> Body1;
-    /// <summary>Handle to the second body's simulation data.</summary>
+    /// <summary>指向第二个刚体模拟数据的句柄。</summary>
     public JHandle<RigidBodyData> Body2;
 
-    /// <summary>Unique key identifying this arbiter's shape pair.</summary>
+    /// <summary>标识该仲裁器形状对的唯一键。</summary>
     public ArbiterKey Key;
 
-    /// <summary>Combined restitution coefficient for this contact pair.</summary>
+    /// <summary>该接触对的合成恢复系数。</summary>
     public Real Restitution;
-    /// <summary>Combined friction coefficient for this contact pair.</summary>
+    /// <summary>该接触对的合成摩擦系数。</summary>
     public Real Friction;
-    /// <summary>Relaxation factor for speculative contacts.</summary>
+    /// <summary>推测接触的松弛因子。</summary>
     public Real SpeculativeRelaxationFactor;
 
-    /// <summary>Determines which velocity components are updated by the solver.</summary>
+    /// <summary>确定求解器更新哪些速度分量。</summary>
     public SolveMode Mode;
 
-    /// <summary>First contact point.</summary>
+    /// <summary>第一个接触点。</summary>
     public Contact Contact0;
-    /// <summary>Second contact point.</summary>
+    /// <summary>第二个接触点。</summary>
     public Contact Contact1;
-    /// <summary>Third contact point.</summary>
+    /// <summary>第三个接触点。</summary>
     public Contact Contact2;
-    /// <summary>Fourth contact point.</summary>
+    /// <summary>第四个接触点。</summary>
     public Contact Contact3;
 
     /// <summary>
-    /// Prepares all active contacts for solver iterations by computing effective masses and warm-starting impulses.
+    /// 通过计算有效质量和热启动冲量，为求解器迭代准备所有活动接触。
     /// </summary>
-    /// <param name="timeStep">The full step and substep timing information.</param>
+    /// <param name="timeStep">完整步与子步的计时信息。</param>
     public unsafe void PrepareForIteration(in TimeStep timeStep)
     {
         var ptr = (ContactData*)Unsafe.AsPointer(ref this);
@@ -139,7 +138,7 @@ public struct ContactData
         }
     }
 
-    /// <summary>Clears the accumulated normal and friction impulses of all active contacts.</summary>
+    /// <summary>清除所有活动接触累积的法向冲量和摩擦冲量。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ResetImpulses()
     {
@@ -150,7 +149,7 @@ public struct ContactData
         if ((UsageMask & MaskContact3) != 0) Contact3.Accumulated = zero;
     }
 
-    /// <summary>Skips replaying accumulated impulses on the next preparation of each active contact.</summary>
+    /// <summary>在每个活动接触的下一次准备阶段跳过重放累积冲量。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SkipWarmStart()
     {
@@ -162,9 +161,9 @@ public struct ContactData
     }
 
     /// <summary>
-    /// Performs one solver iteration over all active contacts, applying corrective impulses.
+    /// 对所有活动接触执行一次求解器迭代，施加修正冲量。
     /// </summary>
-    /// <param name="applyBias">If <see langword="true"/>, applies position-correction bias.</param>
+    /// <param name="applyBias">若为 <see langword="true"/>，则施加位置修正偏置。</param>
     public unsafe void Iterate(bool applyBias)
     {
         var ptr = (ContactData*)Unsafe.AsPointer(ref this);
@@ -226,14 +225,13 @@ public struct ContactData
     }
 
     /// <summary>
-    /// Gets a value indicating whether the current system supports hardware acceleration
-    /// for SIMD (Single Instruction, Multiple Data) operations.
+    /// 获取一个值，指示当前系统是否支持 SIMD（单指令多数据）操作的硬件加速。
     /// </summary>
     public static bool IsHardwareAccelerated => Vector.IsHardwareAccelerated;
 
     /// <summary>
-    /// Updates contact positions after integration and removes contacts whose normal separation exceeds
-    /// one tenth of the break threshold or whose tangential drift exceeds the full threshold.
+    /// 在积分之后更新接触位置，并移除法向分离超过断开阈值十分之一、
+    /// 或切向漂移超过完整阈值的接触。
     /// </summary>
     public unsafe void UpdatePosition()
     {
@@ -264,10 +262,10 @@ public struct ContactData
     }
 
     /// <summary>
-    /// Initializes this contact data for a pair of rigid bodies.
+    /// 为一对刚体初始化此接触数据。
     /// </summary>
-    /// <param name="body1">The first rigid body.</param>
-    /// <param name="body2">The second rigid body.</param>
+    /// <param name="body1">第一个刚体。</param>
+    /// <param name="body2">第二个刚体。</param>
     public void Init(RigidBody body1, RigidBody body2)
     {
         Body1 = body1.Handle;
@@ -284,9 +282,9 @@ public struct ContactData
     }
 
     /// <summary>
-    /// Resets the solve mode based on the current motion types of the bodies, then removes the specified flags.
+    /// 根据刚体当前的运动类型重置求解模式，然后移除指定的标志。
     /// </summary>
-    /// <param name="removeFlags">Flags to remove from the full solve mode.</param>
+    /// <param name="removeFlags">要从完整求解模式中移除的标志。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ResetMode(SolveMode removeFlags = SolveMode.None)
     {
@@ -297,8 +295,8 @@ public struct ContactData
 
     // ---------------------------------------------------------------------------------------------------------
     //
-    // The following contact caching code is heavily influenced / a direct copy of the great
-    // Bullet Physics Engine:
+    // 以下接触缓存代码在很大程度上参考/直接复制自出色的
+    // Bullet 物理引擎：
 
     //
     // Bullet Continuous Collision Detection and Physics Library Copyright (c) 2003-2006 Erwin
@@ -320,25 +318,25 @@ public struct ContactData
     // src/Bullet3OpenCL/NarrowphaseCollision/b3ContactCache.cpp
 
     /// <summary>
-    /// Adds a new collision result to the contact manifold. Keeps at most four points.
+    /// 向接触流形添加新的碰撞结果。最多保留四个点。
     /// </summary>
-    /// <param name="point1">Contact point on the first body in world space.</param>
-    /// <param name="point2">Contact point on the second body in world space.</param>
-    /// <param name="normal">Contact normal in the direction of the solver's positive impulse on body 2.
-    /// For overlapping contact points, it points from <paramref name="point2"/> toward <paramref name="point1"/>.</param>
+    /// <param name="point1">世界空间中第一个刚体上的接触点。</param>
+    /// <param name="point2">世界空间中第二个刚体上的接触点。</param>
+    /// <param name="normal">接触法线，方向为求解器对刚体 2 施加正冲量的方向。
+    /// 对于重叠的接触点，它从 <paramref name="point2"/> 指向 <paramref name="point1"/>。</param>
     public unsafe void AddContact(in JVector point1, in JVector point2, in JVector normal)
     {
         var ptr = (ContactData*)Unsafe.AsPointer(ref this);
 
         if ((UsageMask & MaskContactAll) == MaskContactAll)
         {
-            // All four contacts are in use. Find one candidate to be replaced by the new one.
+            // 全部四个接触都在使用中。找出一个可被新接触替换的候选。
             SortCachedPoints(point1, point2, normal);
             return;
         }
 
-        // Not all contacts are in use, but the new contact point is close enough
-        // to an already existing point. Replace this point by the new one.
+        // 并非所有接触都在使用中，但新接触点与已有某个点足够接近。
+        // 用新点替换该点。
 
         Contact* closest = (Contact*)IntPtr.Zero;
         Real distanceSq = Real.MaxValue;
@@ -391,7 +389,7 @@ public struct ContactData
             return;
         }
 
-        // It is a completely new contact.
+        // 这是一个全新的接触。
 
         if ((UsageMask & MaskContact0) == 0)
         {
@@ -436,7 +434,7 @@ public struct ContactData
     private static uint SelectCachedPointReplacementMask(
         Real area0, Real area1, Real area2, Real area3)
     {
-        // always prefer the new point
+        // 始终优先选择新点
         const Real epsilon = -(Real)0.0001;
 
         Real biggestArea = 0;
@@ -582,51 +580,51 @@ public struct ContactData
     // ---------------------------------------------------------------------------------------------------------
 
     /// <summary>
-    /// Represents a single contact point between two rigid bodies.
+    /// 表示两个刚体之间的单个接触点。
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This structure is layout-sensitive and stored in unmanaged memory as part of a <see cref="ContactData"/>.
-    /// It contains geometric information (normal, tangents, positions) and solver state (accumulated impulses, bias).
+    /// 此结构对布局敏感，作为 <see cref="ContactData"/> 的一部分存储在非托管内存中。
+    /// 它包含几何信息（法线、切线、位置）和求解器状态（累积冲量、偏置）。
     /// </para>
     /// <para>
-    /// Do not cache or store references to this structure across simulation steps.
+    /// 不要跨模拟步缓存或保存对此结构的引用。
     /// </para>
     /// </remarks>
     [StructLayout(LayoutKind.Explicit)]
     public struct Contact
     {
-        /// <summary>Maximum position-correction bias applied per iteration.</summary>
+        /// <summary>每次迭代施加的最大位置修正偏置。</summary>
         public const Real MaximumBias = (Real)100.0;
-        /// <summary>Fraction of penetration corrected per step (Baumgarte stabilization).</summary>
+        /// <summary>每步修正的穿透比例（Baumgarte 稳定化）。</summary>
         public const Real BiasFactor = (Real)0.2;
-        /// <summary>Penetration depth below which no position correction is applied.</summary>
+        /// <summary>低于该穿透深度时不进行位置修正。</summary>
         public const Real AllowedPenetration = (Real)0.01;
-        /// <summary>Maximum tangential drift before a contact breaks; normal separation is limited to one tenth of this value.</summary>
+        /// <summary>接触断开前的最大切向漂移；法向分离被限制为该值的十分之一。</summary>
         public const Real BreakThreshold = (Real)0.02;
 
         /// <summary>
-        /// Flags indicating contact state.
+        /// 指示接触状态的标志。
         /// </summary>
         [Flags]
         public enum Flags
         {
-            /// <summary>Indicates this contact was created in the current step.</summary>
+            /// <summary>表示该接触是在当前步中创建的。</summary>
             NewContact = 1 << 1,
-            /// <summary>Skips replaying the accumulated impulse on the next preparation only.</summary>
+            /// <summary>仅在下次准备阶段跳过重放累积冲量。</summary>
             SkipWarmStart = 1 << 2,
         }
 
-        /// <summary>Current contact state flags.</summary>
+        /// <summary>当前接触状态标志。</summary>
         [FieldOffset(0)] public Flags Flag;
 
-        /// <summary>Velocity bias for restitution or speculative separation.</summary>
+        /// <summary>用于恢复或推测分离的速度偏置。</summary>
         [FieldOffset(4)] public Real Bias;
 
-        /// <summary>Position-correction bias computed from penetration depth.</summary>
+        /// <summary>根据穿透深度计算的位置修正偏置。</summary>
         [FieldOffset(4 + 1 * sizeof(Real))] public Real PenaltyBias;
 
-        // ―――――― The following 4-component vectors overlap ――――――――――――――――――――――――――――――
+        // ―――――― 以下 4 分量向量相互重叠 ――――――――――――――――――――――――――――――
 
         [FieldOffset(4 + 2 * sizeof(Real))] internal VectorReal NormalTangentX;
 
@@ -647,55 +645,55 @@ public struct ContactData
         internal JVector Position2;
 
         /// <summary>
-        /// World-space contact offset from the first body's center of mass used to apply impulses.
-        /// Held fixed during the substeps of a full simulation step.
+        /// 用于施加冲量的接触点相对第一个刚体质心的世界空间偏移。
+        /// 在完整模拟步的各子步期间保持不变。
         /// </summary>
         [FieldOffset(4 + 25 * sizeof(Real))]
         [ReferenceFrame(ReferenceFrame.World)] public JVector RelativePosition1;
 
         /// <summary>
-        /// World-space contact offset from the second body's center of mass used to apply impulses.
-        /// Held fixed during the substeps of a full simulation step.
+        /// 用于施加冲量的接触点相对第二个刚体质心的世界空间偏移。
+        /// 在完整模拟步的各子步期间保持不变。
         /// </summary>
         [FieldOffset(4 + 28 * sizeof(Real))]
         [ReferenceFrame(ReferenceFrame.World)] public JVector RelativePosition2;
 
         /// <summary>
-        /// Normalized contact direction. A positive normal impulse pushes <see cref="ContactData.Body2"/>
-        /// along this direction and <see cref="ContactData.Body1"/> against it. For overlapping contact points,
-        /// the normal points from the point on body 2 toward the point on body 1.
+        /// 归一化的接触方向。正的法向冲量沿此方向推动 <see cref="ContactData.Body2"/>，
+        /// 并反向推动 <see cref="ContactData.Body1"/>。对于重叠的接触点，
+        /// 法线从刚体 2 上的点指向刚体 1 上的点。
         /// </summary>
         [ReferenceFrame(ReferenceFrame.World)]
         public readonly JVector Normal => new(NormalTangentX.GetElement(0),
             NormalTangentY.GetElement(0), NormalTangentZ.GetElement(0));
 
         /// <summary>
-        /// Tangent (normalized) to the contact <see cref="Normal"/>. At creation it follows tangential
-        /// relative velocity when nonzero; otherwise it is an arbitrary tangent. Cached contacts retain their basis.
+        /// 接触 <see cref="Normal"/> 的（归一化）切线。创建时若切向相对速度非零，
+        /// 则沿其方向；否则为任意切线。缓存的接触会保留其基向量。
         /// </summary>
         [ReferenceFrame(ReferenceFrame.World)]
         public readonly JVector Tangent1 => new(NormalTangentX.GetElement(1),
             NormalTangentY.GetElement(1), NormalTangentZ.GetElement(1));
 
         /// <summary>
-        /// A second tangent forming an orthonormal basis with <see cref="Normal"/> and <see cref="Tangent1"/>.
+        /// 第二条切线，与 <see cref="Normal"/> 和 <see cref="Tangent1"/> 构成正交基。
         /// </summary>
         [ReferenceFrame(ReferenceFrame.World)]
         public readonly JVector Tangent2 => new JVector(NormalTangentX.GetElement(2),
             NormalTangentY.GetElement(2), NormalTangentZ.GetElement(2));
 
         /// <summary>
-        /// Gets the accumulated normal solver impulse from the last solved substep.
+        /// 获取上一个已求解子步累积的法向求解器冲量。
         /// </summary>
         public readonly Real Impulse => Accumulated.GetElement(0);
 
         /// <summary>
-        /// Gets the accumulated solver impulse in the first tangent direction from the last solved substep.
+        /// 获取上一个已求解子步在第一切线方向上累积的求解器冲量。
         /// </summary>
         public readonly Real TangentImpulse1 => Accumulated.GetElement(1);
 
         /// <summary>
-        /// Gets the accumulated solver impulse in the second tangent direction from the last solved substep.
+        /// 获取上一个已求解子步在第二切线方向上累积的求解器冲量。
         /// </summary>
         public readonly Real TangentImpulse2 => Accumulated.GetElement(2);
 
@@ -713,13 +711,13 @@ public struct ContactData
             JVector.ConjugatedTransform(RelativePosition1, b1.Orientation, out Position1);
             JVector.ConjugatedTransform(RelativePosition2, b2.Orientation, out Position2);
 
-            // Material Properties
+            // 材质属性
             if (!newContact) return;
 
             Flag = Flags.NewContact;
             Accumulated = Vector.Create((Real)0.0);
 
-            // Linear-only contacts also omit rotation from restitution and the friction basis.
+            // 仅线性的接触在恢复和摩擦基中也会忽略旋转。
             JVector dv = b2.Velocity - b1.Velocity;
             if (cd->Mode == SolveMode.None || (cd->Mode & SolveMode.Angular) != 0)
             {
@@ -731,7 +729,7 @@ public struct ContactData
 
             Bias = 0;
 
-            // Fake restitution
+            // 模拟恢复
             if (relNormalVel < (Real)(-1.0))
             {
                 Bias = -cd->Restitution * relNormalVel;
@@ -764,7 +762,7 @@ public struct ContactData
             ref var b1 = ref cd->Body1.Data;
             ref var b2 = ref cd->Body2.Data;
 
-            // Solving has finished. Refresh the offsets for contact matching in the next step.
+            // 求解已结束。刷新偏移，以便在下一步中进行接触匹配。
             JVector.Transform(Position1, b1.Orientation, out RelativePosition1);
             JVector.Add(RelativePosition1, b1.Position, out JVector p1);
 
@@ -779,7 +777,7 @@ public struct ContactData
 
             Real penetration = JVector.Dot(dist, n);
 
-            // use a tenth of the actual threshold value here.
+            // 此处使用实际阈值值的十分之一。
             if (penetration < -BreakThreshold * (Real)0.1)
             {
                 return false;
@@ -796,12 +794,12 @@ public struct ContactData
             return true;
         }
 
-        // Fallback for missing hardware acceleration
+        // 缺少硬件加速时的回退实现
         #region public unsafe void PrepareForIteration(ContactData* cd, in TimeStep timeStep)
 
         public unsafe void PrepareForIteration(ContactData* cd, in TimeStep timeStep)
         {
-            // Begin read from VectorReal
+            // 开始从 VectorReal 读取
             Real accumulatedNormalImpulse = Accumulated.GetElement(0);
             Real accumulatedTangentImpulse1 = Accumulated.GetElement(1);
             Real accumulatedTangentImpulse2 = Accumulated.GetElement(2);
@@ -810,7 +808,7 @@ public struct ContactData
             Flag &= ~Flags.SkipWarmStart;
             if (skipWarmStart)
             {
-                // Keep Accumulated for Iterate; only omit its replay into velocities.
+                // 为 Iterate 保留 Accumulated；只是不将其重放到速度中。
                 accumulatedNormalImpulse = 0;
                 accumulatedTangentImpulse1 = 0;
                 accumulatedTangentImpulse2 = 0;
@@ -842,7 +840,7 @@ public struct ContactData
 
             if (penetration < -BreakThreshold)
             {
-                // Speculative contact
+                // 推测接触
                 Bias = penetration * timeStep.InverseStepDt * cd->SpeculativeRelaxationFactor;
             }
 
@@ -925,12 +923,12 @@ public struct ContactData
 
         #endregion
 
-        // Fallback for missing hardware acceleration
+        // 缺少硬件加速时的回退实现
         #region public unsafe void Iterate(ContactData* cd, bool applyBias)
 
         public unsafe void Iterate(ContactData* cd, bool applyBias)
         {
-            // Begin read from VectorReal
+            // 开始从 VectorReal 读取
             Real massNormal = MassNormalTangent.GetElement(0);
             Real massTangent1 = MassNormalTangent.GetElement(1);
             Real massTangent2 = MassNormalTangent.GetElement(2);
@@ -969,8 +967,8 @@ public struct ContactData
             accumulatedNormalImpulse = MathR.Max(oldNormalImpulse + normalImpulse, (Real)0.0);
             normalImpulse = accumulatedNormalImpulse - oldNormalImpulse;
 
-            // Use the pre-update normal impulse for the friction cone to stay consistent
-            // with the SIMD path, where this avoids breaking the vectorized clamp.
+            // 摩擦锥使用更新前的法向冲量，以与 SIMD 路径保持一致：
+            // 在 SIMD 路径中这能避免破坏向量化钳制。
             Real maxTangentImpulse = cd->Friction * oldNormalImpulse;
             Real tangentImpulse1 = massTangent1 * -vt1;
             Real tangentImpulse2 = massTangent2 * -vt2;
@@ -1074,7 +1072,7 @@ public struct ContactData
 
             if (penetration < -BreakThreshold)
             {
-                // Speculative contact
+                // 推测接触
                 Bias = penetration * timeStep.InverseStepDt * cd->SpeculativeRelaxationFactor;
             }
 
@@ -1084,7 +1082,7 @@ public struct ContactData
             var ktny = Vector.Create((Real)0.0);
             var ktnz = Vector.Create((Real)0.0);
 
-            // warm-starting, linear
+            // 热启动，线性部分
             Unsafe.SkipInit(out JVector linearImpulse);
             linearImpulse.X = GetSum3(Vector.Multiply(warmStartImpulse, NormalTangentX));
             linearImpulse.Y = GetSum3(Vector.Multiply(warmStartImpulse, NormalTangentY));
@@ -1204,8 +1202,8 @@ public struct ContactData
             var impulse = Vector.Multiply(MassNormalTangent, (Vector.Subtract(Vector.Create(bias, 0, 0, 0), vdots)));
             var oldImpulse = Accumulated;
 
-            // Use the pre-update normal impulse for the friction cone; this keeps the
-            // vectorized clamp simple and matches the scalar path.
+            // 摩擦锥使用更新前的法向冲量；这样可保持向量化钳制简单，
+            // 并与标量路径一致。
             Real maxTangentImpulse = cd->Friction * Accumulated.GetElement(0);
 
             Accumulated = Vector.Add(oldImpulse, impulse);

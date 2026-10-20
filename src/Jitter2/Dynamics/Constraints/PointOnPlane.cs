@@ -13,9 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constrains a fixed point in the reference frame of one body to a plane that is fixed in
-/// the reference frame of another body. This constraint removes one degree of translational
-/// freedom if the limit is enforced.
+/// 将一个刚体参考系中的固定点约束到另一个刚体参考系中固定的平面上。若启用限位，
+/// 该约束移除一个平动自由度。
 /// </summary>
 public unsafe class PointOnPlane : Constraint<PointOnPlane.SliderData>
 {
@@ -44,7 +43,7 @@ public unsafe class PointOnPlane : Constraint<PointOnPlane.SliderData>
         public Real Min;
         public Real Max;
 
-        // 0: inactive, 1: upper limit, 2: lower limit, 3: bilateral fixed limit.
+        // 0：未启用，1：上限，2：下限，3：双边固定限位。
         public ushort Clamp;
 
         public MemoryHelper.MemBlock12Real J0;
@@ -69,22 +68,22 @@ public unsafe class PointOnPlane : Constraint<PointOnPlane.SliderData>
     }
 
     /// <summary>
-    /// Initializes the constraint from world-space parameters.
+    /// 使用世界空间参数初始化约束。
     /// </summary>
-    /// <param name="axis">The plane normal in world space, fixed in the reference frame of body 1.</param>
-    /// <param name="anchor1">Anchor point on body 1 defining the plane origin in world space.</param>
-    /// <param name="anchor2">Anchor point on body 2 constrained to the plane in world space.</param>
-    /// <param name="limit">Distance limit from the plane.</param>
+    /// <param name="axis">世界空间中的平面法线，固定于刚体 1 的参考系。</param>
+    /// <param name="anchor1">刚体 1 上的锚点，在世界空间中定义平面原点。</param>
+    /// <param name="anchor2">刚体 2 上的锚点，在世界空间中约束到该平面。</param>
+    /// <param name="limit">到平面的距离限位。</param>
     /// <remarks>
-    /// Computes local anchor points and axis from the current body poses.
-    /// Equal or reversed distance limits fix the point at their midpoint. This includes
-    /// <see cref="LinearLimit.Fixed"/> and permits correction impulses in both directions.
-    /// Default values: <see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>, <see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>.
+    /// 根据当前刚体位姿计算局部锚点和轴。
+    /// 相等或反向的距离限位会将点固定在其中点。这包括
+    /// <see cref="LinearLimit.Fixed"/>，并允许两个方向上的修正冲量。
+    /// 默认值：<see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>，<see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis"/> is zero or contains a non-finite value, when
-    /// <paramref name="anchor1"/> or <paramref name="anchor2"/> contains a non-finite value,
-    /// or when either value in <paramref name="limit"/> is NaN.
+    /// 当 <paramref name="axis"/> 为零或包含非有限值、当
+    /// <paramref name="anchor1"/> 或 <paramref name="anchor2"/> 包含非有限值，
+    /// 或当 <paramref name="limit"/> 中任一值为 NaN 时抛出。
     /// </exception>
     public void Initialize(JVector axis, JVector anchor1, JVector anchor2, LinearLimit limit)
     {
@@ -192,10 +191,10 @@ public unsafe class PointOnPlane : Constraint<PointOnPlane.SliderData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔顺性）。
     /// </summary>
     /// <value>
-    /// Default is 0.00001. Higher values allow more positional error but improve stability.
+    /// 默认值为 0.00001。较高的值允许更大的位置误差，但可提升稳定性。
     /// </value>
     public Real Softness
     {
@@ -208,10 +207,10 @@ public unsafe class PointOnPlane : Constraint<PointOnPlane.SliderData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively positional error is corrected.
+    /// 获取或设置偏置因子，控制位置误差的修正强度。
     /// </summary>
     /// <value>
-    /// Default is <see cref="Constraint.DefaultLinearBias"/>. Higher values correct errors faster but may cause instability.
+    /// 默认值为 <see cref="Constraint.DefaultLinearBias"/>。较高的值修正误差更快，但可能导致不稳定。
     /// </value>
     public Real Bias
     {
@@ -224,7 +223,7 @@ public unsafe class PointOnPlane : Constraint<PointOnPlane.SliderData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一次已求解子步中累积的求解器冲量。
     /// </summary>
     public Real Impulse => Data.AccumulatedImpulse;
 

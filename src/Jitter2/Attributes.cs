@@ -9,7 +9,7 @@ using System;
 namespace Jitter2;
 
 /// <summary>
-/// Enum representing reference frames.
+/// 表示参考系的枚举。
 /// </summary>
 public enum ReferenceFrame
 {
@@ -18,20 +18,20 @@ public enum ReferenceFrame
 }
 
 /// <summary>
-/// Attribute to specify the reference frame of a member.
+/// 用于指定成员的参考系的特性。
 /// </summary>
 [AttributeUsage(AttributeTargets.All)]
 public sealed class ReferenceFrameAttribute : Attribute
 {
     /// <summary>
-    /// Gets or sets the reference frame.
+    /// 获取或设置参考系。
     /// </summary>
     public ReferenceFrame Frame { get; set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReferenceFrameAttribute"/> class.
+    /// 初始化 <see cref="ReferenceFrameAttribute"/> 类的新实例。
     /// </summary>
-    /// <param name="frame">The reference frame.</param>
+    /// <param name="frame">参考系。</param>
     public ReferenceFrameAttribute(ReferenceFrame frame)
     {
         Frame = frame;
@@ -39,37 +39,37 @@ public sealed class ReferenceFrameAttribute : Attribute
 }
 
 /// <summary>
-/// Specifies the threading context in which code executes or a callback is invoked.
+/// 指定代码执行或回调被调用时所在的线程上下文。
 /// </summary>
 public enum ThreadContext
 {
     /// <summary>
-    /// Called from the main thread (or the thread calling World.Step).
-    /// Safe to access global state.
+    /// 从主线程（或调用 World.Step 的线程）调用。
+    /// 可以安全地访问全局状态。
     /// </summary>
     MainThread,
 
     /// <summary>
-    /// Called from background worker threads.
-    /// Code must be thread-safe and lock-free.
+    /// 从后台工作线程调用。
+    /// 代码必须是线程安全且无锁的。
     /// </summary>
     ParallelWorker,
 
     /// <summary>
-    /// Could be called from either. Handle with care.
+    /// 可能从上述任意线程调用。使用时需谨慎。
     /// </summary>
     Any
 }
 
 /// <summary>
-/// Indicates the thread context in which a callback or event is expected to be invoked.
-/// This attribute is primarily informational and used for documentation purposes.
+/// 指示回调或事件预期被调用时所在的线程上下文。
+/// 此特性主要用于提供信息，并用于文档目的。
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Event)]
 public sealed class CallbackThreadAttribute(ThreadContext context) : Attribute
 {
     /// <summary>
-    /// Gets the thread context in which the attributed member is expected to be invoked.
+    /// 获取预期调用所标注成员时所在的线程上下文。
     /// </summary>
     public ThreadContext Context { get; } = context;
 }

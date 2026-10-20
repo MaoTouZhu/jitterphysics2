@@ -11,17 +11,16 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents the abstract base class for shapes that can be attached to a rigid body.
+/// 表示可附加到刚体上的形状的抽象基类。
 /// </summary>
 public abstract class RigidBodyShape : Shape
 {
     /// <summary>
-    /// The <see cref="RigidBody"/> to which this shape is attached. It is null until the shape is attached
-    /// and after it is removed from a body.
+    /// 此形状所附加到的 <see cref="RigidBody"/>。在形状被附加之前以及从刚体移除之后为 null。
     /// </summary>
     public RigidBody RigidBody { get; internal set; } = null!;
 
-    /// <summary>Draws this shape using its attached body's transform, or the identity transform when unattached.</summary>
+    /// <summary>使用其附加刚体的变换绘制此形状；未附加时使用单位变换。</summary>
     /// <inheritdoc cref="Shape.DebugDraw(IDebugDrawer, in DebugDrawSettings)" path="/remarks"/>
     public override void DebugDraw(IDebugDrawer drawer, in DebugDrawSettings settings)
     {
@@ -50,7 +49,7 @@ public abstract class RigidBodyShape : Shape
 
         if (RigidBody.EnableSpeculativeContacts)
         {
-            // Speculative sweeps predict translation using the body's physical velocity.
+            // 推测扫掠使用刚体的物理速度来预测平移。
             Real swept = dt * data.Velocity.Length();
             box.Min -= new JVector(swept);
             box.Max += new JVector(swept);
@@ -65,13 +64,12 @@ public abstract class RigidBodyShape : Shape
     }
 
     /// <summary>
-    /// Calculates the mass and inertia of the shape. Can be overridden by child classes to improve
-    /// performance or accuracy. The default implementation relies on an approximation of the shape
-    /// constructed using the support map function.
+    /// 计算形状的质量和惯性。子类可重写以提升性能或精度。默认实现依赖于
+    /// 使用支撑映射函数构造的形状近似。
     /// </summary>
     /// <remarks>
-    /// The inertia tensor is computed relative to the coordinate system origin (0,0,0),
-    /// not the center of mass.
+    /// 惯性张量是相对于坐标系原点 (0,0,0) 计算的，
+    /// 而不是相对于质心。
     /// </remarks>
     [ReferenceFrame(ReferenceFrame.Local)]
     public virtual void CalculateMassInertia(out JSymmetricMatrix inertia, out JVector com, out Real mass)
@@ -80,24 +78,23 @@ public abstract class RigidBodyShape : Shape
     }
 
     /// <summary>
-    /// Performs a local ray cast against the shape, checking if a ray originating from a specified point
-    /// and traveling in a specified direction intersects with the object. It does not take into account the
-    /// transformation of the associated rigid body.
+    /// 对形状执行局部射线投射，检查从指定点出发、沿指定方向传播的射线是否与对象相交。
+    /// 它不考虑关联刚体的变换。
     /// </summary>
-    /// <param name="origin">The starting point of the ray.</param>
+    /// <param name="origin">射线的起点。</param>
     /// <param name="direction">
-    /// The direction of the ray. This vector does not need to be normalized.
+    /// 射线的方向。此向量无需归一化。
     /// </param>
     /// <param name="normal">
-    /// The surface normal at the point of intersection, if an intersection occurs.
+    /// 若发生相交，则为交点处的表面法线。
     /// </param>
     /// <param name="lambda">
-    /// The ray parameter from the <paramref name="origin"/> to the intersection point. Because
-    /// <paramref name="direction"/> need not be normalized, this is not necessarily a distance. The hit point is:
-    /// <c>origin + lambda * direction</c>.
+    /// 从 <paramref name="origin"/> 到交点的射线参数。由于
+    /// <paramref name="direction"/> 无需归一化，因此它不一定是距离。命中点为：
+    /// <c>origin + lambda * direction</c>。
     /// </param>
     /// <returns>
-    /// <c>true</c> if the ray intersects with the object; otherwise, <c>false</c>.
+    /// 若射线与对象相交则为 <c>true</c>；否则为 <c>false</c>。
     /// </returns>
     [ReferenceFrame(ReferenceFrame.Local)]
     public virtual bool LocalRayCast(in JVector origin, in JVector direction, out JVector normal, out Real lambda)
@@ -115,13 +112,13 @@ public abstract class RigidBodyShape : Shape
 
         ref var data = ref RigidBody.Data;
 
-        // rotate the ray into the reference frame of the body...
+        // 将射线旋转到刚体的参考系中……
         JVector transformedDir = JVector.ConjugatedTransform(direction, data.Orientation);
         JVector transformedOrigin = JVector.ConjugatedTransform(origin - data.Position, data.Orientation);
 
         bool result = LocalRayCast(transformedOrigin, transformedDir, out normal, out lambda);
 
-        // ...rotate back.
+        // ……再旋转回来。
         JVector.Transform(normal, data.Orientation, out normal);
 
         return result;

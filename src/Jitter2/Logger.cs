@@ -9,17 +9,17 @@ using System;
 namespace Jitter2;
 
 /// <summary>
-/// Provides logging functionality.
+/// 提供日志功能。
 /// </summary>
 public static class Logger
 {
     /// <summary>
-    /// Gets or sets a listener which receives log messages.
+    /// 获取或设置接收日志消息的监听器。
     /// </summary>
     public static Action<LogLevel, string>? Listener { get; set; }
 
     /// <summary>
-    /// Defines the severity levels for logging messages.
+    /// 定义日志消息的严重级别。
     /// </summary>
     public enum LogLevel
     {
@@ -29,9 +29,9 @@ public static class Logger
     }
 
     /// <summary>
-    /// Logs an informational message.
+    /// 记录一条信息性消息。
     /// </summary>
-    /// <param name="format">The message to log.</param>
+    /// <param name="format">要记录的消息。</param>
     public static void Information(scoped ReadOnlySpan<char> format) => Log(LogLevel.Information, format);
 
     /// <inheritdoc cref="Information"/>
@@ -44,9 +44,9 @@ public static class Logger
     public static void Information<T1, T2, T3>(scoped ReadOnlySpan<char> format, T1 arg1, T2 arg2, T3 arg3) => LogFormat(LogLevel.Information, format, arg1, arg2, arg3);
 
     /// <summary>
-    /// Logs a warning message.
+    /// 记录一条警告消息。
     /// </summary>
-    /// <param name="format">The message to log.</param>
+    /// <param name="format">要记录的消息。</param>
     public static void Warning(scoped ReadOnlySpan<char> format) => Log(LogLevel.Warning, format);
 
     /// <inheritdoc cref="Warning"/>
@@ -59,9 +59,9 @@ public static class Logger
     public static void Warning<T1, T2, T3>(scoped ReadOnlySpan<char> format, T1 arg1, T2 arg2, T3 arg3) => LogFormat(LogLevel.Warning, format, arg1, arg2, arg3);
 
     /// <summary>
-    /// Logs an error message.
+    /// 记录一条错误消息。
     /// </summary>
-    /// <param name="format">The message to log.</param>
+    /// <param name="format">要记录的消息。</param>
     public static void Error(scoped ReadOnlySpan<char> format) => Log(LogLevel.Error, format);
 
     /// <inheritdoc cref="Error"/>
@@ -74,17 +74,17 @@ public static class Logger
     public static void Error<T1, T2, T3>(scoped ReadOnlySpan<char> format, T1 arg1, T2 arg2, T3 arg3) => LogFormat(LogLevel.Error, format, arg1, arg2, arg3);
 
     /// <summary>
-    /// Internal logging method that invokes the registered listener with the given message.
+    /// 内部日志方法，使用给定消息调用已注册的监听器。
     /// </summary>
-    /// <param name="level">The log level of the message.</param>
-    /// <param name="format">The message to log.</param>
+    /// <param name="level">消息的日志级别。</param>
+    /// <param name="format">要记录的消息。</param>
     private static void Log(LogLevel level, scoped ReadOnlySpan<char> format)
     {
         Listener?.Invoke(level, format.ToString());
     }
 
     /// <summary>
-    /// Formats a log message with one argument and invokes the registered listener.
+    /// 使用一个参数格式化日志消息，并调用已注册的监听器。
     /// </summary>
     private static void LogFormat<T1>(LogLevel level, scoped ReadOnlySpan<char> format, T1 arg1)
     {
@@ -92,7 +92,7 @@ public static class Logger
     }
 
     /// <summary>
-    /// Formats a log message with two arguments and invokes the listeners.
+    /// 使用两个参数格式化日志消息，并调用监听器。
     /// </summary>
     private static void LogFormat<T1, T2>(LogLevel level, scoped ReadOnlySpan<char> format, T1 arg1, T2 arg2)
     {
@@ -100,7 +100,7 @@ public static class Logger
     }
 
     /// <summary>
-    /// Formats a log message with three arguments and invokes the listeners.
+    /// 使用三个参数格式化日志消息，并调用监听器。
     /// </summary>
     private static void LogFormat<T1, T2, T3>(LogLevel level, scoped ReadOnlySpan<char> format, T1 arg1, T2 arg2, T3 arg3)
     {

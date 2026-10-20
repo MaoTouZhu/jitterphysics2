@@ -10,32 +10,32 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Provides methods for computing points on the Minkowski difference of two convex shapes.
+/// 提供计算两个凸形状 Minkowski 差上各点的方法。
 /// </summary>
 /// <remarks>
-/// The Minkowski difference A - B is defined as the set of all points (a - b) where a is in A and b is in B.
-/// This is the fundamental construct used by GJK and EPA algorithms to detect collisions.
+/// Minkowski 差 A - B 定义为所有点 (a - b) 的集合，其中 a 属于 A，b 属于 B。
+/// 这是 GJK 和 EPA 算法用于检测碰撞的基本构造。
 /// </remarks>
 public static class MinkowskiDifference
 {
     /// <summary>
-    /// Represents a vertex on the Minkowski difference of two shapes.
+    /// 表示两个形状 Minkowski 差上的一个顶点。
     /// </summary>
     public struct Vertex
     {
-        /// <summary>The point on the Minkowski difference: <c>V = A - B</c>.</summary>
+        /// <summary>Minkowski 差上的点：<c>V = A - B</c>。</summary>
         public JVector V;
 
-        /// <summary>The support point on shape A in world space.</summary>
+        /// <summary>形状 A 在世界空间中的支撑点。</summary>
         public JVector A;
 
-        /// <summary>The support point on shape B in world space.</summary>
+        /// <summary>形状 B 在世界空间中的支撑点。</summary>
         public JVector B;
 
         /// <summary>
-        /// Creates a vertex with only the difference point set.
+        /// 创建一个仅设置差值的顶点。
         /// </summary>
-        /// <param name="v">The Minkowski difference point.</param>
+        /// <param name="v">Minkowski 差上的点。</param>
         public Vertex(JVector v)
         {
             V = v;
@@ -43,16 +43,16 @@ public static class MinkowskiDifference
     }
 
     /// <summary>
-    /// Computes the support function S_{A-B}(d) = S_A(d) - S_B(-d) for the Minkowski difference.
+    /// 计算 Minkowski 差的支撑函数 S_{A-B}(d) = S_A(d) - S_B(-d)。
     /// </summary>
-    /// <typeparam name="Ta">The type of support shape A.</typeparam>
-    /// <typeparam name="Tb">The type of support shape B.</typeparam>
-    /// <param name="supportA">The support function of shape A (at origin, not rotated).</param>
-    /// <param name="supportB">The support function of shape B.</param>
-    /// <param name="orientationB">The orientation of shape B.</param>
-    /// <param name="positionB">The position of shape B.</param>
-    /// <param name="direction">The search direction.</param>
-    /// <param name="v">The resulting vertex containing support points from both shapes.</param>
+    /// <typeparam name="Ta">支撑形状 A 的类型。</typeparam>
+    /// <typeparam name="Tb">支撑形状 B 的类型。</typeparam>
+    /// <param name="supportA">形状 A 的支撑函数（位于原点，未旋转）。</param>
+    /// <param name="supportB">形状 B 的支撑函数。</param>
+    /// <param name="orientationB">形状 B 的朝向。</param>
+    /// <param name="positionB">形状 B 的位置。</param>
+    /// <param name="direction">搜索方向。</param>
+    /// <param name="v">包含两个形状支撑点的结果顶点。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Support<Ta, Tb>(in Ta supportA, in Tb supportB, in JQuaternion orientationB,
         in JVector positionB, in JVector direction, out Vertex v) where Ta : ISupportMappable where Tb : ISupportMappable
@@ -69,15 +69,15 @@ public static class MinkowskiDifference
     }
 
     /// <summary>
-    /// Computes a point guaranteed to be inside the Minkowski difference.
+    /// 计算一个保证位于 Minkowski 差内部的点。
     /// </summary>
-    /// <typeparam name="Ta">The type of support shape A.</typeparam>
-    /// <typeparam name="Tb">The type of support shape B.</typeparam>
-    /// <param name="supportA">The support function of shape A (at origin, not rotated).</param>
-    /// <param name="supportB">The support function of shape B.</param>
-    /// <param name="orientationB">The orientation of shape B.</param>
-    /// <param name="positionB">The position of shape B.</param>
-    /// <param name="center">The resulting vertex representing the center of the Minkowski difference.</param>
+    /// <typeparam name="Ta">支撑形状 A 的类型。</typeparam>
+    /// <typeparam name="Tb">支撑形状 B 的类型。</typeparam>
+    /// <param name="supportA">形状 A 的支撑函数（位于原点，未旋转）。</param>
+    /// <param name="supportB">形状 B 的支撑函数。</param>
+    /// <param name="orientationB">形状 B 的朝向。</param>
+    /// <param name="positionB">形状 B 的位置。</param>
+    /// <param name="center">表示 Minkowski 差中心的结果顶点。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GetCenter<Ta, Tb>(in Ta supportA, in Tb supportB, in JQuaternion orientationB, in JVector positionB,
         out Vertex center) where Ta : ISupportMappable where Tb : ISupportMappable

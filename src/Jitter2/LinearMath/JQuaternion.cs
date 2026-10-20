@@ -11,9 +11,9 @@ using System.Runtime.InteropServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// A structure representing a Quaternion: <c>Q = x*i + y*j + z*k + w</c>.
+/// 表示四元数 <c>Q = x*i + y*j + z*k + w</c> 的结构。
 /// <br/>
-/// Uses the Hamilton convention where <c>i² = j² = k² = ijk = -1</c>.
+/// 采用 Hamilton 约定，其中 <c>i² = j² = k² = ijk = -1</c>。
 /// </summary>
 [StructLayout(LayoutKind.Explicit, Size = 4 * sizeof(Real))]
 public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<JQuaternion>
@@ -24,7 +24,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     [FieldOffset(3 * sizeof(Real))] public Real W = w;
 
     /// <summary>
-    /// Gets the vector part <c>(x, y, z)</c> of the quaternion.
+    /// 获取四元数的向量部分 <c>(x, y, z)</c>。
     /// </summary>
     public JVector Vector
     {
@@ -33,7 +33,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Gets the scalar part <c>(w)</c> of the quaternion.
+    /// 获取四元数的标量部分 <c>(w)</c>。
     /// </summary>
     public Real Scalar
     {
@@ -42,25 +42,25 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Gets the identity quaternion <c>(0, 0, 0, 1)</c>.
+    /// 获取单位四元数 <c>(0, 0, 0, 1)</c>。
     /// </summary>
     public static JQuaternion Identity => new(0, 0, 0, 1);
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="JQuaternion"/> struct.
+    /// 初始化 <see cref="JQuaternion"/> 结构的新实例。
     /// </summary>
-    /// <param name="w">The scalar (W) component.</param>
-    /// <param name="v">The vector (X, Y, Z) component.</param>
+    /// <param name="w">标量（W）分量。</param>
+    /// <param name="v">向量（X、Y、Z）分量。</param>
     public JQuaternion(Real w, in JVector v) : this(v.X, v.Y, v.Z, w)
     {
     }
 
     /// <summary>
-    /// Adds two quaternions component-wise.
+    /// 将两个四元数逐分量相加。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <returns>The sum of the two quaternions.</returns>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <returns>两个四元数之和。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion Add(in JQuaternion quaternion1, in JQuaternion quaternion2)
     {
@@ -69,24 +69,22 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion that rotates the unit vector <paramref name="from"/> into
-    /// the unit vector <paramref name="to"/>.
+    /// 创建一个四元数，将单位向量 <paramref name="from"/> 旋转到单位向量 <paramref name="to"/>。
     /// </summary>
     /// <remarks>
-    /// This calculation relies on the half-angle formula.
-    /// If the vectors are parallel (<c>dot ≈ 1</c>), Identity is returned.
-    /// If the vectors are opposite (<c>dot ≈ -1</c>), a rotation of 180° (π radians)
-    /// around an arbitrary orthogonal axis is returned.
+    /// 此计算基于半角公式。
+    /// 若两向量平行（<c>dot ≈ 1</c>），返回 Identity。
+    /// 若两向量相反（<c>dot ≈ -1</c>），返回绕任意正交轴旋转 180°（π 弧度）的旋转。
     /// </remarks>
-    /// <param name="from">Source direction (must be unit length).</param>
-    /// <param name="to">Target direction (must be unit length).</param>
-    /// <returns>A unit quaternion representing the shortest rotation.</returns>
+    /// <param name="from">源方向（必须是单位长度）。</param>
+    /// <param name="to">目标方向（必须是单位长度）。</param>
+    /// <returns>表示最短旋转的单位四元数。</returns>
     public static JQuaternion CreateFromToRotation(JVector from, JVector to)
     {
         const Real epsilon = (Real)1e-6;
         Real dot = JVector.Dot(from, to);
 
-        // Vectors are opposite (Singularity)
+        // 向量方向相反（奇异情形）
         if (dot < -(Real)1.0 + epsilon)
         {
             JVector axis = MathHelper.CreateOrthonormal(from);
@@ -101,11 +99,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Adds two quaternions component-wise.
+    /// 将两个四元数逐分量相加。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <param name="result">Output: The sum of the two quaternions.</param>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <param name="result">输出：两个四元数之和。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Add(in JQuaternion quaternion1, in JQuaternion quaternion2, out JQuaternion result)
     {
@@ -116,14 +114,14 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Returns the conjugate of a quaternion.
+    /// 返回四元数的共轭。
     /// </summary>
     /// <remarks>
-    /// The conjugate is defined as <c>(-x, -y, -z, w)</c>.
-    /// For unit quaternions, the conjugate is equivalent to the inverse.
+    /// 共轭定义为 <c>(-x, -y, -z, w)</c>。
+    /// 对于单位四元数，共轭等价于逆。
     /// </remarks>
-    /// <param name="value">The quaternion to conjugate.</param>
-    /// <returns>The conjugate of the quaternion.</returns>
+    /// <param name="value">要求共轭的四元数。</param>
+    /// <returns>该四元数的共轭。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion Conjugate(in JQuaternion value)
     {
@@ -136,12 +134,12 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Returns the conjugate of the quaternion.
+    /// 返回该四元数的共轭。
     /// </summary>
     /// <remarks>
-    /// The conjugate is defined as <c>(-x, -y, -z, w)</c>.
+    /// 共轭定义为 <c>(-x, -y, -z, w)</c>。
     /// </remarks>
-    /// <returns>The conjugate of the quaternion.</returns>
+    /// <returns>该四元数的共轭。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly JQuaternion Conjugate()
     {
@@ -154,7 +152,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Returns a string representing the quaternion in the format <c>X=..., Y=..., Z=..., W=...</c>.
+    /// 返回以 <c>X=..., Y=..., Z=..., W=...</c> 格式表示该四元数的字符串。
     /// </summary>
     public readonly override string ToString()
     {
@@ -162,11 +160,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Subtracts the second quaternion from the first component-wise.
+    /// 将第二个四元数从第一个中逐分量减去。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <returns>The difference of the two quaternions.</returns>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <returns>两个四元数之差。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion Subtract(in JQuaternion quaternion1, in JQuaternion quaternion2)
     {
@@ -175,11 +173,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Subtracts the second quaternion from the first component-wise.
+    /// 将第二个四元数从第一个中逐分量减去。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <param name="result">Output: The difference of the two quaternions.</param>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <param name="result">输出：两个四元数之差。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Subtract(in JQuaternion quaternion1, in JQuaternion quaternion2, out JQuaternion result)
     {
@@ -190,14 +188,14 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Multiplies two quaternions (Hamilton Product).
+    /// 将两个四元数相乘（Hamilton 积）。
     /// </summary>
     /// <remarks>
-    /// Non-commutative. <c>Q1 * Q2</c> represents the rotation Q2 followed by Q1 (local frame) or Q1 followed by Q2 (global frame).
+    /// 不可交换。<c>Q1 * Q2</c> 表示先旋转 Q2 再旋转 Q1（局部坐标系），或先旋转 Q1 再旋转 Q2（全局坐标系）。
     /// </remarks>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <returns>The product of the two quaternions.</returns>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <returns>两个四元数之积。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion Multiply(in JQuaternion quaternion1, in JQuaternion quaternion2)
     {
@@ -206,13 +204,13 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates the transformation of the X-axis <c>(1, 0, 0)</c> by this quaternion.
+    /// 计算该四元数对 X 轴 <c>(1, 0, 0)</c> 的变换。
     /// </summary>
     /// <remarks>
-    /// For a unit quaternion, mathematically equivalent to <c>q · (1,0,0) · q⁻¹</c>.<br/>
-    /// Result: <c>[1 - 2(y² + z²), 2(xy + zw), 2(xz - yw)]</c>
+    /// 对于单位四元数，数学上等价于 <c>q · (1,0,0) · q⁻¹</c>。<br/>
+    /// 结果：<c>[1 - 2(y² + z²), 2(xy + zw), 2(xz - yw)]</c>
     /// </remarks>
-    /// <returns>The transformed vector.</returns>
+    /// <returns>变换后的向量。</returns>
     public readonly JVector GetBasisX()
     {
         JVector result;
@@ -223,13 +221,13 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates the transformation of the Y-axis <c>(0, 1, 0)</c> by this quaternion.
+    /// 计算该四元数对 Y 轴 <c>(0, 1, 0)</c> 的变换。
     /// </summary>
     /// <remarks>
-    /// For a unit quaternion, mathematically equivalent to <c>q · (0,1,0) · q⁻¹</c>.<br/>
-    /// Result: <c>[2(xy - zw), 1 - 2(x² + z²), 2(yz + xw)]</c>
+    /// 对于单位四元数，数学上等价于 <c>q · (0,1,0) · q⁻¹</c>。<br/>
+    /// 结果：<c>[2(xy - zw), 1 - 2(x² + z²), 2(yz + xw)]</c>
     /// </remarks>
-    /// <returns>The transformed vector.</returns>
+    /// <returns>变换后的向量。</returns>
     public readonly JVector GetBasisY()
     {
         JVector result;
@@ -240,13 +238,13 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates the transformation of the Z-axis <c>(0, 0, 1)</c> by this quaternion.
+    /// 计算该四元数对 Z 轴 <c>(0, 0, 1)</c> 的变换。
     /// </summary>
     /// <remarks>
-    /// For a unit quaternion, mathematically equivalent to <c>q · (0,0,1) · q⁻¹</c>.<br/>
-    /// Result: <c>[2(xz + yw), 2(yz - xw), 1 - 2(x² + y²)]</c>
+    /// 对于单位四元数，数学上等价于 <c>q · (0,0,1) · q⁻¹</c>。<br/>
+    /// 结果：<c>[2(xz + yw), 2(yz - xw), 1 - 2(x² + y²)]</c>
     /// </remarks>
-    /// <returns>The transformed vector.</returns>
+    /// <returns>变换后的向量。</returns>
     public readonly JVector GetBasisZ()
     {
         JVector result;
@@ -257,10 +255,10 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion representing a rotation around the X-axis.
+    /// 创建一个表示绕 X 轴旋转的四元数。
     /// </summary>
-    /// <param name="radians">The angle of rotation in radians.</param>
-    /// <returns>The resulting quaternion.</returns>
+    /// <param name="radians">以弧度表示的旋转角。</param>
+    /// <returns>得到的四元数。</returns>
     public static JQuaternion CreateRotationX(Real radians)
     {
         Real halfAngle = radians * (Real)0.5;
@@ -269,10 +267,10 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion representing a rotation around the Y-axis.
+    /// 创建一个表示绕 Y 轴旋转的四元数。
     /// </summary>
-    /// <param name="radians">The angle of rotation in radians.</param>
-    /// <returns>The resulting quaternion.</returns>
+    /// <param name="radians">以弧度表示的旋转角。</param>
+    /// <returns>得到的四元数。</returns>
     public static JQuaternion CreateRotationY(Real radians)
     {
         Real halfAngle = radians * (Real)0.5;
@@ -281,10 +279,10 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion representing a rotation around the Z-axis.
+    /// 创建一个表示绕 Z 轴旋转的四元数。
     /// </summary>
-    /// <param name="radians">The angle of rotation in radians.</param>
-    /// <returns>The resulting quaternion.</returns>
+    /// <param name="radians">以弧度表示的旋转角。</param>
+    /// <returns>得到的四元数。</returns>
     public static JQuaternion CreateRotationZ(Real radians)
     {
         Real halfAngle = radians * (Real)0.5;
@@ -293,14 +291,14 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion from a unit axis and an angle.
+    /// 根据单位轴和角度创建一个四元数。
     /// </summary>
     /// <remarks>
-    /// The <paramref name="axis"/> must be normalized.
+    /// <paramref name="axis"/> 必须已归一化。
     /// </remarks>
-    /// <param name="axis">The unit vector to rotate around (must be normalized).</param>
-    /// <param name="angle">The angle of rotation in radians.</param>
-    /// <returns>A unit quaternion representing the rotation.</returns>
+    /// <param name="axis">要绕其旋转的单位向量（必须已归一化）。</param>
+    /// <param name="angle">以弧度表示的旋转角。</param>
+    /// <returns>表示该旋转的单位四元数。</returns>
     public static JQuaternion CreateFromAxisAngle(in JVector axis, Real angle)
     {
         Real halfAngle = angle * (Real)0.5;
@@ -309,15 +307,15 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Decomposes a unit quaternion into an axis and an angle.
+    /// 将单位四元数分解为轴和角度。
     /// </summary>
     /// <remarks>
-    /// Assumes <paramref name="quaternion"/> is normalized.
-    /// Returns the shortest arc (angle in [0, π]).
+    /// 假定 <paramref name="quaternion"/> 已归一化。
+    /// 返回最短弧（角度在 [0, π] 范围内）。
     /// </remarks>
-    /// <param name="quaternion">The unit quaternion to decompose.</param>
-    /// <param name="axis">Output: The unit rotation axis.</param>
-    /// <param name="angle">Output: The rotation angle (radians).</param>
+    /// <param name="quaternion">要分解的单位四元数。</param>
+    /// <param name="axis">输出：单位旋转轴。</param>
+    /// <param name="angle">输出：旋转角（弧度）。</param>
     public static void ToAxisAngle(JQuaternion quaternion, out JVector axis, out Real angle)
     {
         Real s = MathR.Sqrt(MathR.Max((Real)0.0, (Real)1.0 - quaternion.W * quaternion.W));
@@ -335,7 +333,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
         axis = new JVector(quaternion.X * invS, quaternion.Y * invS, quaternion.Z * invS);
         angle = (Real)2.0 * StableMath.Acos(quaternion.W);
 
-        // Enforce the shortest-arc representation (angle between 0 and PI)
+        // 强制采用最短弧表示（角度在 0 到 PI 之间）
         if (angle > MathR.PI)
         {
             angle = (Real)2.0 * MathR.PI - angle;
@@ -344,11 +342,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Multiplies two quaternions.
+    /// 将两个四元数相乘。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <param name="result">Output: The product of the two quaternions.</param>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <param name="result">输出：两个四元数之积。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Multiply(in JQuaternion quaternion1, in JQuaternion quaternion2, out JQuaternion result)
     {
@@ -369,11 +367,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates <c>conjugate(Q1) * Q2</c>.
+    /// 计算 <c>conjugate(Q1) * Q2</c>。
     /// </summary>
-    /// <param name="quaternion1">The quaternion to conjugate and then multiply.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <param name="result">Output: The resulting quaternion.</param>
+    /// <param name="quaternion1">先求共轭再参与相乘的四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <param name="result">输出：得到的四元数。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ConjugateMultiply(in JQuaternion quaternion1, in JQuaternion quaternion2, out JQuaternion result)
     {
@@ -402,11 +400,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates <c>Q1 * conjugate(Q2)</c>.
+    /// 计算 <c>Q1 * conjugate(Q2)</c>。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The quaternion to conjugate.</param>
-    /// <param name="result">Output: The resulting quaternion.</param>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">要求共轭的四元数。</param>
+    /// <param name="result">输出：得到的四元数。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void MultiplyConjugate(in JQuaternion quaternion1, in JQuaternion quaternion2, out JQuaternion result)
     {
@@ -435,11 +433,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Multiplies a quaternion by a scalar factor.
+    /// 将四元数乘以标量因子。
     /// </summary>
-    /// <param name="quaternion1">The quaternion.</param>
-    /// <param name="scaleFactor">The scalar factor.</param>
-    /// <returns>The scaled quaternion.</returns>
+    /// <param name="quaternion1">四元数。</param>
+    /// <param name="scaleFactor">标量因子。</param>
+    /// <returns>缩放后的四元数。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion Multiply(in JQuaternion quaternion1, Real scaleFactor)
     {
@@ -448,11 +446,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Multiplies a quaternion by a scalar factor.
+    /// 将四元数乘以标量因子。
     /// </summary>
-    /// <param name="quaternion1">The quaternion.</param>
-    /// <param name="scaleFactor">The scalar factor.</param>
-    /// <param name="result">Output: The scaled quaternion.</param>
+    /// <param name="quaternion1">四元数。</param>
+    /// <param name="scaleFactor">标量因子。</param>
+    /// <param name="result">输出：缩放后的四元数。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Multiply(in JQuaternion quaternion1, Real scaleFactor, out JQuaternion result)
     {
@@ -463,9 +461,9 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates the Euclidean length of the quaternion.
+    /// 计算四元数的欧几里得长度。
     /// </summary>
-    /// <returns>The length (magnitude).</returns>
+    /// <returns>长度（模）。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real Length()
     {
@@ -473,9 +471,9 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates the squared Euclidean length of the quaternion.
+    /// 计算四元数欧几里得长度的平方。
     /// </summary>
-    /// <returns>The squared length.</returns>
+    /// <returns>长度的平方。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Real LengthSquared()
     {
@@ -483,7 +481,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Normalizes the quaternion to unit length.
+    /// 将四元数归一化为单位长度。
     /// </summary>
     [Obsolete($"In-place Normalize() is deprecated; " +
               $"use the static {nameof(JQuaternion.Normalize)} method or {nameof(JQuaternion.NormalizeInPlace)}.", true)]
@@ -499,9 +497,9 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Normalizes the provided quaternion structure in place.
+    /// 就地归一化给定的四元数结构。
     /// </summary>
-    /// <param name="quaternion">The quaternion to normalize.</param>
+    /// <param name="quaternion">要归一化的四元数。</param>
     public static void NormalizeInPlace(ref JQuaternion quaternion)
     {
         Real lengthSquared = quaternion.LengthSquared();
@@ -513,10 +511,10 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Returns a normalized version of the quaternion.
+    /// 返回四元数的归一化版本。
     /// </summary>
-    /// <param name="value">The source quaternion.</param>
-    /// <param name="result">Output: The normalized unit quaternion.</param>
+    /// <param name="value">源四元数。</param>
+    /// <param name="result">输出：归一化后的单位四元数。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Normalize(in JQuaternion value, out JQuaternion result)
     {
@@ -537,10 +535,10 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion from a rotation matrix.
+    /// 从旋转矩阵创建四元数。
     /// </summary>
-    /// <param name="matrix">The rotation matrix.</param>
-    /// <returns>The quaternion representing the rotation.</returns>
+    /// <param name="matrix">旋转矩阵。</param>
+    /// <returns>表示该旋转的四元数。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion CreateFromMatrix(in JMatrix matrix)
     {
@@ -549,10 +547,10 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Creates a quaternion from a rotation matrix.
+    /// 从旋转矩阵创建四元数。
     /// </summary>
-    /// <param name="matrix">The rotation matrix.</param>
-    /// <param name="result">Output: The quaternion representing the rotation.</param>
+    /// <param name="matrix">旋转矩阵。</param>
+    /// <param name="result">输出：表示该旋转的四元数。</param>
     public static void CreateFromMatrix(in JMatrix matrix, out JQuaternion result)
     {
         Real t;
@@ -592,11 +590,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Calculates the dot product of two quaternions.
+    /// 计算两个四元数的点积。
     /// </summary>
-    /// <param name="quaternion1">The first quaternion.</param>
-    /// <param name="quaternion2">The second quaternion.</param>
-    /// <returns>The dot product.</returns>
+    /// <param name="quaternion1">第一个四元数。</param>
+    /// <param name="quaternion2">第二个四元数。</param>
+    /// <returns>点积。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Real Dot(in JQuaternion quaternion1, in JQuaternion quaternion2)
     {
@@ -607,12 +605,11 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Returns the inverse of a quaternion.
+    /// 返回四元数的逆。
     /// </summary>
     /// <remarks>
-    /// Unlike <see cref="Conjugate(in JQuaternion)"/>, this handles non-unit quaternions correctly
-    /// by dividing by the squared length. Returns <see cref="Identity"/> when the squared length
-    /// is below 1e-12.
+    /// 与 <see cref="Conjugate(in JQuaternion)"/> 不同，此方法通过除以长度平方正确处理非单位四元数。
+    /// 当长度平方低于 1e-12 时返回 <see cref="Identity"/>。
     /// </remarks>
     public static JQuaternion Inverse(in JQuaternion value)
     {
@@ -628,12 +625,12 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Linearly interpolates between two quaternions and normalizes the result.
+    /// 在两个四元数之间进行线性插值并归一化结果。
     /// </summary>
-    /// <param name="quaternion1">Source quaternion.</param>
-    /// <param name="quaternion2">Target quaternion.</param>
-    /// <param name="amount">Weight of the interpolation.</param>
-    /// <returns>The interpolated unit quaternion.</returns>
+    /// <param name="quaternion1">源四元数。</param>
+    /// <param name="quaternion2">目标四元数。</param>
+    /// <param name="amount">插值权重。</param>
+    /// <returns>插值后的单位四元数。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion Lerp(in JQuaternion quaternion1, in JQuaternion quaternion2, Real amount)
     {
@@ -649,7 +646,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
         }
         else
         {
-            // Flip sign of the second quaternion to ensure shortest path
+            // 翻转第二个四元数的符号以确保走最短路径
             result.X = inverse * quaternion1.X - amount * quaternion2.X;
             result.Y = inverse * quaternion1.Y - amount * quaternion2.Y;
             result.Z = inverse * quaternion1.Z - amount * quaternion2.Z;
@@ -661,19 +658,19 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Interpolates between two quaternions using Spherical Linear Interpolation (SLERP).
+    /// 使用球面线性插值（SLERP）在两个四元数之间进行插值。
     /// </summary>
-    /// <param name="quaternion1">Source quaternion.</param>
-    /// <param name="quaternion2">Target quaternion.</param>
-    /// <param name="amount">Weight of the interpolation.</param>
-    /// <returns>The interpolated quaternion.</returns>
+    /// <param name="quaternion1">源四元数。</param>
+    /// <param name="quaternion2">目标四元数。</param>
+    /// <param name="amount">插值权重。</param>
+    /// <returns>插值后的四元数。</returns>
     public static JQuaternion Slerp(in JQuaternion quaternion1, in JQuaternion quaternion2, Real amount)
     {
         Real dot = Dot(quaternion1, quaternion2);
         JQuaternion target = quaternion2;
 
-        // If the dot product is negative, the quaternions are pointing in opposite directions.
-        // Reversing one ensures we take the shortest path around the sphere.
+        // 如果点积为负，则两个四元数指向相反方向。
+        // 反转其中一个可确保沿球面走最短路径。
         if (dot < (Real)0.0)
         {
             dot = -dot;
@@ -683,7 +680,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
         const Real epsilon = (Real)1e-6;
         Real scale0, scale1;
 
-        // If the quaternions are very close, linear interpolation is faster and safe.
+        // 如果两个四元数非常接近，线性插值更快且安全。
         if (dot > (Real)1.0 - epsilon)
         {
             scale0 = (Real)1.0 - amount;
@@ -705,7 +702,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Flips the sign of each component of the quaternion.
+    /// 翻转四元数各分量的符号。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion operator -(in JQuaternion value)
@@ -714,7 +711,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Multiplies two quaternions (Hamilton Product).
+    /// 将两个四元数相乘（Hamilton 积）。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion operator *(in JQuaternion value1, in JQuaternion value2)
@@ -724,7 +721,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Scales a quaternion by a factor.
+    /// 按因子缩放四元数。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion operator *(Real value1, in JQuaternion value2)
@@ -734,7 +731,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Scales a quaternion by a factor.
+    /// 按因子缩放四元数。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion operator *(in JQuaternion value1, Real value2)
@@ -744,7 +741,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Adds two quaternions component-wise.
+    /// 将两个四元数逐分量相加。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion operator +(in JQuaternion value1, in JQuaternion value2)
@@ -754,7 +751,7 @@ public partial struct JQuaternion(Real x, Real y, Real z, Real w) : IEquatable<J
     }
 
     /// <summary>
-    /// Subtracts the second quaternion from the first component-wise.
+    /// 将第二个四元数从第一个中逐分量减去。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JQuaternion operator -(in JQuaternion value1, in JQuaternion value2)

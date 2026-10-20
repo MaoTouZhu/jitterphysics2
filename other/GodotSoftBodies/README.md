@@ -1,5 +1,5 @@
-## Jitter2 Soft Bodies in Godot
+## Godot 中的 Jitter2 软体
 
-Small demo to showing Jitter2 soft bodies in Godot.
+用于展示 Godot 中 Jitter2 软体的小型演示。
 
-Get Godot (.NET, Version >= 4.3) from https://godotengine.org/. Open Godot and select "project.godot".
+从 https://godotengine.org/ 获取 Godot（.NET 版本，版本 >= 4.3）。打开 Godot 并选择 "project.godot"。

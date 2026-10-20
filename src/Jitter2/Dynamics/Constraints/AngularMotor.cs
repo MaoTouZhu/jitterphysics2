@@ -13,8 +13,7 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Represents a motor that drives relative angular velocity between two axes fixed
-/// in the reference frames of their respective bodies.
+/// 表示一种马达，用于驱动分别固定在各自刚体参考系中的两条轴之间的相对角速度。
 /// </summary>
 public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
 {
@@ -53,16 +52,16 @@ public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = (Real)0.0;
 
     /// <summary>
-    /// Initializes the motor with separate axes for each body.
+    /// 使用为每个刚体分别指定的轴初始化马达。
     /// </summary>
-    /// <param name="axis1">The motor axis on the first body in world space.</param>
-    /// <param name="axis2">The motor axis on the second body in world space.</param>
+    /// <param name="axis1">第一个刚体上的马达轴，位于世界空间。</param>
+    /// <param name="axis2">第二个刚体上的马达轴，位于世界空间。</param>
     /// <remarks>
-    /// Stores the axes in local frames. Both axes are normalized internally.
-    /// Default values: <see cref="TargetVelocity"/> = 0, <see cref="MaximumTorque"/> = 0.
+    /// 将轴存储到局部坐标系中。两条轴都会在内部进行归一化。
+    /// 默认值：<see cref="TargetVelocity"/> = 0，<see cref="MaximumTorque"/> = 0。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis1"/> or <paramref name="axis2"/> is zero or contains a non-finite value.
+    /// 当 <paramref name="axis1"/> 或 <paramref name="axis2"/> 为零或包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector axis1, JVector axis2)
     {
@@ -85,11 +84,11 @@ public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
     }
 
     /// <summary>
-    /// Initializes the motor with the same axis for both bodies.
+    /// 使用同一条轴为两个刚体初始化马达。
     /// </summary>
-    /// <param name="axis">The motor axis in world space, used for both bodies.</param>
+    /// <param name="axis">马达轴，位于世界空间，用于两个刚体。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis"/> is zero or contains a non-finite value.
+    /// 当 <paramref name="axis"/> 为零或包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector axis)
     {
@@ -97,9 +96,9 @@ public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
     }
 
     /// <summary>
-    /// Gets or sets the target angular velocity in radians per second.
+    /// 获取或设置目标角速度，单位为弧度每秒。
     /// </summary>
-    /// <value>Default is 0.</value>
+    /// <value>默认值为 0。</value>
     public Real TargetVelocity
     {
         get => Data.Velocity;
@@ -111,21 +110,21 @@ public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
     }
 
     /// <summary>
-    /// Gets the motor axis on the first body in local space.
+    /// 获取第一个刚体上的马达轴，位于局部空间。
     /// </summary>
     public JVector LocalAxis1 => Data.LocalAxis1;
 
     /// <summary>
-    /// Gets the motor axis on the second body in local space.
+    /// 获取第二个刚体上的马达轴，位于局部空间。
     /// </summary>
     public JVector LocalAxis2 => Data.LocalAxis2;
 
     /// <summary>
-    /// Gets or sets the maximum torque the motor can apply.
+    /// 获取或设置马达可施加的最大力矩。
     /// </summary>
-    /// <value>Default is 0. Must be non-negative.</value>
+    /// <value>默认值为 0。必须为非负值。</value>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is negative.
+    /// 当 <paramref name="value"/> 为负数时抛出。
     /// </exception>
     public Real MaximumTorque
     {
@@ -137,9 +136,9 @@ public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
     }
 
     /// <summary>
-    /// Gets or sets the maximum torque the motor can apply.
+    /// 获取或设置马达可施加的最大力矩。
     /// </summary>
-    /// <remarks>Use <see cref="MaximumTorque"/> instead.</remarks>
+    /// <remarks>请改用 <see cref="MaximumTorque"/>。</remarks>
     [Obsolete("Use MaximumTorque instead.")]
     public Real MaximumForce
     {
@@ -222,12 +221,12 @@ public unsafe class AngularMotor : Constraint<AngularMotor.AngularMotorData>
         drawer.DrawSegment(origin, origin + first * length, settings.ReferenceColor);
         drawer.DrawSegment(secondOrigin, secondOrigin + second * length, settings.CurrentColor);
 
-        // Show body 2's target rotation, or body 1's opposite rotation when body 2 is fixed.
+        // 显示刚体 2 的目标旋转，或在刚体 2 固定时显示刚体 1 的反向旋转。
         bool drawFirst = Body2.MotionType != MotionType.Dynamic;
         JVector axis = drawFirst ? first : second;
         JVector center = drawFirst ? origin : secondOrigin;
-        // Keep the arrow attached to the other body's frame, rather than choosing
-        // a new perpendicular from the slightly changing world-space motor axis.
+        // 让箭头附着在另一个刚体的坐标架上，而不是从略微变化的世界空间马达轴
+        // 重新选取一条垂线。
         JQuaternion referenceOrientation = drawFirst ? Body2.Orientation : Body1.Orientation;
         JVector referenceAxis = drawFirst ? data.LocalAxis2 : data.LocalAxis1;
         JVector reference = JVector.Transform(MathHelper.CreateOrthonormal(referenceAxis), referenceOrientation);

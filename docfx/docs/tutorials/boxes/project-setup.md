@@ -1,26 +1,26 @@
-# Project Setup
+# 项目搭建
 
-In this project we will use Raylib and Jitter to implement a simple scene of boxes falling to the ground.
+本项目将使用 Raylib 和 Jitter 实现一个箱子掉落到地面的简单场景。
 
-## Requirements
+## 环境要求
 
-Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+安装 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)。
 
-Ensure that dotnet is correctly set up by executing the following command:
+执行以下命令，确认 dotnet 已正确配置：
 
 ```sh
 dotnet --version
 ```
 
-## Create a New Console Application and Add Jitter and Raylib
+## 创建新的控制台应用并添加 Jitter 与 Raylib
 
-First, create a new directory named "BoxDrop" and navigate into it:
+首先，创建一个名为“BoxDrop”的新目录并进入该目录：
 
 ```sh
 mkdir BoxDrop && cd BoxDrop
 ```
 
-Next, create a new console application in this directory and add Raylib-cs and Jitter2:
+接着，在该目录中创建一个新的控制台应用，并添加 Raylib-cs 和 Jitter2：
 
 ```sh
 dotnet new console
@@ -28,10 +28,10 @@ dotnet add package Raylib-cs --version 6.1.1
 dotnet add package Jitter2
 ```
 
-You have completed the setup. If you now execute the following command:
+至此环境搭建完成。如果现在执行以下命令：
 
 ```sh
 dotnet run
 ```
 
-Your console should display: "Hello, World!".
+控制台应输出：“Hello, World!”。

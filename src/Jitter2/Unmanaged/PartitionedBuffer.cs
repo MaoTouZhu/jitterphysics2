@@ -12,31 +12,31 @@ using Jitter2.Parallelization;
 namespace Jitter2.Unmanaged;
 
 /// <summary>
-/// Handle for an unmanaged object stored in a <see cref="PartitionedBuffer{T}"/>.
-/// The handle remains stable even when the underlying memory is resized.
+/// 存储在 <see cref="PartitionedBuffer{T}"/> 中的非托管对象的句柄。
+/// 即使底层内存被调整大小，该句柄也保持稳定。
 /// </summary>
-/// <typeparam name="T">The unmanaged type of the data.</typeparam>
+/// <typeparam name="T">数据的非托管类型。</typeparam>
 /// <remarks>
 /// <para>
-/// <b>Validity:</b> A handle is valid only while the owning <see cref="PartitionedBuffer{T}"/>
-/// exists and the element has not been freed via <see cref="PartitionedBuffer{T}.Free"/>.
+/// <b>有效性：</b>只有在所属的 <see cref="PartitionedBuffer{T}"/>
+/// 仍然存在且该元素尚未通过 <see cref="PartitionedBuffer{T}.Free"/> 释放时，句柄才有效。
 /// </para>
 /// <para>
-/// <b>Do not cache</b> the <see cref="Data"/> reference across operations that may resize
-/// the buffer. Use the handle to obtain a fresh reference when needed.
+/// <b>不要缓存</b>可能调整缓冲区大小的操作之间的 <see cref="Data"/> 引用。
+/// 需要时使用句柄获取新的引用。
 /// </para>
 /// </remarks>
 public readonly unsafe struct JHandle<T> : IEquatable<JHandle<T>> where T : unmanaged
 {
     /// <summary>
-    /// A handle representing a null/invalid reference.
+    /// 表示空/无效引用的句柄。
     /// </summary>
     public static readonly JHandle<T> Zero = new(null);
 
     internal readonly T** Pointer;
 
     /// <summary>
-    /// Gets a reference to the underlying data.
+    /// 获取对底层数据的引用。
     /// </summary>
     public ref T Data => ref Unsafe.AsRef<T>(*Pointer);
 
@@ -46,20 +46,20 @@ public readonly unsafe struct JHandle<T> : IEquatable<JHandle<T>> where T : unma
     }
 
     /// <summary>
-    /// Gets a value indicating whether this is the zero handle. A freed handle can remain nonzero;
-    /// this property does not establish that the referenced element is still valid.
+    /// 获取一个值，指示这是否为零句柄。已释放的句柄可能仍然非零；
+    /// 该属性并不表示所引用的元素仍然有效。
     /// </summary>
     public readonly bool IsZero => Pointer == null;
 
     /// <summary>
-    /// Reinterprets a handle as a handle to a different type. Both types must have compatible layouts.
+    /// 将句柄重新解释为指向另一种类型的句柄。两种类型必须具有兼容的布局。
     /// </summary>
-    /// <typeparam name="TConvert">The target unmanaged type to reinterpret as.</typeparam>
-    /// <param name="handle">The handle to reinterpret.</param>
-    /// <returns>A handle reinterpreted as the target type.</returns>
+    /// <typeparam name="TConvert">要重新解释为的目标非托管类型。</typeparam>
+    /// <param name="handle">要重新解释的句柄。</param>
+    /// <returns>重新解释为目标类型的句柄。</returns>
     /// <remarks>
-    /// <b>Safety:</b> The caller must ensure that <typeparamref name="T"/> and <typeparamref name="TConvert"/>
-    /// have compatible memory layouts. No runtime validation is performed.
+    /// <b>安全性：</b>调用方必须确保 <typeparamref name="T"/> 和 <typeparamref name="TConvert"/>
+    /// 具有兼容的内存布局。不会执行任何运行时验证。
     /// </remarks>
     public static JHandle<TConvert> AsHandle<TConvert>(JHandle<T> handle) where TConvert : unmanaged
     {
@@ -93,43 +93,43 @@ public readonly unsafe struct JHandle<T> : IEquatable<JHandle<T>> where T : unma
 }
 
 /// <summary>
-/// Manages memory for unmanaged structs, storing them sequentially in contiguous memory blocks.
-/// Each struct can either be active or inactive.
+/// 管理非托管结构体的内存，将它们依次存储在连续的内存块中。
+/// 每个结构体可以处于活动状态或非活动状态。
 /// </summary>
-/// <typeparam name="T">The unmanaged type to store. Must be at least 4 bytes in size.</typeparam>
+/// <typeparam name="T">要存储的非托管类型。大小必须至少为 4 字节。</typeparam>
 /// <remarks>
 /// <para>
-/// <b>Memory Layout Requirement:</b> The type <typeparamref name="T"/> must reserve its first
-/// 4 bytes (sizeof(int)) for internal bookkeeping. This memory region is used to store
-/// the stable ID that maps the data back to its <see cref="JHandle{T}"/>.
+/// <b>内存布局要求：</b>类型 <typeparamref name="T"/> 必须为其前
+/// 4 字节（sizeof(int)）预留用于内部记录。该内存区域用于存储
+/// 将数据映射回其 <see cref="JHandle{T}"/> 的稳定 ID。
 /// </para>
 /// <para>
-/// Do not modify these bytes manually. A compatible struct should look like this:
+/// 不要手动修改这些字节。兼容的结构体应如下所示：
 /// <code>
 /// [StructLayout(LayoutKind.Sequential)]
 /// public struct RigidBodyData
 /// {
-///     private readonly int _internalIndex; // Reserved by PartitionedBuffer
+///     private readonly int _internalIndex; // 由 PartitionedBuffer 预留
 ///
 ///     public JVector Position;
 ///     public JQuaternion Orientation;
-///     // ... other fields
+///     // ... 其他字段
 /// }
 /// </code>
 /// </para>
 /// <para>
-/// <b>Threading:</b> Callers must serialize mutations, including calls to <see cref="Allocate"/>.
-/// Use <see cref="ResizeLock"/> to protect readers while an allocation may resize the buffer;
-/// the resize lock alone does not make concurrent allocations safe.
+/// <b>线程：</b>调用方必须串行化所有变更操作，包括调用 <see cref="Allocate"/>。
+/// 使用 <see cref="ResizeLock"/> 在分配可能调整缓冲区大小时保护读取方；
+/// 仅靠调整大小锁并不能使并发分配变得安全。
 /// </para>
 /// <para>
-/// <b>Disposal:</b> This class owns unmanaged memory and must be disposed to avoid memory leaks.
+/// <b>释放：</b>此类拥有非托管内存，必须释放以避免内存泄漏。
 /// </para>
 /// </remarks>
 public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanaged
 {
     /// <summary>
-    /// Exception thrown when the buffer's internal indirection table reaches its maximum capacity.
+    /// 当缓冲区的内部间接表达到最大容量时引发的异常。
     /// </summary>
     public class MaximumSizeException : Exception
     {
@@ -138,15 +138,15 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
         public MaximumSizeException(string message, Exception inner) : base(message, inner) { }
     }
 
-    // Paging constants for the indirection table
+    // 间接表的分页常量
     private const int PageSize = 4096;
     private const int PageMask = PageSize - 1;
     private const int PageShift = 12; // 2^12 = 4096
-    private const int MaxPages = 1024 * 16; // Capacity for ~67 million handles
+    private const int MaxPages = 1024 * 16; // 可容纳约 6700 万个句柄
     private const int MaximumCapacity = MaxPages * PageSize;
 
     private T* memory;
-    private T*** pages; // Array of pointers to pages (indirection table)
+    private T*** pages; // 指向各页的指针数组（间接表）
 
     private int activeCount;
     private int size;
@@ -154,32 +154,32 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     private bool disposed;
 
     /// <summary>
-    /// Reader-writer lock. Locked by a writer when a resize occurs.
-    /// Resizing moves the contiguous data memory addresses. Use a reader lock
-    /// to access data if concurrent calls to Allocate are made.
+    /// 读写锁。发生调整大小时由写入方加锁。
+    /// 调整大小会移动连续数据的内存地址。如果存在对 Allocate 的并发调用，
+    /// 请使用读取锁访问数据。
     /// </summary>
     public readonly ReaderWriterLock ResizeLock = new();
 
     /// <summary>
-    /// Gets the number of allocated elements in the buffer.
+    /// 获取缓冲区中已分配元素的数量。
     /// </summary>
     public int Count { get; private set; }
 
     /// <summary>
-    /// Indicates whether the allocated memory is aligned to a 64-byte boundary.
+    /// 指示已分配的内存是否对齐到 64 字节边界。
     /// </summary>
     public bool Aligned64 { get; }
 
     /// <summary>
-    /// Initializes a new instance of the class.
+    /// 初始化该类的新实例。
     /// </summary>
-    /// <param name="initialSize">The initial size of the contiguous memory block.</param>
-    /// <param name="aligned64">Indicates whether the memory should be aligned to 64 bytes.</param>
+    /// <param name="initialSize">连续内存块的初始大小。</param>
+    /// <param name="aligned64">指示内存是否应按照 64 字节对齐。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <typeparamref name="T"/> is too small to store the internal element ID.
+    /// 当 <typeparamref name="T"/> 太小而无法存储内部元素 ID 时引发。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="initialSize"/> is less than one or exceeds the maximum capacity.
+    /// 当 <paramref name="initialSize"/> 小于 1 或超过最大容量时引发。
     /// </exception>
     public PartitionedBuffer(int initialSize = 1024, bool aligned64 = false)
     {
@@ -193,7 +193,7 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
 
         size = initialSize;
 
-        // Allocate the master list of page pointers
+        // 分配页指针的主列表
         pages = (T***)MemoryHelper.AllocateHeap(MaxPages * sizeof(IntPtr));
 
         if (aligned64)
@@ -215,7 +215,7 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
 
         EnsureHandleCapacity(size);
 
-        // Initialize ID slots in the memory
+        // 初始化内存中的 ID 槽位
         for (int i = 0; i < size; i++)
         {
             Unsafe.AsRef<int>(&memory[i]) = i;
@@ -223,7 +223,7 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// Returns the total amount of unmanaged memory allocated in bytes (data + indirection pages + master page table).
+    /// 返回已分配的非托管内存总量（以字节为单位，数据 + 间接页 + 主页表）。
     /// </summary>
     public long TotalBytesAllocated => (long)size * sizeof(T) + (long)pageCount * PageSize * sizeof(IntPtr) + MaxPages * sizeof(IntPtr);
 
@@ -246,12 +246,12 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// Removes the associated unmanaged element from the buffer and invalidates the handle.
+    /// 从缓冲区中移除关联的非托管元素，并使该句柄失效。
     /// </summary>
-    /// <param name="handle">The handle to free.</param>
+    /// <param name="handle">要释放的句柄。</param>
     /// <remarks>
-    /// <b>Safety:</b> After calling this method, the handle becomes invalid.
-    /// Do not use the handle or any cached references to its data.
+    /// <b>安全性：</b>调用此方法后，句柄将失效。
+    /// 不要使用该句柄或其数据的任何缓存引用。
     /// </remarks>
     public void Free(JHandle<T> handle)
     {
@@ -264,8 +264,8 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
 
         Debug.Assert((uint)index < (uint)Count);
 
-        // Only surviving elements need to be preserved. Fill the active hole from the
-        // active boundary, then fill the resulting inactive hole from the last element.
+        // 只有存活下来的元素需要保留。先从活动边界处填补活动空洞，
+        // 再用最后一个元素填补由此产生的非活动空洞。
         if (index < activeCount)
         {
             int lastActiveIndex = activeCount - 1;
@@ -296,44 +296,44 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// A span for all elements marked as active.
+    /// 所有标记为活动的元素的 span。
     /// </summary>
     /// <remarks>
-    /// <b>Do not cache:</b> This span is invalidated when the buffer resizes.
+    /// <b>不要缓存：</b>缓冲区调整大小时，此 span 将失效。
     /// </remarks>
     public Span<T> Active => new(memory, activeCount);
 
     /// <summary>
-    /// A span for all elements marked as inactive.
+    /// 所有标记为非活动的元素的 span。
     /// </summary>
     /// <remarks>
-    /// <b>Do not cache:</b> This span is invalidated when the buffer resizes.
+    /// <b>不要缓存：</b>缓冲区调整大小时，此 span 将失效。
     /// </remarks>
     public Span<T> Inactive => new(&memory[activeCount], Count - activeCount);
 
     /// <summary>
-    /// A span for all elements.
+    /// 所有元素的 span。
     /// </summary>
     /// <remarks>
-    /// <b>Do not cache:</b> This span is invalidated when the buffer resizes.
+    /// <b>不要缓存：</b>缓冲区调整大小时，此 span 将失效。
     /// </remarks>
     public Span<T> Elements => new(memory, Count);
 
     /// <summary>
-    /// Returns the handle of the object. O(1) operation.
+    /// 返回对象的句柄。O(1) 操作。
     /// </summary>
-    /// <param name="t">A reference to the element in the buffer.</param>
-    /// <returns>The handle for the element.</returns>
+    /// <param name="t">对缓冲区中元素的引用。</param>
+    /// <returns>该元素的句柄。</returns>
     public JHandle<T> GetHandle(ref T t)
     {
         return new JHandle<T>(GetHandleSlot(Unsafe.Read<int>(Unsafe.AsPointer(ref t))));
     }
 
     /// <summary>
-    /// Checks if the element is stored as an active element. O(1).
+    /// 检查该元素是否作为活动元素存储。O(1)。
     /// </summary>
-    /// <param name="handle">The handle to check.</param>
-    /// <returns><see langword="true"/> if the element is active; otherwise, <see langword="false"/>.</returns>
+    /// <param name="handle">要检查的句柄。</param>
+    /// <returns>如果元素处于活动状态则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     public bool IsActive(JHandle<T> handle)
     {
         Debug.Assert(*handle.Pointer - memory < Count);
@@ -341,9 +341,9 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// Moves an object from inactive to active.
+    /// 将对象从非活动移动到活动。
     /// </summary>
-    /// <param name="handle">The handle of the element to move.</param>
+    /// <param name="handle">要移动的元素的句柄。</param>
     public void MoveToActive(JHandle<T> handle)
     {
         Debug.Assert(*handle.Pointer - memory < Count);
@@ -359,9 +359,9 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// Moves an object from active to inactive.
+    /// 将对象从活动移动到非活动。
     /// </summary>
-    /// <param name="handle">The handle of the element to move.</param>
+    /// <param name="handle">要移动的元素的句柄。</param>
     public void MoveToInactive(JHandle<T> handle)
     {
         if ((nint)(*handle.Pointer) - (nint)memory >= activeCount * sizeof(T)) return;
@@ -374,10 +374,10 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// Swap two entries based on their index. Adjusts handles accordingly.
+    /// 根据索引交换两个条目，并相应地调整句柄。
     /// </summary>
-    /// <param name="i">The index of the first element.</param>
-    /// <param name="j">The index of the second element.</param>
+    /// <param name="i">第一个元素的索引。</param>
+    /// <param name="j">第二个元素的索引。</param>
     public void Swap(int i, int j)
     {
         (memory[i], memory[j]) = (memory[j], memory[i]);
@@ -387,27 +387,27 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
     }
 
     /// <summary>
-    /// Gets the index of the element referred to by the handle.
+    /// 获取句柄所引用元素的索引。
     /// </summary>
-    /// <param name="handle">The handle to get the index for.</param>
-    /// <returns>The index of the element in the buffer.</returns>
+    /// <param name="handle">要获取索引的句柄。</param>
+    /// <returns>元素在缓冲区中的索引。</returns>
     public int GetIndex(JHandle<T> handle)
     {
         return (int)(((nint)(*handle.Pointer) - (nint)memory) / sizeof(T));
     }
 
     /// <summary>
-    /// Allocates an unmanaged object. Growth is dynamic.
+    /// 分配一个非托管对象。容量会动态增长。
     /// </summary>
-    /// <param name="active">If <see langword="true"/>, the element is added to the active partition.</param>
-    /// <param name="clear">If <see langword="true"/>, the element's memory (excluding the internal ID) is zeroed.</param>
-    /// <returns>A handle to the newly allocated element.</returns>
+    /// <param name="active">如果为 <see langword="true"/>，则该元素被添加到活动分区。</param>
+    /// <param name="clear">如果为 <see langword="true"/>，则将该元素的内存（不包括内部 ID）清零。</param>
+    /// <returns>新分配元素的句柄。</returns>
     /// <remarks>
-    /// <b>Threading:</b> Callers must serialize allocations with other mutations. This method may
-    /// resize the buffer, which moves all data; use <see cref="ResizeLock"/> to protect concurrent readers.
+    /// <b>线程：</b>调用方必须将分配操作与其他变更操作串行化。此方法可能
+    /// 调整缓冲区大小，从而移动所有数据；请使用 <see cref="ResizeLock"/> 保护并发读取方。
     /// </remarks>
     /// <exception cref="MaximumSizeException">
-    /// Thrown when the internal indirection table limit is reached.
+    /// 当达到内部间接表限制时引发。
     /// </exception>
     public JHandle<T> Allocate(bool active = false, bool clear = false)
     {
@@ -434,7 +434,7 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
                 if (Aligned64) newMemory = MemoryHelper.AlignedAllocateHeap<T>(newSize, 64);
                 else newMemory = MemoryHelper.AllocateHeap<T>(newSize);
 
-                // Ensure handles are ready before publishing any new data pointers.
+                // 在发布任何新的数据指针之前，确保句柄已就绪。
                 EnsureHandleCapacity(newSize);
 
                 for (int i = 0; i < oldSize; i++)
@@ -477,8 +477,8 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
 
         int targetIndex = freeIndex;
 
-        // Place a new active element directly at the active boundary. The inactive
-        // element displaced from there only needs to be moved once, into the free slot.
+        // 将新的活动元素直接放在活动边界处。从该位置被置换出去的
+        // 非活动元素只需移动一次，即移入空闲槽位。
         if (active && activeCount != Count)
         {
             targetIndex = activeCount;
@@ -493,7 +493,7 @@ public sealed unsafe class PartitionedBuffer<T> : IDisposable where T : unmanage
 
         if (clear)
         {
-            // Skip the first 4 bytes (the ID) when clearing
+            // 清零时跳过前 4 字节（ID）
             MemoryHelper.MemSet((byte*)*slot + sizeof(int), sizeof(T) - sizeof(int));
         }
 

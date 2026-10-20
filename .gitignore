@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.tmp-*/
+.tmp-tm/
+.tmp-main/
+i18n/review/

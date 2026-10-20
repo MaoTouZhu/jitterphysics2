@@ -94,7 +94,7 @@ public class ConvexPolytopeTests
         var hull = Tetrahedron(new JVector(scale, 0, 0), new JVector(-scale, 0, 0),
             new JVector(0, scale, 0), JVector.UnitZ);
 
-        // The seed has small face distances, but the new fan's squared distances overflow Real.
+        // 初始四面体的面距离很小，但新扇形的平方距离会使 Real 溢出。
         Assert.That(hull.AddVertexDetailed(new Vertex(new JVector(0, 0, -scale))), Is.EqualTo(Expansion.NumericalFailure));
         Assert.That(hull.HullTriangles.Length, Is.Zero);
         Assert.Throws<InvalidOperationException>(() => hull.GetClosestTriangle());
@@ -291,7 +291,7 @@ public class ConvexPolytopeTests
 
             if (i % 2 == 1)
             {
-                // Just touching along the direction, then pushed in a little: the shallow contacts resting bodies make.
+                // 沿该方向恰好接触，然后稍微压入：即静止刚体产生的浅接触。
                 Real outside = 6, inside = 0;
                 for (int k = 0; k < 40; k++)
                 {
@@ -305,7 +305,7 @@ public class ConvexPolytopeTests
             if (!NarrowPhase.MprEpa(a, b, orientation, position, out _, out _, out JVector normal, out Real penetration)) continue;
             overlapping++;
 
-            // A depth found along a normal is how far the shapes reach past each other along it.
+            // 沿某法线求得的深度，就是形状沿该法线相互嵌入的距离。
             MinkowskiDifference.Support(a, b, orientation, position, normal, out var support);
             Real along = JVector.Dot(support.V, normal);
             if (MathR.Abs(along - penetration) <= (Real)1e-3) continue;

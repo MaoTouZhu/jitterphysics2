@@ -28,7 +28,7 @@ public class Demo01 : IDemo, IDrawUpdate
         pg.AddFloor();
 
         {
-            // -------  bridge
+            // ------- 桥
             RigidBody body = null!;
 
             JVector startPos = new JVector(-10, 8, -20);
@@ -67,7 +67,7 @@ public class Demo01 : IDemo, IDrawUpdate
         }
 
         {
-            // Add a car made out of constraints
+            // 添加一辆由约束构成的汽车
             JVector carPos = new JVector(10, 9, -20);
             JQuaternion rot = JQuaternion.CreateRotationY(MathF.PI / 2.0f);
 

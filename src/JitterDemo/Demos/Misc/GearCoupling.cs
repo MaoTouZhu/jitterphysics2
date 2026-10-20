@@ -7,39 +7,38 @@ using Jitter2.LinearMath;
 namespace JitterDemo;
 
 /*
- --- 1. The Basic Idea ---
- We simulate the gear connection using a standard DistanceLimit constraint.
- This constraint acts like a "Virtual Tooth" that pins the two bodies together
- at the contact point.
+ --- 1. 基本思路 ---
+ 我们使用标准的 DistanceLimit 约束来模拟齿轮连接。
+ 该约束就像一个“虚拟齿”，在接触点处把两个刚体钉在一起。
 
- Crucially, we hook into the physics loop (OnPreStep) to update this constraint
- EVERY FRAME. Since the gears are rotating, the specific points on the surface
- that are touching change constantly. By resetting the DistanceLimit anchors to the
- current world contact point every frame, we allow the gears to rotate freely
- while maintaining the velocity relationship at the contact.
+ 关键在于，我们挂接进物理循环（OnPreStep），以便
+ 每一帧都更新该约束。由于齿轮在旋转，表面上
+ 相互接触的具体点不断变化。通过每帧把 DistanceLimit 的锚点重置到
+ 当前世界接触点，我们既允许齿轮自由旋转，
+ 又在接触处维持速度关系。
 
- --- 2. The Refinement: Error Correction ---
- If we strictly placed the anchors at the current contact point, the gears would
- eventually drift out of sync ("slip"). This happens because the physics solver
- has limited iterations and cannot solve the velocity constraints perfectly
- every frame, leading to accumulated position error.
+ --- 2. 改进：误差修正 ---
+ 如果我们严格把锚点放在当前接触点，齿轮最终会
+ 逐渐失步（“打滑”）。这是因为物理求解器的
+ 迭代次数有限，无法每一帧都完美求解
+ 速度约束，从而累积位置误差。
 
- To fix this, this demo implements an active Error Correction system:
- - We track the EXACT total rotation of both gears (counting full 360 loops).
- - We calculate the "Angular Error" (how far they have drifted from the ideal ratio).
- - We shift the BallSocket anchors slightly along the tangent based on this error.
+ 为解决这个问题，本演示实现了一个主动误差修正系统：
+ - 我们跟踪两个齿轮的精确总旋转量（计入完整的 360 度圈数）。
+ - 我们计算“角度误差”（它们偏离理想传动比的程度）。
+ - 我们依据该误差沿切线方向略微移动 BallSocket 锚点。
 
- This forces the physics solver to push the gears back into perfect phase,
- correcting any drift.
+ 这会迫使物理求解器把齿轮推回完美相位，
+ 修正任何漂移。
  */
 
 public class GearCoupling
 {
-    // DistanceLimit seems to lead to more stable systems.
-    // BallSocketConstraint over-constraints the system (Hinge, Hinge, BallSocket).
+    // DistanceLimit 似乎能带来更稳定的系统。
+    // BallSocketConstraint 会过度约束系统（Hinge、Hinge、BallSocket）。
     public DistanceLimit DistanceLimit { get; private set; }
 
-    // Using simple HingeJoints to pin the gears to the world (NullBody)
+    // 使用简单的 HingeJoint 将齿轮固定到世界（NullBody）
     public HingeJoint HingeJoint1 { get; private set; }
     public HingeJoint HingeJoint2 { get; private set; }
 
@@ -60,7 +59,7 @@ public class GearCoupling
 
     public float GearRatio { get; private set; }
 
-    // Accumulators for full rotations
+    // 完整旋转的累加器
     public int Rotations1 { get; private set; }
     public int Rotations2 { get; private set; }
 
@@ -75,22 +74,22 @@ public class GearCoupling
         this.world = world;
         this.ContactPoint = contactPoint;
 
-        // 1. Store Local Axes
-        // We must store the axis relative to EACH body's initial orientation
+        // 1. 存储局部轴
+        // 我们必须把轴存储为相对于每个刚体初始朝向的形式
         localAxis1 = JVector.ConjugatedTransform(rotationAxis1, body1.Orientation);
         localAxis2 = JVector.ConjugatedTransform(rotationAxis2, body2.Orientation);
 
-        // 2. Setup World Hinges (Pins the gears in place)
+        // 2. 设置世界铰链（将齿轮固定在原位）
         HingeJoint1 = new HingeJoint(world, world.NullBody, body1, body1.Position, rotationAxis1, AngularLimit.Full);
         HingeJoint2 = new HingeJoint(world, world.NullBody, body2, body2.Position, rotationAxis2, AngularLimit.Full);
 
-        // Make hinges stiff so gears don't wobble
+        // 让铰链保持刚性，这样齿轮就不会晃动
         HingeJoint1.HingeAngle.Bias = 0.3f;
         HingeJoint2.HingeAngle.Bias = 0.3f;
         HingeJoint1.HingeAngle.Softness = 0.0f;
         HingeJoint2.HingeAngle.Softness = 0.0f;
 
-        // 3. Setup the Virtual Tooth
+        // 3. 设置虚拟齿
         DistanceLimit = world.CreateConstraint<DistanceLimit>(body1, body2);
         DistanceLimit.Initialize(contactPoint, contactPoint, LinearLimit.Fixed);
 
@@ -100,14 +99,14 @@ public class GearCoupling
         initialOrientation1 = body1.Orientation;
         initialOrientation2 = body2.Orientation;
 
-        // Calculate Ratio based on radius to contact point
+        // 根据到接触点的半径计算传动比
         // Ratio = r1 / r2
         float r1 = (body1.Position - contactPoint).Length();
         float r2 = (body2.Position - contactPoint).Length();
         this.GearRatio = r1 / r2;
 
-        // 4. Initialize Angles immediately to prevent "spin on spawn"
-        // (Pass the correct local axis for each!)
+        // 4. 立即初始化角度，以避免“生成时自旋”
+        // （为每个齿轮传入正确的局部轴！）
         this.prevAngle1 = GetTwistAngle(body1, initialOrientation1, localAxis1);
         this.prevAngle2 = GetTwistAngle(body2, initialOrientation2, localAxis2);
 
@@ -115,7 +114,7 @@ public class GearCoupling
     }
 
     /// <summary>
-    /// Calculates the signed twist angle relative to the initial orientation.
+    /// 计算相对于初始朝向的有符号扭转角。
     /// </summary>
     private static float GetTwistAngle(RigidBody body, JQuaternion initialOrientation, JVector localAxis)
     {
@@ -125,7 +124,7 @@ public class GearCoupling
         float y = JVector.Dot(q.Vector, ax);
         float x = q.Scalar;
 
-        // Double-cover check
+        // 双重覆盖检查
         if (x < 0)
         {
             x = -x;
@@ -146,7 +145,7 @@ public class GearCoupling
         float deltaAngle1 = angle1 - prevAngle1;
         float deltaAngle2 = angle2 - prevAngle2;
 
-        // Phase Unwrapping
+        // 相位展开
         if (MathF.Abs(deltaAngle1) > MathF.PI)
             Rotations1 -= MathF.Sign(deltaAngle1);
 
@@ -159,33 +158,33 @@ public class GearCoupling
         float totRot1 = Rotations1 * MathF.PI * 2.0f + angle1;
         float totRot2 = Rotations2 * MathF.PI * 2.0f + angle2;
 
-        // Constraint: Theta2 - Ratio * Theta1 = 0
-        // We return the error (delta)
-        return totRot2 + GearRatio * totRot1; // Note: Usually '+' if gears rotate opposite directions!
+        // 约束：Theta2 - Ratio * Theta1 = 0
+        // 返回误差（delta）
+        return totRot2 + GearRatio * totRot1; // 注意：如果齿轮反向旋转，通常用 '+'！
     }
 
     private void OnPreStep(TimeStep timeStep)
     {
-        // 1. Calculate the Error
+        // 1. 计算误差
         float error = TrackDeltaAngle();
 
-        // Optional: Clamp error to prevent explosions if physics glitched hard
+        // 可选：钳制误差，以防物理严重异常时发生爆炸
         error = Math.Clamp(error, -0.1f, 0.1f);
 
-        // 2. Calculate the Tangent Direction
-        // The tangent is the direction the teeth move at the contact point.
-        // We approximate this using the Cross Product of the axle and the radius.
+        // 2. 计算切线方向
+        // 切线是轮齿在接触点处运动的方向。
+        // 我们用车轴与半径的叉积来近似它。
 
         JVector ax1 = JVector.Transform(localAxis1, Body1.Orientation);
         JVector r = ContactPoint - Body1.Position;
 
-        // Tangent direction at the contact point
+        // 接触点处的切线方向
         JVector tangent = JVector.Normalize(JVector.Cross(ax1, r));
 
-        // 3. Move the Anchor Points ("Virtual Tooth")
-        // We shift the anchor points along the tangent to compensate for the angular error.
-        // The factor '0.5' splits the correction between both bodies.
-        // 'r2' (radius) acts as the lever arm converter (Angle -> Arc Length).
+        // 3. 移动锚点（“虚拟齿”）
+        // 我们沿切线方向移动锚点，以补偿角度误差。
+        // 系数 '0.5' 把修正量分摊到两个刚体上。
+        // 'r2'（半径）充当力臂转换器（角度 -> 弧长）。
         float radius2 = (Body2.Position - ContactPoint).Length();
         JVector offset = tangent * (error * radius2 * 0.5f);
 

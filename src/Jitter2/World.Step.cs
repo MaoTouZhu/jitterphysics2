@@ -31,52 +31,52 @@ public sealed partial class World
 {
     private static readonly Lock MultiThreadStepLock = new();
 
-    // Note: A SlimBag of the reference type 'Arbiter' does not introduce GC problems (not setting
-    // all elements to null when clearing) since the references for Arbiters are pooled anyway.
+    // 注意：引用类型 'Arbiter' 的 SlimBag 不会引入 GC 问题（清空时未将所有元素置为 null），
+    // 因为仲裁器的引用本来就来自池化。
     private readonly SlimBag<Arbiter> deferredArbiters = [];
     private readonly SlimBag<JHandle<ContactData>> brokenArbiters = [];
     private readonly List<Arbiter> dispatchArbiters = [];
     private readonly List<Arbiter> retiredArbiters = [];
 
     /// <summary>
-    /// Profiling buckets for <see cref="DebugTimings"/>, representing stages of <see cref="Step(Real, bool)"/>.
+    /// <see cref="DebugTimings"/> 的性能分析分桶，对应 <see cref="Step(Real, bool)"/> 的各个阶段。
     /// </summary>
     public enum Timings
     {
-        /// <summary>Time spent in <see cref="PreStep"/> callbacks.</summary>
+        /// <summary>在 <see cref="PreStep"/> 回调中花费的时间。</summary>
         PreStep,
 
-        /// <summary>Time spent in narrow phase collision detection and contact generation.</summary>
+        /// <summary>在窄相碰撞检测和接触生成中花费的时间。</summary>
         NarrowPhase,
 
-        /// <summary>Time spent creating deferred arbiters.</summary>
+        /// <summary>创建延迟仲裁器所花费的时间。</summary>
         AddArbiter,
 
-        /// <summary>Time spent reordering contacts (for cache optimization or deterministic results)</summary>
+        /// <summary>重排接触所花费的时间（用于缓存优化或确定性结果）。</summary>
         ReorderContacts,
 
-        /// <summary>Time spent evaluating body deactivation (sleeping).</summary>
+        /// <summary>评估刚体停用（休眠）所花费的时间。</summary>
         CheckDeactivation,
 
-        /// <summary>Time spent in substeps: force integration, constraint solving, and velocity integration.</summary>
+        /// <summary>在子步中花费的时间：力积分、约束求解和速度积分。</summary>
         Solve,
 
-        /// <summary>Time spent removing broken arbiters.</summary>
+        /// <summary>移除失效仲裁器所花费的时间。</summary>
         RemoveArbiter,
 
-        /// <summary>Time spent updating contact state after solving.</summary>
+        /// <summary>求解后更新接触状态所花费的时间。</summary>
         UpdateContacts,
 
-        /// <summary>Time spent finalizing body state and broadphase proxy updates.</summary>
+        /// <summary>最终确定刚体状态和宽相代理更新所花费的时间。</summary>
         UpdateBodies,
 
-        /// <summary>Time spent updating the dynamic tree (broadphase).</summary>
+        /// <summary>更新动态树（宽相）所花费的时间。</summary>
         BroadPhase,
 
-        /// <summary>Time spent in <see cref="PostStep"/> callbacks.</summary>
+        /// <summary>在 <see cref="PostStep"/> 回调中花费的时间。</summary>
         PostStep,
 
-        /// <summary>Sentinel value for array sizing. Not a real timing bucket.</summary>
+        /// <summary>用于数组大小的哨兵值。不是真正的计时分桶。</summary>
         Last
     }
 
@@ -116,28 +116,28 @@ public sealed partial class World
     private readonly double[] debugTimings = new double[(int)Timings.Last];
 
     /// <summary>
-    /// Contains timings for the stages of the last call to <see cref="World.Step(Real, bool)"/>.
-    /// Values are in milliseconds. Index using <c>(int)Timings.XYZ</c>.
+    /// 包含最近一次调用 <see cref="World.Step(Real, bool)"/> 各阶段的计时信息。
+    /// 数值单位为毫秒。使用 <c>(int)Timings.XYZ</c> 进行索引。
     /// </summary>
     public ReadOnlySpan<double> DebugTimings => debugTimings;
 
     /// <summary>
-    /// Performs a single simulation step.
+    /// 执行单个模拟步。
     /// </summary>
-    /// <param name="dt">The duration of time to simulate in seconds. Should remain fixed and not exceed 1/60 s.</param>
-    /// <param name="multiThread">If <see langword="true"/>, uses the internal thread pool for parallel execution.
-    /// Set to <see langword="false"/> for single-threaded execution (useful for debugging or platforms without threading).</param>
+    /// <param name="dt">要模拟的时间长度，单位为秒。应保持固定且不超过 1/60 秒。</param>
+    /// <param name="multiThread">若为 <see langword="true"/>，则使用内部线程池并行执行。
+    /// 设为 <see langword="false"/> 可单线程执行（适用于调试或无线程支持的平台）。</param>
     /// <remarks>
-    /// The step is divided into <see cref="SubstepCount"/> substeps for improved stability.
-    /// Each <see cref="World"/> must not be stepped or modified concurrently from multiple external threads.
-    /// Different worlds may be stepped concurrently with <paramref name="multiThread"/> set to <see langword="false"/>.
-    /// When <paramref name="multiThread"/> is <see langword="true"/>, the step uses a process-wide worker pool;
-    /// therefore multithreaded steps are internally serialized across all worlds.
-    /// Callbacks (<see cref="PreStep"/>, <see cref="PostStep"/>, etc.) are invoked on the calling thread.
-    /// When <paramref name="multiThread"/> is true, <see cref="BroadPhaseFilter"/> and <see cref="NarrowPhaseFilter"/>
-    /// may be called concurrently from worker threads.
+    /// 该步被划分为 <see cref="SubstepCount"/> 个子步以提高稳定性。
+    /// 每个 <see cref="World"/> 都不得从多个外部线程并发地步进或修改。
+    /// 若将 <paramref name="multiThread"/> 设为 <see langword="false"/>，不同世界可以并发步进。
+    /// 当 <paramref name="multiThread"/> 为 <see langword="true"/> 时，该步使用进程范围的工作线程池；
+    /// 因此多线程步进会在所有世界之间于内部串行化。
+    /// 回调（<see cref="PreStep"/>、<see cref="PostStep"/> 等）在调用线程上调用。
+    /// 当 <paramref name="multiThread"/> 为 true 时，<see cref="BroadPhaseFilter"/> 和 <see cref="NarrowPhaseFilter"/>
+    /// 可能从工作线程被并发调用。
     /// </remarks>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="dt"/> is negative or not finite.</exception>
+    /// <exception cref="ArgumentException">当 <paramref name="dt"/> 为负数或非有限值时抛出。</exception>
     public void Step(Real dt, bool multiThread = true)
     {
         if (!multiThread)
@@ -161,7 +161,7 @@ public sealed partial class World
             case < (Real)0.0:
                 throw new ArgumentException("Time step cannot be negative.", nameof(dt));
             case < Real.Epsilon:
-                return; // nothing to do
+                return; // 无事可做
         }
 
         try
@@ -184,11 +184,11 @@ public sealed partial class World
 
             if (multiThread)
             {
-                // Signal the thread pool to spin up threads
+                // 通知线程池启动线程
                 ThreadPool.Instance.ResumeWorkers();
             }
 
-            // Start timer
+            // 启动计时器
             time = Stopwatch.GetTimestamp();
 
             Tracer.ProfileScopeBegin();
@@ -196,7 +196,7 @@ public sealed partial class World
             Tracer.ProfileScopeEnd(TraceName.PreStep);
             SetTime(Timings.PreStep);
 
-            // Perform narrow phase detection.
+            // 执行窄相检测。
             Tracer.ProfileBegin(TraceName.NarrowPhase);
             DynamicTree.EnumerateOverlaps(detect, multiThread);
             Tracer.ProfileEnd(TraceName.NarrowPhase);
@@ -230,23 +230,23 @@ public sealed partial class World
 
             Tracer.ProfileBegin(TraceName.Solve);
 
-            // Sub-stepping
+            // 子步进
             for (int i = 0; i < timeStep.SubstepCount; i++)
             {
                 PreSubStep?.Invoke(timeStep);
-                IntegrateForces(multiThread); // FAST SWEEP
+                IntegrateForces(multiThread); // 快速扫掠
 
                 if (SolveMode == Jitter2.SolveMode.Deterministic)
                 {
-                    SolveIslands(multiThread, solverIterations); // FAST SWEEP
-                    IntegrateVelocities(multiThread); // FAST SWEEP
-                    RelaxIslands(multiThread, velocityRelaxations); // FAST SWEEP
+                    SolveIslands(multiThread, solverIterations); // 快速扫掠
+                    IntegrateVelocities(multiThread); // 快速扫掠
+                    RelaxIslands(multiThread, velocityRelaxations); // 快速扫掠
                 }
                 else
                 {
-                    SolveVelocities(multiThread, solverIterations); // FAST SWEEP
-                    IntegrateVelocities(multiThread); // FAST SWEEP
-                    RelaxVelocities(multiThread, velocityRelaxations); // FAST SWEEP
+                    SolveVelocities(multiThread, solverIterations); // 快速扫掠
+                    IntegrateVelocities(multiThread); // 快速扫掠
+                    RelaxVelocities(multiThread, velocityRelaxations); // 快速扫掠
                 }
 
                 PostSubStep?.Invoke(timeStep);
@@ -262,7 +262,7 @@ public sealed partial class World
             AssertIslandActivationInvariants();
 
             Tracer.ProfileBegin(TraceName.UpdateContacts);
-            UpdateContacts(multiThread); // FAST SWEEP
+            UpdateContacts(multiThread); // 快速扫掠
             Tracer.ProfileEnd(TraceName.UpdateContacts);
             SetTime(Timings.UpdateContacts);
 
@@ -287,7 +287,7 @@ public sealed partial class World
             if ((ThreadModel == ThreadModelType.Regular || !multiThread)
                 && ThreadPool.InstanceInitialized)
             {
-                // Signal the thread pool that threads can go into a wait state.
+                // 通知线程池，线程可以进入等待状态。
                 ThreadPool.Instance.PauseWorkers();
             }
 
@@ -296,24 +296,24 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Solves the existing contacts and constraints at the velocity level without advancing body transforms.
+    /// 在速度层面求解现有的接触和约束，而不推进刚体变换。
     /// </summary>
-    /// <param name="dt">The reference timestep in seconds used to scale bias and softness terms.</param>
-    /// <param name="solverIterations">The number of solver iterations to execute.</param>
-    /// <param name="relaxationIterations">The number of relaxation iterations to execute after solving.</param>
-    /// <param name="multiThread">If <see langword="true"/>, uses the internal thread pool for parallel execution.
-    /// Multithreaded calls are internally serialized across all worlds because the worker pool is process-wide.</param>
+    /// <param name="dt">参考时间步长（秒），用于缩放偏置和柔软度项。</param>
+    /// <param name="solverIterations">要执行的求解器迭代次数。</param>
+    /// <param name="relaxationIterations">求解之后要执行的松弛迭代次数。</param>
+    /// <param name="multiThread">若为 <see langword="true"/>，则使用内部线程池并行执行。
+    /// 由于工作线程池是进程范围的，多线程调用会在所有世界之间于内部串行化。</param>
     /// <remarks>
-    /// Unlike <see cref="Step"/>, this method does not perform broadphase or narrowphase collision detection,
-    /// does not integrate forces, and does not integrate positions or orientations. It only processes the
-    /// existing active contacts and constraints already present in the world at the velocity level.
-    /// This is primarily useful after loading a previously saved scene: restore the saved contacts and
-    /// constraints first, then call <see cref="Stabilize"/> to warm-start and solve the restored system
-    /// before resuming normal simulation with <see cref="Step"/>.
+    /// 与 <see cref="Step"/> 不同，此方法不执行宽相或窄相碰撞检测，
+    /// 不积分力，也不积分位置或朝向。它只在速度层面处理世界中
+    /// 已存在的活动接触和约束。
+    /// 这主要用于加载先前保存的场景之后：先恢复保存的接触和约束，
+    /// 然后调用 <see cref="Stabilize"/> 对恢复的系统进行热启动和求解，
+    /// 之后再通过 <see cref="Step"/> 恢复正常模拟。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown if <paramref name="dt"/> is negative or not finite, <paramref name="solverIterations"/>
-    /// is less than 1, or <paramref name="relaxationIterations"/> is negative.
+    /// 当 <paramref name="dt"/> 为负数或非有限值、<paramref name="solverIterations"/>
+    /// 小于 1，或 <paramref name="relaxationIterations"/> 为负数时抛出。
     /// </exception>
     public void Stabilize(Real dt, int solverIterations, int relaxationIterations = 0, bool multiThread = true)
     {
@@ -348,7 +348,7 @@ public sealed partial class World
             throw new ArgumentException("Relaxation iterations cannot be smaller than zero.", nameof(relaxationIterations));
         }
 
-        if (dt < Real.Epsilon) return; // nothing to do
+        if (dt < Real.Epsilon) return; // 无事可做
 
         try
         {
@@ -400,17 +400,16 @@ public sealed partial class World
     private const int SolverPrefetchDistance = 4;
     private const int SolverPrefetchCacheLineSize = 64;
 
-    // Ask the CPU to fetch the bodies for an upcoming contact or constraint while it solves
-    // the current one. Their addresses come through handles and are harder for the CPU to predict
-    // than the sequential contact and constraint data. These hints give the fetches a head start;
-    // they do not lock the bodies or read their values into the solver.
+    // 在求解当前接触或约束的同时，请求 CPU 预先取出即将处理的接触或约束所用的刚体。
+    // 这些刚体的地址通过句柄获取，比顺序排列的接触和约束数据更难以让 CPU 预测。
+    // 这些提示让预取获得先机；它们不会锁定刚体，也不会把刚体的值读入求解器。
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe void PrefetchBodies(JHandle<RigidBodyData> handle1, JHandle<RigidBodyData> handle2)
     {
         byte* body1 = (byte*)*handle1.Pointer;
         byte* body2 = (byte*)*handle2.Pointer;
 
-        // Cover each body's 64-byte cache lines, including velocities, inertia and motion flags.
+        // 覆盖每个刚体的 64 字节缓存行，包括速度、惯性和运动标志。
         Sse.Prefetch0(body1);
         Sse.Prefetch0(body2);
         Sse.Prefetch0(body1 + SolverPrefetchCacheLineSize);
@@ -727,23 +726,23 @@ public sealed partial class World
     private int sortCounter;
 
     /// <summary>
-    /// This method gradually improves the memory layout of <see cref="memContacts"/>, moving connected contacts
-    /// next to each other. This improves cache coherence.
+    /// 此方法逐步优化 <see cref="memContacts"/> 的内存布局，把彼此相连的接触
+    /// 移到相邻位置。这能改善缓存一致性。
     /// </summary>
     private void ReorderContacts()
     {
         int activeCount = memContacts.Active.Length;
 
-        // Don't even bother with sorting contacts when the set is small.
+        // 当集合较小时，根本不必进行接触排序。
         if (activeCount < 1024) return;
 
         const int fraction = 1024;
 
-        // The basic idea here is to gradually improve the spatial locality of the contact array.
-        // Each frame, only a small fraction of contacts (1/1024th of the total) are visited.
-        // For each visited contact, the algorithm checks whether it is already adjacent to another
-        // contact that shares one of its bodies. If not, it attempts to move contacts that
-        // involve the same bodies forward in memory, grouping connected contacts together.
+        // 这里的基本思路是逐步改善接触数组的空间局部性。
+        // 每帧只访问一小部分接触（总量的 1/1024）。
+        // 对每个被访问的接触，算法检查它是否已经与另一个共享其某个刚体的
+        // 接触相邻。若不相邻，则尝试把涉及相同刚体的接触在内存中前移，
+        // 从而把相互连接的接触归拢到一起。
 
         int iterations = activeCount / fraction;
 
@@ -865,7 +864,7 @@ public sealed partial class World
 
         for (int i = 0; i < span.Length; i++)
         {
-            // get rid of broken contacts
+            // 清除已失效的接触
             ref ContactData cq = ref span[i];
             cq.UpdatePosition();
 
@@ -893,13 +892,13 @@ public sealed partial class World
                     dispatchArbiters.Add(arb);
                 }
 
-                // All contacts must be linked and no longer pending before handlers can remove them.
+                // 在处理器能够移除它们之前，所有接触都必须已链接且不再处于待定状态。
                 deferredArbiters.Clear();
 
                 foreach (var arb in dispatchArbiters)
                 {
-                    // Removed arbiters cannot be reused until this batch finishes, so a zero handle
-                    // also invalidates queued notifications, even if a handler creates new contacts.
+                    // 被移除的仲裁器在此批处理结束前无法复用，因此零句柄
+                    // 也会使已排队的通知失效，即使处理器创建了新的接触。
                     if (!arb.Handle.IsZero) arb.Body1.RaiseBeginCollide(arb);
                     if (!arb.Handle.IsZero) arb.Body2.RaiseBeginCollide(arb);
                 }
@@ -914,12 +913,12 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Attempts to lock two rigid bodies. Briefly waits on contention, then backs off if unsuccessful.
-    /// The lock order is determined by memory address to prevent deadlocks.
+    /// 尝试锁定两个刚体。遇到竞争时短暂等待，若仍不成功则退避。
+    /// 锁定顺序由内存地址决定，以防止死锁。
     /// </summary>
-    /// <param name="b1">Reference to the first rigid body data.</param>
-    /// <param name="b2">Reference to the second rigid body data.</param>
-    /// <returns><see langword="true"/> if both locks were acquired; otherwise, <see langword="false"/>.</returns>
+    /// <param name="b1">第一个刚体数据的引用。</param>
+    /// <param name="b2">第二个刚体数据的引用。</param>
+    /// <returns>若两把锁均已获取则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryLockTwoBody(ref RigidBodyData b1, ref RigidBodyData b2)
     {
@@ -946,7 +945,7 @@ public sealed partial class World
                     Thread.SpinWait(spinCount);
                     if (Interlocked.CompareExchange(ref b2._lockFlag, 1, 0) != 0)
                     {
-                        // back off
+                        // 退避
                         if (b1.MotionType == MotionType.Dynamic) Volatile.Write(ref b1._lockFlag, 0);
                         return false;
                     }
@@ -974,7 +973,7 @@ public sealed partial class World
                     Thread.SpinWait(spinCount);
                     if (Interlocked.CompareExchange(ref b1._lockFlag, 1, 0) != 0)
                     {
-                        // back off
+                        // 退避
                         if (b2.MotionType == MotionType.Dynamic) Volatile.Write(ref b2._lockFlag, 0);
                         return false;
                     }
@@ -986,11 +985,11 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Acquires locks on two rigid bodies using a spin-wait loop. The lock order is determined
-    /// by memory address to prevent deadlocks.
+    /// 使用自旋等待循环获取两个刚体上的锁。锁定顺序由内存地址决定，
+    /// 以防止死锁。
     /// </summary>
-    /// <param name="b1">Reference to the first rigid body data.</param>
-    /// <param name="b2">Reference to the second rigid body data.</param>
+    /// <param name="b1">第一个刚体数据的引用。</param>
+    /// <param name="b2">第二个刚体数据的引用。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void LockTwoBody(ref RigidBodyData b1, ref RigidBodyData b2)
     {
@@ -1037,11 +1036,11 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Releases locks on two rigid bodies previously acquired by <see cref="LockTwoBody"/>
-    /// or <see cref="TryLockTwoBody"/>.
+    /// 释放此前由 <see cref="LockTwoBody"/>
+    /// 或 <see cref="TryLockTwoBody"/> 获取的两个刚体上的锁。
     /// </summary>
-    /// <param name="b1">Reference to the first rigid body data.</param>
-    /// <param name="b2">Reference to the second rigid body data.</param>
+    /// <param name="b1">第一个刚体数据的引用。</param>
+    /// <param name="b2">第二个刚体数据的引用。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void UnlockTwoBody(ref RigidBodyData b1, ref RigidBodyData b2)
     {
@@ -1074,23 +1073,23 @@ public sealed partial class World
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static JVector SolveGyroscopic(in JSymmetricMatrix inertiaWorld, in JVector omega, Real dt)
     {
-        // The equation which we solve for ω_{n+1} in this method with a single Newton iteration:
+        // 本方法用单次牛顿迭代求解 ω_{n+1} 的方程：
         // I_{n+1}(ω_{n+1} - ω_{n}) + h ω_{n+1} x (I_{n+1}ω_{n+1})=0
 
-        // Based on Erin Catto’s “Numerical Methods” (GDC 2015) slides.
-        // Catto integrates the gyroscopic term in **body space** where the inertia
-        // tensor I_b is constant, then transforms the updated angular velocity ω′
-        // back to world space with the *previous* orientation R_n.
+        // 基于 Erin Catto 的 “Numerical Methods”（GDC 2015）幻灯片。
+        // Catto 在**刚体空间**中积分陀螺项，其中惯性
+        // 张量 I_b 为常量，然后用*前一*朝向 R_n 把更新后的角速度 ω′
+        // 变换回世界空间。
 
-        // In this implementation, we keep only the world-space inverse inertia, so
-        // we solve the same implicit equation directly in **world space** using
-        //   I_w = R_n I_b R_nᵀ (assembled from the orientation at t_n).
+        // 在本实现中，我们只保留世界空间下的逆惯性，因此
+        // 直接在**世界空间**中使用下式求解同一隐式方程：
+        //   I_w = R_n I_b R_nᵀ（由 t_n 时刻的朝向组装而成）。
         //
-        // The two approaches are algebraically equivalent:
-        // - Catto keeps I_b fixed and rotates omega' with R_n.
-        // - This method keeps I_w fixed (= R_n I_b R_n^T) while solving.
-        // Both introduce the same first-order O(h) approximation: either freeze
-        // the inertia tensor or rotate omega' with an orientation that is one step out of date.
+        // 两种方法在代数上等价：
+        // - Catto 保持 I_b 固定，并用 R_n 旋转 omega'。
+        // - 本方法在求解时保持 I_w 固定（= R_n I_b R_n^T）。
+        // 两者都引入相同的一阶 O(h) 近似：要么冻结
+        // 惯性张量，要么用滞后一步的朝向旋转 omega'。
 
         JVector f = dt * (omega % JVector.Transform(omega, inertiaWorld));
 
@@ -1111,7 +1110,7 @@ public sealed partial class World
         {
             ref RigidBodyData rigidBody = ref span[i];
 
-            // Only dynamic and kinematic objects have a velocity.
+            // 只有动态和运动学对象具有速度。
             if (rigidBody.MotionType == MotionType.Static) continue;
 
             JVector linearVelocity = rigidBody.Velocity;
@@ -1124,9 +1123,9 @@ public sealed partial class World
 
             if (!rigidBody.EnableGyroscopicForces || rigidBody.HasMotionLocks) continue;
 
-            // Note: We do not perform a symplectic Euler update here (i.e., we calculate the new orientation
-            // from the *old* angular velocity), since the gyroscopic term does introduce instabilities.
-            // We handle the gyroscopic term with implicit Euler. This is known as the symplectic splitting method.
+            // 注意：此处不执行辛欧拉更新（即不用*旧*角速度计算新朝向），
+            // 因为陀螺项确实会引入不稳定性。
+            // 我们用隐式欧拉处理陀螺项。这被称为辛分裂方法。
             JSymmetricMatrix.Inverse(rigidBody.InverseInertiaWorld, out var inertiaWorld);
             rigidBody.AngularVelocity = SolveGyroscopic(inertiaWorld, angularVelocity, timeStep.SubstepDt);
         }
@@ -1255,9 +1254,8 @@ public sealed partial class World
 
         bool deactivatedBody = wasActive && body.MotionType != MotionType.Static;
 
-        // Static bodies have contacts and constraints, but they do not form
-        // collision islands. Do not deactivate their contacts or constraints
-        // when a connected dynamic island goes to sleep.
+        // 静态刚体具有接触和约束，但它们不构成
+        // 碰撞岛。当相连的动态岛进入休眠时，不要停用它们的接触或约束。
         if (body.MotionType != MotionType.Static)
         {
             foreach (var c in body.InternalContacts)
@@ -1295,9 +1293,9 @@ public sealed partial class World
             bool deactivateIsland = !island.MarkedAsActive;
             if (!AllowDeactivation) deactivateIsland = false;
 
-            // Mark the island as inactive
-            // Next frame one active body will be enough to set
-            // MarkedAsActive back to true;
+            // 将该岛标记为非活动
+            // 下一帧只要有一个活动刚体就足以把
+            // MarkedAsActive 重新置为 true；
             island.MarkedAsActive = false;
 
             bool needsUpdate = island.NeedsUpdate;
@@ -1324,7 +1322,7 @@ public sealed partial class World
                 }
                 else
                 {
-                    // Don't activate static bodies at all.
+                    // 完全不要激活静态刚体。
                     if (rigidBody.MotionType == MotionType.Static) continue;
 
                     rigidBody.IsActive = true;

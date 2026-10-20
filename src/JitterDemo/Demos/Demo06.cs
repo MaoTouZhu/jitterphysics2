@@ -50,7 +50,7 @@ public class CarMesh : TriangleMeshDrawable
 {
     public CarMesh() : base("car.obj")
     {
-        // Default covers the chassis group.
+        // 默认材质覆盖底盘组。
         Material = new Material
         {
             Tint = Vector3.Zero,
@@ -62,7 +62,7 @@ public class CarMesh : TriangleMeshDrawable
             Texture = CarTextureCache.CarTexture
         };
 
-        // Group 0 is the glass canopy — translucent, no texture.
+        // 组 0 是玻璃座舱罩——半透明，无纹理。
         Groups = new[]
         {
             new MaterialSlot(0, new Material

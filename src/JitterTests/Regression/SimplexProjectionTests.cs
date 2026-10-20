@@ -50,8 +50,8 @@ public class SimplexProjectionTests
             new JVector(100000, offset, 0),
             new JVector(-130000, offset, 0));
 
-        // The segment is parallel to X and straddles the origin. Interpolating its
-        // large endpoint coordinates leaves an X residual greater than the gap.
+        // 该线段平行于 X 轴并跨越原点。对其较大的端点坐标进行插值
+        // 会留下大于间隙的 X 残差。
         AssertVector(closest, new JVector(0, offset, 0), (Real)1e-9);
     }
 
@@ -65,7 +65,7 @@ public class SimplexProjectionTests
             new JVector(-130000, 100000, offset),
             new JVector(100000, -130000, offset));
 
-        // The XY projection lies inside this triangle; its plane is Z = offset.
+        // XY 投影位于该三角形内部；其平面为 Z = offset。
         AssertVector(closest, new JVector(0, 0, offset), (Real)1e-9);
     }
 

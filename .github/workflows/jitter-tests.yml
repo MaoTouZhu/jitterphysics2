@@ -17,7 +17,7 @@ env:
 
 jobs:
   format:
-    name: Check Formatting
+    name: 检查格式
 
     runs-on: ubuntu-latest
 
@@ -28,19 +28,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Restore dependencies
+      - name: 还原依赖
         run: dotnet restore Jitter2/Jitter2.csproj
 
-      - name: Check formatting
+      - name: 检查格式
         run: dotnet format Jitter2/Jitter2.csproj --verify-no-changes --no-restore
 
   build-and-test:
-    name: Build and Test (${{ matrix.precision }})
+    name: 构建并测试（${{ matrix.precision }}）
 
     runs-on: ubuntu-latest
     strategy:
@@ -57,23 +57,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup .NET
+      - name: 安装 .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
       
-      - name: Restore dependencies
+      - name: 还原依赖
         run: dotnet restore
 
-      - name: Build single-precision tests
+      - name: 构建单精度测试
         if: matrix.precision == 'single'
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
 
-      - name: Build double-precision tests
+      - name: 构建双精度测试
         if: matrix.precision == 'double'
         run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore -p:DoublePrecision=true
 
-      - name: Run single-precision tests
+      - name: 运行单精度测试
         if: matrix.precision == 'single'
         run: |
           mkdir -p ${{ env.TEST_RESULTS_DIR }}
@@ -81,7 +81,7 @@ jobs:
           dotnet test --configuration ${{ env.CONFIGURATION }} --no-restore \
             --test-adapter-path:. --logger "trx;LogFileName=single-precision.trx"
 
-      - name: Run double-precision tests
+      - name: 运行双精度测试
         if: matrix.precision == 'double'
         run: |
           mkdir -p ${{ env.TEST_RESULTS_DIR }}

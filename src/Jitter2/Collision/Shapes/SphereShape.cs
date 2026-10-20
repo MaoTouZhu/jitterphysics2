@@ -10,7 +10,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a sphere.
+/// 表示一个球体。
 /// </summary>
 public class SphereShape : RigidBodyShape
 {
@@ -23,10 +23,10 @@ public class SphereShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the radius of the sphere.
+    /// 获取或设置球体的半径。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is less than or equal to zero.
+    /// 当 <paramref name="value"/> 小于或等于零时抛出。
     /// </exception>
     public Real Radius
     {
@@ -39,11 +39,11 @@ public class SphereShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SphereShape"/> class.
+    /// 初始化 <see cref="SphereShape"/> 类的新实例。
     /// </summary>
-    /// <param name="radius">The radius of the sphere. Defaults to 1.0.</param>
+    /// <param name="radius">球体的半径。默认为 1.0。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> is less than or equal to zero.
+    /// 当 <paramref name="radius"/> 小于或等于零时抛出。
     /// </exception>
     public SphereShape(Real radius = (Real)1.0)
     {
@@ -101,7 +101,7 @@ public class SphereShape : RigidBodyShape
     {
         mass = (Real)(4.0 / 3.0) * MathR.PI * radius * radius * radius;
 
-        // (0,0,0) is the center of mass
+        // (0,0,0) 是质心
         inertia = JSymmetricMatrix.Identity;
         inertia.M11 = (Real)(2.0 / 5.0) * mass * radius * radius;
         inertia.M22 = (Real)(2.0 / 5.0) * mass * radius * radius;

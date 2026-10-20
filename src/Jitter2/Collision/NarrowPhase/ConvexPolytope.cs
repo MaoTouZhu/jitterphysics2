@@ -14,15 +14,14 @@ using Vertex = Jitter2.Collision.MinkowskiDifference.Vertex;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// EPA polytope with filtered exact visibility, orientation and
-/// degeneracy predicates on the supplied floating-point coordinates.
+/// 带过滤后精确可见性、朝向和退化判定的 EPA 多面体，
+/// 这些判定基于给定的浮点坐标。
 /// </summary>
 /// <remarks>
-/// Distances, barycentric coordinates and contact outputs remain approximate and
-/// are evaluated in double precision. Managed storage is allocated by
-/// <see cref="InitHeap"/> and reused. Instances must not be shared between threads.
-/// Each nonzero Minkowski vertex coordinate must have magnitude between 2^-200
-/// and 2^200, inclusive. Seeds and expansions outside this range are rejected.
+/// 距离、重心坐标和接触输出仍然是近似的，并以双精度计算。
+/// 托管存储由 <see cref="InitHeap"/> 分配并复用。实例不得在线程间共享。
+/// 每个非零的 Minkowski 顶点坐标的绝对值必须介于 2^-200
+/// 与 2^200 之间（含端点）。超出此范围的种子与扩展会被拒绝。
 /// </remarks>
 public unsafe struct ConvexPolytope
 {
@@ -90,7 +89,7 @@ public unsafe struct ConvexPolytope
     public readonly Span<Triangle> HullTriangles => triangles.AsSpan(0, triangleCount);
 
     /// <summary>
-    /// Indicates whether the origin is enclosed. Updated by <see cref="GetClosestTriangle"/>.
+    /// 指示原点是否被包围。由 <see cref="GetClosestTriangle"/> 更新。
     /// </summary>
     public readonly bool OriginEnclosed => originEnclosed;
 
@@ -100,7 +99,7 @@ public unsafe struct ConvexPolytope
         return ref vertices[index];
     }
 
-    /// <summary>Allocates reusable managed buffers once. Call before setting vertices or initializing the hull.</summary>
+    /// <summary>一次性分配可复用的托管缓冲区。在设置顶点或初始化凸包之前调用。</summary>
     public void InitHeap()
     {
         if (vertices != null) return;
@@ -109,7 +108,7 @@ public unsafe struct ConvexPolytope
         faceData = new FaceData[MaxTriangles];
     }
 
-    /// <summary>Initializes from the first four vertices. False indicates an invalid or unsupported seed.</summary>
+    /// <summary>从前四个顶点初始化。返回 false 表示种子无效或不受支持。</summary>
     public bool InitTetrahedron()
     {
         vertexCount = 4;
@@ -131,8 +130,8 @@ public unsafe struct ConvexPolytope
         return true;
     }
 
-    /// <summary>Initializes a small tetrahedron centered at the specified point.</summary>
-    /// <returns>False if the seed is degenerate, unsupported, or cannot be evaluated.</returns>
+    /// <summary>以指定点为中心初始化一个小四面体。</summary>
+    /// <returns>如果种子退化、不受支持或无法求值，则返回 false。</returns>
     public bool InitTetrahedron(in JVector point)
     {
         const Real scale = (Real)1e-2;
@@ -143,7 +142,7 @@ public unsafe struct ConvexPolytope
         return InitTetrahedron();
     }
 
-    /// <summary>Finds the closest triangle using double-precision distances and updates origin enclosure.</summary>
+    /// <summary>使用双精度距离查找最近的三角形，并更新原点是否被包围的状态。</summary>
     public ref Triangle GetClosestTriangle()
     {
         if (triangleCount == 0) throw new InvalidOperationException("The polytope is not initialized.");
@@ -165,7 +164,7 @@ public unsafe struct ConvexPolytope
         return ref triangles[closest];
     }
 
-    /// <summary>Calculates shape contact points from a triangle still belonging to the current hull.</summary>
+    /// <summary>根据仍属于当前凸包的三角形计算形状接触点。</summary>
     public void CalculatePoints(in Triangle triangle, out JVector pointA, out JVector pointB)
     {
         for (int i = 0; i < triangleCount; i++)
@@ -184,16 +183,16 @@ public unsafe struct ConvexPolytope
         throw new ArgumentException("Triangle no longer belongs to this hull.", nameof(triangle));
     }
 
-    /// <summary>Adds a vertex. Use <see cref="AddVertexDetailed"/> to distinguish a clean stop from a failure.</summary>
+    /// <summary>添加一个顶点。使用 <see cref="AddVertexDetailed"/> 区分正常停止与失败。</summary>
     /// <remarks>
-    /// Successful expansion invalidates previous triangle references. NoHorizon preserves the hull;
-    /// any other failure requires reinitialization before the hull can be used again.
+    /// 成功扩展会使先前的三角形引用失效。NoHorizon 会保留凸包；
+    /// 其他任何失败都需要重新初始化后才能再次使用凸包。
     /// </remarks>
     public bool AddVertex(in Vertex vertex) => AddVertexDetailed(vertex) == AddVertexResult.Added;
 
     /// <summary>
-    /// Expands the hull in place. NoHorizon is a clean lack of expansion and leaves
-    /// the active hull unchanged. Any other failure requires reinitialization.
+    /// 就地扩展凸包。NoHorizon 表示正常地未发生扩展，活动凸包保持不变。
+    /// 其他任何失败都需要重新初始化。
     /// </summary>
     [SkipLocalsInit]
     public AddVertexResult AddVertexDetailed(in Vertex vertex)
@@ -244,8 +243,8 @@ public unsafe struct ConvexPolytope
             survivorCount++;
         }
 
-        // Build the replacement fan directly in its final slots. A failed face
-        // invalidates the hull; EPA callers abandon the solve and reinitialize it.
+        // 直接在最终槽位中构建替换用的扇形面。某个面创建失败
+        // 会使凸包失效；EPA 调用方会放弃本次求解并重新初始化它。
         for (int i = 0; i < edgeCount; i++)
         {
             int index = survivorCount + i;
@@ -269,9 +268,9 @@ public unsafe struct ConvexPolytope
         triangle = default;
         data = default;
         data.Filter = new PlaneFilter(vertices[a].V, vertices[b].V, vertices[c].V);
-        // The four seed vertices remain inside the growing hull. A nonzero
-        // side for any of them proves both nonzero area and face orientation;
-        // this avoids constructing an exact centroid for every query.
+        // 四个种子顶点始终位于不断增长的凸包内部。其中任意一个具有非零
+        // 侧值即可同时证明面积非零和面朝向正确；
+        // 这避免了为每次查询构造精确质心。
         int orientation = 0;
         for (short i = 0; i < 4 && orientation == 0; i++)
         {

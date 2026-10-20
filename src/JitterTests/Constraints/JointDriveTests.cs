@@ -151,7 +151,7 @@ public class JointDriveTests
         servo.Softness = (Real)0.00001;
         body.Orientation = reference.Orientation * JQuaternion.CreateRotationX(JAngle.FromDegree(-170 * direction).Radian);
 
-        // Jump the target across zero in both directions, keeping the physical stops in place.
+        // 在两个方向上让目标跨越零点，同时保持物理限位不变。
         foreach (int targetDegrees in new[] { 170 * direction, -170 * direction })
         {
             servo.TargetAngle = JAngle.FromDegree(targetDegrees);
@@ -199,7 +199,7 @@ public class JointDriveTests
     {
         using var world = new World();
         var body = CreateBody(world);
-#pragma warning disable CS0618 // Check compatibility of the deprecated public constructors.
+#pragma warning disable CS0618 // 检查已弃用的公共构造函数的兼容性。
         if (prismatic)
         {
             var joint = limited
@@ -292,7 +292,7 @@ public class JointDriveTests
     {
         using var world = new World();
         var body = CreateBody(world);
-#pragma warning disable CS0618 // Check the deprecated constructor's compatibility.
+#pragma warning disable CS0618 // 检查已弃用构造函数的兼容性。
         var joint = new UniversalJoint(world, world.NullBody, body, JVector.Zero, JVector.UnitX, JVector.UnitY, hasMotor: hasMotor);
 #pragma warning restore CS0618
         Assert.That(joint.Motor is not null, Is.EqualTo(hasMotor));
@@ -335,7 +335,7 @@ public class JointDriveTests
             Assert.That((joint.BallSocket.Anchor1 - joint.BallSocket.Anchor2).Length(), Is.LessThan((Real)0.001));
         }
 
-        // A target in the forbidden direction must not unlock the mechanical joint.
+        // 指向禁止方向的目标不得解除机械关节的锁定。
         joint.Servo.TargetRelativeOrientation = JQuaternion.CreateRotationZ((Real)0.7);
         for (int i = 0; i < 300; i++) world.Step((Real)0.01, multiThread);
         Assert.That(MathR.Abs(joint.TwistAngle.Angle.Radian), Is.LessThan((Real)0.003));

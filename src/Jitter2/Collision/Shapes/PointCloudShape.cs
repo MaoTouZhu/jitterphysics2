@@ -12,9 +12,9 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a convex hull shape defined by a point cloud. Unlike <see cref="ConvexHullShape"/>,
-/// it is not necessary for the points to lie on the convex hull. For performance optimization,
-/// this shape should ideally be used for a small number of points (~300).
+/// 表示由点云定义的凸包形状。与 <see cref="ConvexHullShape"/> 不同，
+/// 这些点不必位于凸包上。为了优化性能，
+/// 此形状最好用于少量点（约 300 个）的情况。
 /// </summary>
 public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
 {
@@ -33,14 +33,14 @@ public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PointCloudShape"/> class.
+    /// 初始化 <see cref="PointCloudShape"/> 类的新实例。
     /// </summary>
-    /// <param name="vertices">All vertices that define the convex hull.</param>
+    /// <param name="vertices">定义凸包的所有顶点。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="vertices"/> is empty.
+    /// 当 <paramref name="vertices"/> 为空时抛出。
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <paramref name="vertices"/> does not define a non-degenerate volume.
+    /// 当 <paramref name="vertices"/> 未定义非退化体积时抛出。
     /// </exception>
     public PointCloudShape(ReadOnlySpan<JVector> vertices)
     {
@@ -49,10 +49,10 @@ public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PointCloudShape"/> class.
+    /// 初始化 <see cref="PointCloudShape"/> 类的新实例。
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <paramref name="supportMap"/> does not define a non-degenerate volume.
+    /// 当 <paramref name="supportMap"/> 未定义非退化体积时抛出。
     /// </exception>
     public PointCloudShape(VertexSupportMap supportMap)
     {
@@ -65,8 +65,7 @@ public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
     }
 
     /// <summary>
-    /// Creates a copy of this shape. The underlying data structure is shared
-    /// among the instances.
+    /// 创建此形状的副本。底层数据结构在各实例之间共享。
     /// </summary>
     public PointCloudShape Clone()
     {
@@ -84,8 +83,7 @@ public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
     }
 
     /// <summary>
-    /// Gets or sets the shift value for the shape. This property can be used when constructing a rigid
-    /// body that contains one or more shapes.
+    /// 获取或设置形状的偏移值。此属性可用于构造包含一个或多个形状的刚体。
     /// </summary>
     public JVector Shift
     {
@@ -98,10 +96,10 @@ public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
     }
 
     /// <summary>
-    /// Updates the shape's cached mass, inertia, and bounding box.
+    /// 更新形状缓存的质量、惯性和包围盒。
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the point cloud does not define a non-degenerate volume.
+    /// 当点云未定义非退化体积时抛出。
     /// </exception>
     public void UpdateShape()
     {
@@ -111,10 +109,10 @@ public class PointCloudShape : RigidBodyShape, ICloneableShape<PointCloudShape>
     }
 
     /// <summary>
-    /// Recalculates the mass, center of mass, and inertia tensor.
+    /// 重新计算质量、质心和惯性张量。
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the point cloud does not define a non-degenerate volume.
+    /// 当点云未定义非退化体积时抛出。
     /// </exception>
     public void CalculateMassInertia()
     {

@@ -13,13 +13,13 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Restricts relative swing to the region between two elliptical cones, leaving twist free.
+/// 将相对摆角限制在两个椭圆锥之间的区域，且不约束扭转。
 /// </summary>
 /// <remarks>
-/// Body 1 owns the cone frame; body 2 owns the axis being constrained. The boundaries are ellipses
-/// in swing-angle coordinates (the shortest tilt, resolved along the two frame directions).
-/// Equal lower and upper boundaries constrain the axis to the cone surface. Identical ranges in
-/// both directions reproduce a circular cone. This constraint does not restrict translation.
+/// 刚体 1 拥有锥体坐标系；刚体 2 拥有被约束的轴。边界是摆角坐标中的椭圆
+/// （最短倾斜角，沿两个坐标系方向分解）。
+/// 上下边界相等时，轴被约束在锥面上。两个方向的取值范围相同则退化为圆锥。
+/// 该约束不限制平移。
 /// </remarks>
 public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.EllipticalConeLimitData>
 {
@@ -65,13 +65,13 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     public override void ResetWarmStart() => Data.AccumulatedImpulse = 0;
 
     /// <summary>
-    /// Initializes both body axes from the same world-space direction.
+    /// 使用同一世界空间方向初始化两个刚体的轴。
     /// </summary>
     /// <remarks>
-    /// The reference direction defines the first ellipse semiaxis on body 1. Its component along
-    /// the cone axis is discarded. The second direction is axis cross reference direction.
-    /// A positive inner boundary means the initially aligned pose lies outside the allowed region.
-    /// See the two-axis overload to initialize a pose with nonzero swing.
+    /// 参考方向定义刚体 1 上的第一个椭圆半轴。其沿锥轴的分量会被舍弃。
+    /// 第二个方向为轴与参考方向的叉积。
+    /// 内边界为正值表示初始对齐姿态位于允许区域之外。
+    /// 若要以非零摆角初始化姿态，请参见双轴重载。
     /// </remarks>
     public void Initialize(JVector axis, JVector referenceDirection,
         AngularLimit limitAlongReference, AngularLimit limitAlongPerpendicular)
@@ -80,15 +80,15 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     }
 
     /// <summary>
-    /// Initializes the constraint using world-space axes and a world-space reference direction on body 1.
+    /// 使用世界空间轴以及刚体 1 上的世界空间参考方向初始化约束。
     /// </summary>
-    /// <param name="axisBody1">The cone's central axis, attached to body 1.</param>
-    /// <param name="axisBody2">The axis attached to body 2 whose swing is constrained.</param>
-    /// <param name="referenceDirectionBody1">The first ellipse direction, attached to body 1.</param>
-    /// <param name="limitAlongReference">Inner and outer angular semiaxes in the reference direction.</param>
-    /// <param name="limitAlongPerpendicular">Inner and outer angular semiaxes in the perpendicular direction.</param>
-    /// <exception cref="ArgumentException">A direction is invalid or the reference is parallel to the cone axis.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">The limits do not satisfy <see cref="SetLimits"/>.</exception>
+    /// <param name="axisBody1">锥体的中心轴，附着于刚体 1。</param>
+    /// <param name="axisBody2">附着于刚体 2、其摆角受约束的轴。</param>
+    /// <param name="referenceDirectionBody1">第一个椭圆方向，附着于刚体 1。</param>
+    /// <param name="limitAlongReference">沿参考方向的内、外角半轴。</param>
+    /// <param name="limitAlongPerpendicular">沿垂直方向的内、外角半轴。</param>
+    /// <exception cref="ArgumentException">某个方向无效，或参考方向与锥轴平行。</exception>
+    /// <exception cref="ArgumentOutOfRangeException">限值不满足 <see cref="SetLimits"/> 的要求。</exception>
     public void Initialize(JVector axisBody1, JVector axisBody2, JVector referenceDirectionBody1,
         AngularLimit limitAlongReference, AngularLimit limitAlongPerpendicular)
     {
@@ -126,40 +126,40 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     }
 
     /// <summary>
-    /// Gets body 1's central cone axis in world space.
+    /// 获取刚体 1 在世界空间中的中心锥轴。
     /// </summary>
     public JVector AxisBody1 => JVector.Transform(Data.LocalAxis1, Data.Body1.Data.Orientation);
 
     /// <summary>
-    /// Gets body 2's constrained axis in world space.
+    /// 获取刚体 2 在世界空间中被约束的轴。
     /// </summary>
     public JVector AxisBody2 => JVector.Transform(Data.LocalAxis2, Data.Body2.Data.Orientation);
 
     /// <summary>
-    /// Gets the first ellipse direction in world space, perpendicular to <see cref="AxisBody1"/>.
+    /// 获取世界空间中的第一个椭圆方向，垂直于 <see cref="AxisBody1"/>。
     /// </summary>
     public JVector ReferenceDirectionBody1 => JVector.Transform(Data.LocalReference1, Data.Body1.Data.Orientation);
 
     /// <summary>
-    /// Gets the inner and outer angular semiaxes in the reference direction.
+    /// 获取沿参考方向的内、外角半轴。
     /// </summary>
     public AngularLimit LimitAlongReference => new((JAngle)Data.MinAngle1, (JAngle)Data.MaxAngle1);
 
     /// <summary>
-    /// Gets the inner and outer angular semiaxes in the perpendicular direction.
+    /// 获取沿垂直方向的内、外角半轴。
     /// </summary>
     public AngularLimit LimitAlongPerpendicular => new((JAngle)Data.MinAngle2, (JAngle)Data.MaxAngle2);
 
     /// <summary>
-    /// Sets both angular ranges together and clears the cached impulse.
+    /// 同时设置两个角度范围，并清除缓存的冲量。
     /// </summary>
     /// <remarks>
-    /// Each range must satisfy 0 &lt;= From &lt;= To &lt; pi, with To strictly positive.
-    /// The lower bounds must either both be zero (no inner boundary) or both be positive.
-    /// Equal bounds in both ranges define a fixed elliptical cone surface.
-    /// Fixed zero or pi tilt is unsupported; use HingeAngle with AngularLimit.Full instead.
+    /// 每个范围必须满足 0 &lt;= From &lt;= To &lt; pi，且 To 严格为正。
+    /// 下界必须同时为零（无内边界）或同时为正。
+    /// 两个范围的上界相等时，定义固定的椭圆锥面。
+    /// 不支持固定的零倾斜或 pi 倾斜；请改用带 AngularLimit.Full 的 HingeAngle。
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">The ranges violate the requirements above.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">范围违反了上述要求。</exception>
     public void SetLimits(AngularLimit limitAlongReference, AngularLimit limitAlongPerpendicular)
     {
         ValidateLimits(limitAlongReference, limitAlongPerpendicular);
@@ -200,8 +200,8 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     }
 
     /// <summary>
-    /// Gets signed swing-angle coordinates along the reference and perpendicular directions.
-    /// Their Euclidean length is the tilt angle. At exactly opposite axes the swing direction is ambiguous.
+    /// 获取沿参考方向和垂直方向的有符号摆角坐标。
+    /// 它们的欧几里得长度为倾斜角。当两轴恰好相反时，摆角方向不确定。
     /// </summary>
     public void GetSwing(out JAngle alongReference, out JAngle alongPerpendicular)
     {
@@ -221,7 +221,7 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance). Default is 0.001.
+    /// 获取或设置柔软度（柔顺度）。默认值为 0.001。
     /// </summary>
     public Real Softness
     {
@@ -235,7 +235,7 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     }
 
     /// <summary>
-    /// Gets or sets the angular error correction factor. Default is 0.2.
+    /// 获取或设置角度误差修正因子。默认值为 0.2。
     /// </summary>
     public Real Bias
     {
@@ -249,11 +249,11 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上次求解子步累积的求解器冲量。
     /// </summary>
     public Real Impulse => Data.AccumulatedImpulse;
 
-    // Radius and logarithmic azimuth derivative of the ellipse in swing-angle coordinates.
+    // 摆角坐标中椭圆的半径及对数方位角导数。
     private static Real EllipseRadius(Real a, Real b, Real cosine, Real sine, out Real derivative)
     {
         Real scale = MathR.Min(a, b);
@@ -293,8 +293,8 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
         }
         else
         {
-            // The logarithm has no unique direction at either pole. Pick a principal direction
-            // with a responsive angular axis, including when one body's rotation is restricted.
+            // 对数在两极处没有唯一方向。选择一个具有响应性角度轴的主方向，
+            // 包括某个刚体的旋转受到限制的情形。
             JSymmetricMatrix inertia = body1.InverseInertiaWorld + body2.InverseInertiaWorld;
             bool useReference = JVector.Transform(other, inertia) * other >= JVector.Transform(reference, inertia) * reference;
             cosineAzimuth = useReference ? 1 : 0;
@@ -339,13 +339,13 @@ public unsafe class EllipticalConeLimit : Constraint<EllipticalConeLimit.Ellipti
         JVector azimuthDirection = axis % tiltDirection;
         JVector angleDirection = z * tiltDirection - sine * axis;
 
-        // Differentiate sqrt((swing1/a)^2 + (swing2/b)^2) - 1, then scale the row
-        // to a unit angular Jacobian. This includes the changing azimuth of the ellipse;
-        // using only cross(target, axis) would incorrectly make the limit circular.
+        // 对 sqrt((swing1/a)^2 + (swing2/b)^2) - 1 求导，然后将该行缩放
+        // 为单位角度雅可比。这包含了椭圆方位角的变化；
+        // 若只使用 cross(target, axis)，会错误地将限位变成圆形。
         Real azimuthFactor = sine > 0 ? angle / sine * derivative : 0;
 
-        // Scale before taking the length: close to the antipode, the logarithm's
-        // azimuth derivative can be large enough to overflow a squared vector length.
+        // 先缩放再求长度：在对跖点附近，对数的方位角导数可能大到
+        // 使向量长度平方溢出。
         Real scale = MathR.Max((Real)1, MathR.Abs(azimuthFactor));
         JVector jacobian = -azimuthDirection * ((Real)1 / scale) + (azimuthFactor / scale) * angleDirection;
         Real inverseLength = (Real)1 / jacobian.Length();

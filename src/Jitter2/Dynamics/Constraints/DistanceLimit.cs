@@ -13,10 +13,9 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constrains the distance between a fixed point in the reference frame of one body and a fixed
-/// point in the reference frame of another body. A fixed limit removes one translational degree
-/// of freedom; a range limit acts when a boundary is reached. For a distance of zero, use the
-/// <see cref="BallSocket"/> constraint.
+/// 约束一个刚体参考系中的固定点与另一个刚体参考系中的固定点之间的距离。
+/// 固定限位会移除一个平动自由度；范围限位在到达边界时生效。若距离为零，
+/// 请使用 <see cref="BallSocket"/> 约束。
 /// </summary>
 public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
 {
@@ -63,12 +62,12 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = (Real)0.0;
 
     /// <summary>
-    /// Initializes the constraint with a fixed distance between anchor points.
+    /// 使用锚点之间的固定距离初始化约束。
     /// </summary>
-    /// <param name="anchor1">Anchor point on the first body in world space.</param>
-    /// <param name="anchor2">Anchor point on the second body in world space.</param>
+    /// <param name="anchor1">第一个刚体上的锚点，位于世界空间。</param>
+    /// <param name="anchor2">第二个刚体上的锚点，位于世界空间。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="anchor1"/> or <paramref name="anchor2"/> contains a non-finite value.
+    /// 当 <paramref name="anchor1"/> 或 <paramref name="anchor2"/> 包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector anchor1, JVector anchor2)
     {
@@ -76,20 +75,20 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Initializes the constraint with distance limits between anchor points.
+    /// 使用锚点之间的距离限位初始化约束。
     /// </summary>
-    /// <param name="anchor1">Anchor point on the first body in world space.</param>
-    /// <param name="anchor2">Anchor point on the second body in world space.</param>
-    /// <param name="limit">Allowed offsets from the initial distance between anchor points.
-    /// For example, a limit of (-1, 1) allows the distance to change by at most one unit in either direction.</param>
+    /// <param name="anchor1">第一个刚体上的锚点，位于世界空间。</param>
+    /// <param name="anchor2">第二个刚体上的锚点，位于世界空间。</param>
+    /// <param name="limit">相对于锚点初始距离所允许的偏移量。
+    /// 例如，限位 (-1, 1) 允许距离在任一方向上最多变化一个单位。</param>
     /// <remarks>
-    /// Computes local anchor points and the initial distance from current poses.
-    /// Equal or reversed limits fix the distance offset at their midpoint.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>, <see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>.
+    /// 根据当前姿态计算局部锚点和初始距离。
+    /// 相等或反向的限位会将距离偏移固定在其中点。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>，<see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="anchor1"/> or <paramref name="anchor2"/> contains a non-finite value,
-    /// or when either value in <paramref name="limit"/> is NaN.
+    /// 当 <paramref name="anchor1"/> 或 <paramref name="anchor2"/> 包含非有限值，
+    /// 或 <paramref name="limit"/> 中的任一值为 NaN 时抛出。
     /// </exception>
     public void Initialize(JVector anchor1, JVector anchor2, LinearLimit limit)
     {
@@ -117,8 +116,8 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the anchor point on the first rigid body in world space. The anchor point is
-    /// fixed in the local reference frame of the first body.
+    /// 获取或设置第一个刚体上的锚点，位于世界空间。该锚点
+    /// 固定在第一个刚体的局部参考系中。
     /// </summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor1
@@ -143,8 +142,8 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the anchor point on the second rigid body in world space. The anchor point is
-    /// fixed in the local reference frame of the second body.
+    /// 获取或设置第二个刚体上的锚点，位于世界空间。该锚点
+    /// 固定在第二个刚体的局部参考系中。
     /// </summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor2
@@ -169,9 +168,9 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the target distance between anchor points.
+    /// 获取或设置锚点之间的目标距离。
     /// </summary>
-    /// <value>Set during initialization from the initial anchor separation.</value>
+    /// <value>初始化时根据锚点的初始间距设置。</value>
     public Real TargetDistance
     {
         set
@@ -185,7 +184,7 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets the current distance between anchor points in world space.
+    /// 获取锚点之间在世界空间中的当前距离。
     /// </summary>
     public Real Distance
     {
@@ -247,8 +246,8 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
             return;
         }
 
-        // A distance constraint has no direction at exactly coincident anchors.
-        // Every nonzero separation needs a unit Jacobian, including tiny distances.
+        // 锚点完全重合时，距离约束没有方向。
+        // 任何非零间距都需要单位雅可比，包括极小的距离。
         if (distance == 0)
         {
             data.Clamp = 0;
@@ -291,10 +290,10 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔量）。
     /// </summary>
     /// <value>
-    /// Default is <see cref="Constraint.DefaultLinearSoftness"/>. Higher values allow more distance error but improve stability.
+    /// 默认为 <see cref="Constraint.DefaultLinearSoftness"/>。值越大允许的距离误差越大，但稳定性越好。
     /// </value>
     public Real Softness
     {
@@ -307,10 +306,10 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively distance error is corrected.
+    /// 获取或设置偏置因子，用于控制距离误差的修正强度。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct errors faster but may cause instability.
+    /// 默认为 0.2。值越大误差修正越快，但可能引起不稳定。
     /// </value>
     public Real Bias
     {
@@ -323,7 +322,7 @@ public unsafe class DistanceLimit : Constraint<DistanceLimit.DistanceLimitData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一个已求解子步累积的求解器冲量。
     /// </summary>
     public Real Impulse => Data.AccumulatedImpulse;
 

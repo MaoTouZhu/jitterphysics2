@@ -19,12 +19,12 @@ namespace Jitter2;
 public sealed partial class World
 {
     /// <summary>
-    /// Thrown when the narrow phase encounters a pair of proxy types it cannot process.
+    /// 当窄相遇到一对无法处理的代理类型时抛出。
     /// </summary>
     /// <remarks>
-    /// This typically indicates that non-<see cref="RigidBodyShape"/> proxies were inserted into the
-    /// world's <see cref="DynamicTree"/>. Use <see cref="BroadPhaseFilter"/> to filter such pairs,
-    /// or ensure only supported proxy types are added.
+    /// 这通常表示非 <see cref="RigidBodyShape"/> 代理被插入了世界的 <see cref="DynamicTree"/> 中。
+    /// 使用 <see cref="BroadPhaseFilter"/> 过滤此类配对，
+    /// 或确保只添加受支持的代理类型。
     /// </remarks>
     public class InvalidCollisionTypeException : Exception
     {
@@ -59,65 +59,64 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Hook into the narrow-phase collision detection pipeline.
-    /// The default instance is of type <see cref="TriangleEdgeCollisionFilter"/>.
+    /// 接入窄相碰撞检测管线。
+    /// 默认实例的类型为 <see cref="TriangleEdgeCollisionFilter"/>。
     /// </summary>
     /// <remarks>
-    /// Use this to intercept collisions after contact generation, modify contact data,
-    /// or implement custom collision responses. When <see cref="Step(Real, bool)"/> is called
-    /// with <c>multiThread=true</c>, this may be invoked concurrently. Implementations must be thread-safe.
+    /// 用于在生成接触后拦截碰撞、修改接触数据，
+    /// 或实现自定义碰撞响应。当以 <c>multiThread=true</c> 调用 <see cref="Step(Real, bool)"/> 时，
+    /// 此对象可能被并发调用。实现必须线程安全。
     /// </remarks>
     public INarrowPhaseFilter? NarrowPhaseFilter { get; set; } = new TriangleEdgeCollisionFilter();
 
     /// <summary>
-    /// Hook into the broadphase collision detection pipeline. The default value is null.
+    /// 接入宽相碰撞检测管线。默认值为 null。
     /// </summary>
     /// <remarks>
-    /// Use this to intercept shape pairs before narrow-phase detection, implement custom collision layers,
-    /// or handle collisions for custom proxy types. When <see cref="Step(Real, bool)"/> is called
-    /// with <c>multiThread=true</c>, this may be invoked concurrently. Implementations must be thread-safe.
+    /// 用于在窄相检测前拦截形状配对、实现自定义碰撞层，
+    /// 或处理自定义代理类型的碰撞。当以 <c>multiThread=true</c> 调用 <see cref="Step(Real, bool)"/> 时，
+    /// 此对象可能被并发调用。实现必须线程安全。
     /// </remarks>
     public IBroadPhaseFilter? BroadPhaseFilter { get; set; }
 
     /// <summary>
-    /// Enables the generation of additional contacts for flat surfaces that are in contact.
-    /// Traditionally, the collision system reports the deepest collision point between two objects.
-    /// A full contact manifold is then generated over several time steps using contact caching, which
-    /// can be unstable. This method attempts to build a fuller or complete contact manifold within a single time step.
+    /// 启用为相互接触的平坦表面生成额外接触点。
+    /// 传统上，碰撞系统只报告两个物体之间最深的碰撞点。
+    /// 随后借助接触缓存、经过多个时间步生成完整的接触流形，这种方式
+    /// 可能不稳定。本方法尝试在单个时间步内构建更完整乃至完整的接触流形。
     /// </summary>
     public bool EnableAuxiliaryContactPoints { set; get; } = true;
 
     /// <summary>
-    /// When enabled (the default), contact points and their accumulated impulses are cached between
-    /// frames. This allows the solver to warm-start from the previous solution and enables the
-    /// manifold to grow over several steps, which improves stability for resting contacts.
-    /// When disabled, all contact data is discarded at the end of each frame and every contact is
-    /// treated as brand-new. Disabling this removes all frame-to-frame contact memory at the cost
-    /// of solver convergence speed.
+    /// 启用时（默认），接触点及其累积冲量会在帧之间缓存。
+    /// 这使求解器能够从上一帧的解热启动，并让流形
+    /// 在多个步中逐步增长，从而提高静止接触的稳定性。
+    /// 禁用时，所有接触数据会在每帧结束时丢弃，每个接触都被
+    /// 视为全新的。禁用此选项会清除所有帧间接触记忆，代价是
+    /// 求解器收敛速度下降。
     /// </summary>
     public bool PersistentContactManifold { get; set; } = true;
 
     /// <summary>
-    /// A speculative contact limits relative linear closing velocity to help prevent tunneling through
-    /// an obstacle within one frame. It does not account for rotational motion.
-    /// The <see cref="SpeculativeRelaxationFactor"/> scales the slowdown, ranging from 0
-    /// (where the body stops immediately during this frame) to 1 (where the body and the
-    /// obstacle just touch after the next velocity integration). A value below 1 is preferred, as the leftover velocity
-    /// might be enough to trigger another speculative contact in the next frame.
-    /// Default value: 0.9.
+    /// 推测接触会限制相对线性接近速度，以帮助防止物体在一帧内穿透
+    /// 障碍物。它不考虑旋转运动。
+    /// <see cref="SpeculativeRelaxationFactor"/> 会缩放减速程度，取值范围从 0
+    /// （物体在本帧内立即停止）到 1（物体与障碍物在下一次速度积分后
+    /// 刚好接触）。建议使用小于 1 的值，因为剩余速度
+    /// 可能足以在下一帧触发另一次推测接触。
+    /// 默认值：0.9。
     /// </summary>
     public Real SpeculativeRelaxationFactor { get; set; } = (Real)0.9;
 
     /// <summary>
-    /// Speculative contacts are generated when the relative linear speed between two bodies exceeds
-    /// the threshold value. To prevent bodies with a diameter of D from tunneling through thin walls, this
-    /// threshold should be set to approximately D / timestep, e.g., 100 for a unit cube and a
-    /// timestep of 0.01.
-    /// Default value: 10.0.
+    /// 当两个刚体之间的相对线速度超过阈值时，会生成推测接触。为防止直径为 D 的刚体
+    /// 穿透薄墙，该阈值应设置为大约 D / 时间步，例如对于单位立方体和
+    /// 0.01 的时间步，阈值取 100。
+    /// 默认值：10.0。
     /// </summary>
     /// <remarks>
-    /// Angular velocity does not contribute to this threshold. Built-in speculative contacts
-    /// predict translation at fixed orientations and do not prevent tunneling caused by rotation.
+    /// 角速度不计入该阈值。内置的推测接触
+    /// 在固定朝向下预测平移，无法防止由旋转引起的穿透。
     /// </remarks>
     public Real SpeculativeVelocityThreshold { get; set; } = (Real)10.0;
 
@@ -218,30 +217,30 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Registers a single contact point into an existing <see cref="Arbiter"/>.
+    /// 将一个接触点注册到已有的 <see cref="Arbiter"/> 中。
     /// </summary>
     /// <remarks>
-    /// This method adds a contact point to the specified <paramref name="arbiter"/>, using the provided contact points
-    /// and normal. All input vectors must be in world space. The <paramref name="normal"/> vector must be normalized.
-    /// This method assumes that the <paramref name="arbiter"/> is already valid and mapped to the correct pair of bodies.
+    /// 此方法使用提供的接触点和法线，把一个接触点添加到指定的 <paramref name="arbiter"/> 中。
+    /// 所有输入向量必须位于世界空间。<paramref name="normal"/> 向量必须已归一化。
+    /// 此方法假定 <paramref name="arbiter"/> 已有效，且已映射到正确的刚体对。
     /// <para>
-    /// Calls that create or register contacts may run concurrently with each other. They must not run
-    /// concurrently with <see cref="Step(Real, bool)"/>, <see cref="Remove(Arbiter)"/>, body or shape
-    /// removal, <see cref="Clear"/>, <see cref="Dispose"/>, or other topology-changing operations.
-    /// If custom contact generation uses external worker threads, all such work must finish before the
-    /// world is stepped or modified.
+    /// 创建或注册接触的调用可以彼此并发执行。它们不得与 <see cref="Step(Real, bool)"/>、
+    /// <see cref="Remove(Arbiter)"/>、刚体或形状移除、<see cref="Clear"/>、<see cref="Dispose"/>
+    /// 或其他改变拓扑的操作并发执行。
+    /// 如果自定义接触生成使用了外部工作线程，则所有这些工作都必须在世界
+    /// 步进或修改之前完成。
     /// </para>
     /// <para>
-    /// Do not pass an arbiter after it has been removed from the world; removed arbiters may be recycled.
+    /// 不要在仲裁器已从世界中移除后传入它；已移除的仲裁器可能被回收。
     /// </para>
     /// </remarks>
-    /// <param name="arbiter">The existing <see cref="Arbiter"/> instance to which the contact will be added.</param>
-    /// <param name="point1">The contact point on the first body, in world space.</param>
-    /// <param name="point2">The contact point on the second body, in world space.</param>
-    /// <param name="normal">The contact normal, in world space. Must be normalized; a positive normal
-    /// impulse pushes the arbiter's second body along this direction and its first body against it.</param>
-    /// <param name="removeFlags">A bitmask of <see cref="ContactData.SolveMode"/> flags to be removed from the full
-    /// contact solution (see <see cref="ContactData.SolveMode.Full"/>).</param>
+    /// <param name="arbiter">要添加接触的现有 <see cref="Arbiter"/> 实例。</param>
+    /// <param name="point1">第一个刚体上的接触点，位于世界空间。</param>
+    /// <param name="point2">第二个刚体上的接触点，位于世界空间。</param>
+    /// <param name="normal">接触法线，位于世界空间。必须已归一化；正的法线
+    /// 冲量会沿此方向推动仲裁器的第二个刚体，并沿相反方向推动其第一个刚体。</param>
+    /// <param name="removeFlags"><see cref="ContactData.SolveMode"/> 标志的位掩码，将从完整的
+    /// 接触求解中移除（参见 <see cref="ContactData.SolveMode.Full"/>）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RegisterContact(Arbiter arbiter, in JVector point1, in JVector point2,
         in JVector normal, ContactData.SolveMode removeFlags = ContactData.SolveMode.None)
@@ -263,33 +262,33 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Registers one or more contact points between two rigid bodies using a <see cref="CollisionManifold"/>,
-    /// creating an <see cref="Arbiter"/> if one does not already exist.
+    /// 使用 <see cref="CollisionManifold"/> 在两个刚体之间注册一个或多个接触点，
+    /// 若 <see cref="Arbiter"/> 尚不存在则创建它。
     /// </summary>
     /// <remarks>
-    /// This method ensures that contact information between the specified ID pair is tracked by an <see cref="Arbiter"/>.
-    /// If no arbiter exists for the given IDs, one is created using <paramref name="body1"/> and <paramref name="body2"/>.
+    /// 此方法确保指定 ID 对之间的接触信息由 <see cref="Arbiter"/> 跟踪。
+    /// 如果给定 ID 尚无仲裁器，则使用 <paramref name="body1"/> 和 <paramref name="body2"/> 创建一个。
     ///
     /// <para>
-    /// Calls that create or register contacts may run concurrently with each other. They must not run
-    /// concurrently with <see cref="Step(Real, bool)"/>, <see cref="Remove(Arbiter)"/>, body or shape
-    /// removal, <see cref="Clear"/>, <see cref="Dispose"/>, or other topology-changing operations.
-    /// If custom contact generation uses external worker threads, all such work must finish before the
-    /// world is stepped or modified.
+    /// 创建或注册接触的调用可以彼此并发执行。它们不得与 <see cref="Step(Real, bool)"/>、
+    /// <see cref="Remove(Arbiter)"/>、刚体或形状移除、<see cref="Clear"/>、<see cref="Dispose"/>
+    /// 或其他改变拓扑的操作并发执行。
+    /// 如果自定义接触生成使用了外部工作线程，则所有这些工作都必须在世界
+    /// 步进或修改之前完成。
     /// </para>
     ///
-    /// <para><b>Note:</b> The order of <paramref name="id0"/> and <paramref name="id1"/> <i>does matter</i>.</para>
+    /// <para><b>Note：</b><paramref name="id0"/> 与 <paramref name="id1"/> 的顺序<i>确实重要</i>。</para>
     /// </remarks>
-    /// <param name="id0">The first identifier associated with the contact (e.g., shape or feature ID).</param>
-    /// <param name="id1">The second identifier associated with the contact.</param>
-    /// <param name="body1">The first rigid body involved in the contact.</param>
-    /// <param name="body2">The second rigid body involved in the contact.</param>
+    /// <param name="id0">与接触关联的第一个标识符（例如形状或特征 ID）。</param>
+    /// <param name="id1">与接触关联的第二个标识符。</param>
+    /// <param name="body1">参与接触的第一个刚体。</param>
+    /// <param name="body2">参与接触的第二个刚体。</param>
     /// <param name="normal">
-    /// The contact normal, in world space. Must be a unit vector pointing from <paramref name="body1"/> toward <paramref name="body2"/>.
+    /// 接触法线，位于世界空间。必须是单位向量，方向从 <paramref name="body1"/> 指向 <paramref name="body2"/>。
     /// </param>
-    /// <param name="manifold">A <see cref="CollisionManifold"/> containing contact point pairs in world space.</param>
-    /// <param name="removeFlags">A bitmask of <see cref="ContactData.SolveMode"/> flags to be removed from the full
-    /// contact solution (see <see cref="ContactData.SolveMode.Full"/>).</param>
+    /// <param name="manifold">包含世界空间中接触点对的 <see cref="CollisionManifold"/>。</param>
+    /// <param name="removeFlags"><see cref="ContactData.SolveMode"/> 标志的位掩码，将从完整的
+    /// 接触求解中移除（参见 <see cref="ContactData.SolveMode.Full"/>）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RegisterContact(ulong id0, ulong id1, RigidBody body1, RigidBody body2, in JVector normal,
         ref CollisionManifold manifold, ContactData.SolveMode removeFlags = ContactData.SolveMode.None)
@@ -298,7 +297,7 @@ public sealed partial class World
 
         lock (arbiter)
         {
-            // Do not add contacts while contacts might be resized
+            // 在接触可能被调整大小时不要添加接触
             memContacts.ResizeLock.EnterReadLock();
 
             try
@@ -324,34 +323,34 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Registers a contact point between two rigid bodies, creating an <see cref="Arbiter"/> if one does not already exist.
+    /// 在两个刚体之间注册一个接触点，若 <see cref="Arbiter"/> 尚不存在则创建它。
     /// </summary>
     /// <remarks>
-    /// This method ensures that contact information between the specified ID pair is tracked by an <see cref="Arbiter"/>.
-    /// If no arbiter exists for the given IDs, one is created using <paramref name="body1"/> and <paramref name="body2"/>.
-    /// The provided contact points and normal must be in world space. The <paramref name="normal"/> vector must be normalized.
+    /// 此方法确保指定 ID 对之间的接触信息由 <see cref="Arbiter"/> 跟踪。
+    /// 如果给定 ID 尚无仲裁器，则使用 <paramref name="body1"/> 和 <paramref name="body2"/> 创建一个。
+    /// 提供的接触点和法线必须位于世界空间。<paramref name="normal"/> 向量必须已归一化。
     ///
     /// <para>
-    /// Calls that create or register contacts may run concurrently with each other. They must not run
-    /// concurrently with <see cref="Step(Real, bool)"/>, <see cref="Remove(Arbiter)"/>, body or shape
-    /// removal, <see cref="Clear"/>, <see cref="Dispose"/>, or other topology-changing operations.
-    /// If custom contact generation uses external worker threads, all such work must finish before the
-    /// world is stepped or modified.
+    /// 创建或注册接触的调用可以彼此并发执行。它们不得与 <see cref="Step(Real, bool)"/>、
+    /// <see cref="Remove(Arbiter)"/>、刚体或形状移除、<see cref="Clear"/>、<see cref="Dispose"/>
+    /// 或其他改变拓扑的操作并发执行。
+    /// 如果自定义接触生成使用了外部工作线程，则所有这些工作都必须在世界
+    /// 步进或修改之前完成。
     /// </para>
     ///
-    /// <para><b>Note:</b> The order of <paramref name="id0"/> and <paramref name="id1"/> <i>does matter</i>.</para>
+    /// <para><b>Note：</b><paramref name="id0"/> 与 <paramref name="id1"/> 的顺序<i>确实重要</i>。</para>
     /// </remarks>
-    /// <param name="id0">The first identifier associated with the contact (e.g., shape or feature ID).</param>
-    /// <param name="id1">The second identifier associated with the contact.</param>
-    /// <param name="body1">The first rigid body involved in the contact.</param>
-    /// <param name="body2">The second rigid body involved in the contact.</param>
-    /// <param name="point1">The contact point on <paramref name="body1"/>, in world space.</param>
-    /// <param name="point2">The contact point on <paramref name="body2"/>, in world space.</param>
+    /// <param name="id0">与接触关联的第一个标识符（例如形状或特征 ID）。</param>
+    /// <param name="id1">与接触关联的第二个标识符。</param>
+    /// <param name="body1">参与接触的第一个刚体。</param>
+    /// <param name="body2">参与接触的第二个刚体。</param>
+    /// <param name="point1"><paramref name="body1"/> 上的接触点，位于世界空间。</param>
+    /// <param name="point2"><paramref name="body2"/> 上的接触点，位于世界空间。</param>
     /// <param name="normal">
-    /// The contact normal, in world space. Must be a unit vector pointing from <paramref name="body1"/> toward <paramref name="body2"/>.
+    /// 接触法线，位于世界空间。必须是单位向量，方向从 <paramref name="body1"/> 指向 <paramref name="body2"/>。
     /// </param>
-    /// <param name="removeFlags">A bitmask of <see cref="ContactData.SolveMode"/> flags to be removed from the full
-    /// contact solution (see <see cref="ContactData.SolveMode.Full"/>).</param>
+    /// <param name="removeFlags"><see cref="ContactData.SolveMode"/> 标志的位掩码，将从完整的
+    /// 接触求解中移除（参见 <see cref="ContactData.SolveMode.Full"/>）。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RegisterContact(ulong id0, ulong id1, RigidBody body1, RigidBody body2,
         in JVector point1, in JVector point2, in JVector normal,
@@ -362,20 +361,20 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Gets an existing <see cref="Arbiter"/> instance for the given pair of IDs.
+    /// 获取给定 ID 对对应的现有 <see cref="Arbiter"/> 实例。
     /// </summary>
-    /// <param name="id0">The first identifier (e.g., shape ID).</param>
-    /// <param name="id1">The second identifier.</param>
-    /// <param name="arbiter">The arbiter for the ordered ID pair, or <see langword="null"/> if none exists.</param>
-    /// <returns><see langword="true"/> if an arbiter exists for the ordered ID pair; otherwise, <see langword="false"/>.</returns>
+    /// <param name="id0">第一个标识符（例如形状 ID）。</param>
+    /// <param name="id1">第二个标识符。</param>
+    /// <param name="arbiter">该有序 ID 对的仲裁器；若不存在则为 <see langword="null"/>。</param>
+    /// <returns>如果该有序 ID 对存在仲裁器则返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
     /// <remarks>
-    /// The order of <paramref name="id0"/> and <paramref name="id1"/> matters.
-    /// For arbiters created by the engine, <paramref name="id0"/> &lt; <paramref name="id1"/> holds
-    /// for <see cref="RigidBodyShape"/>s.
+    /// <paramref name="id0"/> 与 <paramref name="id1"/> 的顺序很重要。
+    /// 对于引擎创建的仲裁器，<see cref="RigidBodyShape"/> 满足
+    /// <paramref name="id0"/> &lt; <paramref name="id1"/>。
     /// <para>
-    /// This method may run concurrently with contact creation and registration. It must not run
-    /// concurrently with <see cref="Step(Real, bool)"/>, <see cref="Remove(Arbiter)"/>, body or shape
-    /// removal, <see cref="Clear"/>, <see cref="Dispose"/>, or other topology-changing operations.
+    /// 此方法可以与接触创建和注册并发执行。它不得与 <see cref="Step(Real, bool)"/>、
+    /// <see cref="Remove(Arbiter)"/>、刚体或形状移除、<see cref="Clear"/>、<see cref="Dispose"/>
+    /// 或其他改变拓扑的操作并发执行。
     /// </para>
     /// </remarks>
     public bool GetArbiter(ulong id0, ulong id1, [MaybeNullWhen(false)] out Arbiter arbiter)
@@ -389,30 +388,30 @@ public sealed partial class World
     }
 
     /// <summary>
-    /// Gets an existing <see cref="Arbiter"/> instance for the given pair of IDs,
-    /// or creates a new one if none exists.
+    /// 获取给定 ID 对对应的现有 <see cref="Arbiter"/> 实例，
+    /// 若不存在则创建一个新的。
     /// </summary>
     /// <remarks>
-    /// This method ensures there is a unique <see cref="Arbiter"/> for each ordered pair of IDs.
-    /// If an arbiter already exists, it is returned via the <paramref name="arbiter"/> out parameter.
-    /// Otherwise, a new arbiter is allocated, initialized with the provided <paramref name="body1"/> and <paramref name="body2"/>,
-    /// and registered internally. The body arguments are used only when a new arbiter is created.
+    /// 此方法确保每个有序 ID 对都有唯一的 <see cref="Arbiter"/>。
+    /// 如果仲裁器已存在，则通过 <paramref name="arbiter"/> 输出参数返回它。
+    /// 否则，分配一个新的仲裁器，用提供的 <paramref name="body1"/> 和 <paramref name="body2"/> 初始化，
+    /// 并在内部注册。仅当创建新仲裁器时才会使用刚体参数。
     ///
     /// <para>
-    /// Calls that create or register contacts may run concurrently with each other. They must not run
-    /// concurrently with <see cref="Step(Real, bool)"/>, <see cref="Remove(Arbiter)"/>, body or shape
-    /// removal, <see cref="Clear"/>, <see cref="Dispose"/>, or other topology-changing operations.
-    /// If custom contact generation uses external worker threads, all such work must finish before the
-    /// world is stepped or modified.
+    /// 创建或注册接触的调用可以彼此并发执行。它们不得与 <see cref="Step(Real, bool)"/>、
+    /// <see cref="Remove(Arbiter)"/>、刚体或形状移除、<see cref="Clear"/>、<see cref="Dispose"/>
+    /// 或其他改变拓扑的操作并发执行。
+    /// 如果自定义接触生成使用了外部工作线程，则所有这些工作都必须在世界
+    /// 步进或修改之前完成。
     /// </para>
     ///
-    /// <para><b>Note:</b> The order of <paramref name="id0"/> and <paramref name="id1"/> <i>does matter</i>.</para>
+    /// <para><b>Note：</b><paramref name="id0"/> 与 <paramref name="id1"/> 的顺序<i>确实重要</i>。</para>
     /// </remarks>
-    /// <param name="id0">The first identifier associated with the contact (e.g., shape or feature ID).</param>
-    /// <param name="id1">The second identifier associated with the contact.</param>
-    /// <param name="body1">The first rigid body. Used only if a new arbiter is created.</param>
-    /// <param name="body2">The second rigid body. Used only if a new arbiter is created.</param>
-    /// <param name="arbiter">The resulting <see cref="Arbiter"/> instance associated with the ID pair.</param>
+    /// <param name="id0">与接触关联的第一个标识符（例如形状或特征 ID）。</param>
+    /// <param name="id1">与接触关联的第二个标识符。</param>
+    /// <param name="body1">第一个刚体。仅在创建新仲裁器时使用。</param>
+    /// <param name="body2">第二个刚体。仅在创建新仲裁器时使用。</param>
+    /// <param name="arbiter">与该 ID 对关联的结果 <see cref="Arbiter"/> 实例。</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void GetOrCreateArbiter(ulong id0, ulong id1, RigidBody body1, RigidBody body2, out Arbiter arbiter)
     {
@@ -441,12 +440,12 @@ public sealed partial class World
         arbiter.Body1 = null!;
         arbiter.Body2 = null!;
 
-        // Queued BeginCollide notifications may still refer to this instance.
+        // 已排队的 BeginCollide 通知可能仍引用此实例。
         if (dispatchArbiters.Count > 0) retiredArbiters.Add(arbiter);
         else arbiterPool.Push(arbiter);
     }
 
-    // The caller holds the shard lock until initialization and publication complete.
+    // 调用方在初始化和发布完成之前一直持有分片锁。
     private Arbiter CreateArbiter(ArbiterKey arbiterKey, RigidBody body1, RigidBody body2)
     {
         Debug.Assert(body1 != body2);
@@ -475,7 +474,7 @@ public sealed partial class World
                 Debug.Assert(memContacts.IsActive(arbiter.Handle));
             }
 
-            // Dictionary growth only blocks this shard, not every contact creator.
+            // 字典扩容只会阻塞本分片，而不会阻塞所有接触创建者。
             arbiters.Add(arbiterKey, arbiter);
             return arbiter;
         }
@@ -489,8 +488,8 @@ public sealed partial class World
 
                     if (!arbiter.Handle.IsZero)
                     {
-                        // Free can move another, already published contact. Exclude
-                        // concurrent RegisterContact calls while its data is moved.
+                        // Free 可能移动另一个已发布的接触。在其数据被移动期间
+                        // 排除并发的 RegisterContact 调用。
                         memContacts.ResizeLock.EnterWriteLock();
                         try
                         {

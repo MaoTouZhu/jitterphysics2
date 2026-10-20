@@ -27,34 +27,34 @@ static Texture2D GenCheckedTexture(int size, int checks, Color colorA, Color col
 
 const int NumberOfBoxes = 12;
 
-// set a hint for anti-aliasing
+// 设置抗锯齿提示
 SetConfigFlags(ConfigFlags.Msaa4xHint);
 
-// initialize a 1200x800 px window with a title
+// 初始化一个 1200x800 像素、带标题的窗口
 InitWindow(1200, 800, "BoxDrop example");
 
-// dynamically create a plane model
+// 动态创建平面模型
 Texture2D texture = GenCheckedTexture(10, 1, Color.LightGray, Color.Gray);
 Model planeModel = LoadModelFromMesh(GenMeshPlane(10, 10, 10, 10));
 SetMaterialTexture(ref planeModel, 0, MaterialMapIndex.Diffuse, ref texture);
 
-// dynamically create a box model
+// 动态创建盒子模型
 texture = GenCheckedTexture(2, 1, Color.White, Color.Magenta);
 Mesh boxMesh = GenMeshCube(1, 1, 1);
 Material boxMat = LoadMaterialDefault();
 SetMaterialTexture(ref boxMat, MaterialMapIndex.Diffuse, texture);
 
-// initialize the Jitter physics world
+// 初始化 Jitter 物理世界
 World world = new();
 world.SubstepCount = 4;
 
-// add a body representing the plane
+// 添加一个代表平面的刚体
 RigidBody planeBody = world.CreateRigidBody();
 planeBody.AddShape(new BoxShape(10));
 planeBody.Position = new JVector(0, -5, 0);
 planeBody.MotionType = MotionType.Static;
 
-// add NumberOfBoxes cubes
+// 添加 NumberOfBoxes 个立方体
 for (int i = 0; i < NumberOfBoxes; i++)
 {
     RigidBody body = world.CreateRigidBody();
@@ -62,7 +62,7 @@ for (int i = 0; i < NumberOfBoxes; i++)
     body.Position = new JVector(0, i * 2 + 0.5f, 0);
 }
 
-// create a camera
+// 创建相机
 Camera3D camera = new()
 {
     Position = new Vector3(-20.0f, 8.0f, 10.0f),
@@ -72,10 +72,10 @@ Camera3D camera = new()
     Projection = CameraProjection.Perspective
 };
 
-// 100 fps target
+// 目标帧率 100 fps
 SetTargetFPS(100);
 
-// simple render loop
+// 简单的渲染循环
 while (!WindowShouldClose())
 {
     BeginDrawing();
@@ -89,7 +89,7 @@ while (!WindowShouldClose())
 
     foreach (var body in world.RigidBodies)
     {
-        if (body == planeBody || body == world.NullBody) continue; // do not draw this
+        if (body == planeBody || body == world.NullBody) continue; // 不要绘制该刚体
         DrawMesh(boxMesh, boxMat, GetRayLibTransformMatrix(body));
     }
 

@@ -1,37 +1,37 @@
-# Project Setup
+# 项目搭建
 
-In the previous section, we created a simulation of falling boxes. Jitter includes several default shapes, such as capsules, cylinders, and spheres.
-These shapes can be transformed and/or combined, and they are already sufficient to represent many types of collidable entities.
+在上一节中，我们创建了一个下落的箱子的模拟。Jitter 内置了若干默认形状，例如胶囊体、圆柱体和球体。
+这些形状可以被变换和/或组合，它们已足以表示许多类型的可碰撞实体。
 
-In this section, we will add a custom convex shape to the simulation—specifically, the famous *Utah teapot*. We'll construct this shape from its visual representation by loading a `teapot.obj` file and using its vertices to create the convex shape.
+在本节中，我们将向模拟中添加一个自定义凸形状——具体来说，就是著名的*犹他茶壶*。我们将从其视觉表示出发构造这个形状：加载 `teapot.obj` 文件，并使用其顶点创建凸形状。
 
 
-### Requirements
+### 环境要求
 
-Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+安装 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)。
 
-Ensure that dotnet is correctly set up by executing the following command:
+执行以下命令，确认 dotnet 已正确配置：
 
 ```sh
 dotnet --version
 ```
 
-### Create a New Console Application and Add Jitter and Raylib
+### 创建新的控制台应用并添加 Jitter 与 Raylib
 
-First, create a new directory named "TeaDrop" and navigate into it:
+首先，创建一个名为 "TeaDrop" 的新目录，并进入该目录：
 
 ```sh
 mkdir TeaDrop && cd TeaDrop
 ```
 
-Download and unzip the [teapot.obj](https://github.com/notgiven688/jitterphysics2/raw/refs/heads/main/src/JitterDemo/assets/teapot.obj.zip) model.
+下载并解压 [teapot.obj](https://github.com/notgiven688/jitterphysics2/raw/refs/heads/main/src/JitterDemo/assets/teapot.obj.zip) 模型。
 
 ```sh
 wget https://github.com/notgiven688/jitterphysics2/raw/refs/heads/main/src/JitterDemo/assets/teapot.obj.zip
 unzip teapot.obj.zip
 ```
 
-Next, create a new console application in this directory and add Raylib-cs and Jitter2:
+接下来，在该目录中创建一个新的控制台应用，并添加 Raylib-cs 与 Jitter2：
 
 ```sh
 dotnet new console
@@ -39,7 +39,7 @@ dotnet add package Raylib-cs --version 6.1.1
 dotnet add package Jitter2
 ```
 
-Add the following code to `TeaDrop.csproj` to allow unsafe code, and to copy teapot.obj automatically to the output directory:
+在 `TeaDrop.csproj` 中添加以下代码，以允许不安全代码，并将 teapot.obj 自动复制到输出目录：
 
 ```xml
   <PropertyGroup>
@@ -53,10 +53,10 @@ Add the following code to `TeaDrop.csproj` to allow unsafe code, and to copy tea
   </ItemGroup>
 ```
 
-You have completed the setup. If you now execute the following command:
+至此，搭建已完成。如果你现在执行以下命令：
 
 ```sh
 dotnet run
 ```
 
-Your console should display: "Hello, World!".
+你的控制台应显示："Hello, World!"。

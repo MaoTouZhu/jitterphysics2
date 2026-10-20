@@ -13,8 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Implements a ball-and-socket joint that anchors a point on each body together,
-/// removing three translational degrees of freedom.
+/// 实现球窝关节，将每个刚体上的一个点锚定在一起，
+/// 从而移除三个平移自由度。
 /// </summary>
 public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
 {
@@ -56,15 +56,15 @@ public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = JVector.Zero;
 
     /// <summary>
-    /// Initializes the constraint from a world-space anchor point.
+    /// 使用世界空间中的锚点初始化约束。
     /// </summary>
-    /// <param name="anchor">The anchor point in world space, shared by both bodies.</param>
+    /// <param name="anchor">世界空间中的锚点，由两个刚体共享。</param>
     /// <remarks>
-    /// Computes local anchor points for each body from their current poses.
-    /// Default values: <see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>, <see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>.
+    /// 根据各刚体当前的姿态计算其局部锚点。
+    /// 默认值：<see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>，<see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="anchor"/> contains a non-finite value.
+    /// 当 <paramref name="anchor"/> 包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector anchor)
     {
@@ -86,8 +86,8 @@ public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
     }
 
     /// <summary>
-    /// Gets or sets the anchor point on the first rigid body in world space. The anchor point is
-    /// fixed in the local reference frame of the first body.
+    /// 获取或设置第一个刚体上的锚点，位于世界空间。该锚点
+    /// 固定于第一个刚体的局部参考系中。
     /// </summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor1
@@ -112,8 +112,8 @@ public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
     }
 
     /// <summary>
-    /// Gets or sets the anchor point on the second rigid body in world space. The anchor point is
-    /// fixed in the local reference frame of the second body.
+    /// 获取或设置第二个刚体上的锚点，位于世界空间。该锚点
+    /// 固定于第二个刚体的局部参考系中。
     /// </summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor2
@@ -183,11 +183,11 @@ public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔顺度）。
     /// </summary>
     /// <value>
-    /// Default is <see cref="Constraint.DefaultLinearSoftness"/>. Higher values allow more positional error but improve stability.
-    /// Scaled by inverse timestep during solving.
+    /// 默认值为 <see cref="Constraint.DefaultLinearSoftness"/>。值越高允许的位置误差越大，但稳定性更好。
+    /// 求解时按时间步的倒数进行缩放。
     /// </value>
     public Real Softness
     {
@@ -200,10 +200,10 @@ public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively positional error is corrected.
+    /// 获取或设置偏置因子，控制位置误差被修正的激进程度。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct errors faster but may cause instability.
+    /// 默认值为 0.2。值越高误差修正越快，但可能引起不稳定。
     /// </value>
     public Real Bias
     {
@@ -216,7 +216,7 @@ public unsafe class BallSocket : Constraint<BallSocket.BallSocketData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一次求解的子步中累积的求解器冲量。
     /// </summary>
     public JVector Impulse => Data.AccumulatedImpulse;
 

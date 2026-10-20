@@ -10,18 +10,18 @@ using Jitter2.Collision.Shapes;
 namespace Jitter2.SoftBodies;
 
 /// <summary>
-/// Provides a collision filter that rejects pairs of soft-body shapes belonging to the same
-/// soft body and pairs of rigid-body shapes attached to the same rigid body. Mixed pairs pass.
+/// 提供一个碰撞过滤器，用于拒绝属于同一软体的软体形状对，
+/// 以及附着在同一刚体上的刚体形状对。混合形状对则通过。
 /// </summary>
 public static class DynamicTreeCollisionFilter
 {
     /// <summary>
-    /// Filters matching soft-body and rigid-body shape pairs that share an owner.
+    /// 过滤拥有相同所有者的软体与刚体形状对。
     /// </summary>
-    /// <param name="proxyA">The first proxy.</param>
-    /// <param name="proxyB">The second proxy.</param>
+    /// <param name="proxyA">第一个代理。</param>
+    /// <param name="proxyB">第二个代理。</param>
     /// <returns>
-    /// <c>true</c> if the pair should be processed for collision; <c>false</c> if it should be skipped.
+    /// 如果该形状对应进行碰撞处理则为 <c>true</c>；如果应跳过则为 <c>false</c>。
     /// </returns>
     public static bool Filter(IDynamicTreeProxy proxyA, IDynamicTreeProxy proxyB)
     {

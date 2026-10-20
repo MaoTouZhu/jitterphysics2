@@ -184,8 +184,8 @@ public class SymmetricMatrixTests
     [Test]
     public void TensorTransform_PreservesInertiaInvariantsUnderRotation()
     {
-        // A normalized quaternion avoids including StableMath's trigonometric approximation
-        // error in the tight double-precision checks for orthogonal-transform invariants.
+        // 使用归一化四元数，避免把 StableMath 的三角函数近似误差
+        // 引入到正交变换不变量的严格双精度检查中。
         JMatrix rotation = JMatrix.CreateFromQuaternion(
             JQuaternion.Normalize(new JQuaternion((Real)0.1, (Real)0.2, (Real)0.3, (Real)0.4)));
         JSymmetricMatrix rotated = JSymmetricMatrix.Transform(Sample, rotation);

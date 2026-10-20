@@ -1,33 +1,33 @@
-## Jitter2 in the browser
+## 浏览器中的 Jitter2
 
-**Credits for raylib-cs in the browser and this README go to: https://github.com/disketteman/DotnetRaylibWasm and https://github.com/Kiriller12/RaylibWasm**
+**浏览器中 raylib-cs 及本 README 的致谢：https://github.com/disketteman/DotnetRaylibWasm 和 https://github.com/Kiriller12/RaylibWasm**
 
-## Setup
+## 环境准备
 
-Make sure you have the latest version of .NET 9.
+确保你安装了最新版本的 .NET 9。
 
-Install the official wasm tooling:
+安装官方 wasm 工具链：
 
 ```
 dotnet workload install wasm-tools
 dotnet workload install wasm-experimental
 ```
 
-Install a tool to create ad-hoc http server to serve `application/wasm`:
+安装一个工具，用于创建临时 HTTP 服务器来提供 `application/wasm`：
 
 ```
 dotnet tool install --global dotnet-serve
 ```
 
-## Run it
+## 运行
 
-`publish` the solution. Don't use `build`. Publishing may take a while.
+`publish` 该解决方案。不要使用 `build`。发布可能需要一段时间。
 
 ```
 dotnet publish -c Release
 ```
 
-To serve the files use this command:
+要提供这些文件，请使用以下命令：
 
 ```
 dotnet serve --mime .wasm=application/wasm --mime .js=text/javascript --mime .json=application/json --directory ./bin/Release/net9.0/browser-wasm/AppBundle

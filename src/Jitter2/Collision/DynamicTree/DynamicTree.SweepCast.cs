@@ -14,57 +14,57 @@ namespace Jitter2.Collision;
 public partial class DynamicTree
 {
     /// <summary>
-    /// Represents the result of a sweep against the dynamic tree.
+    /// 表示对动态树进行扫掠的结果。
     /// </summary>
     public struct SweepCastResult
     {
-        /// <summary>The proxy that was hit.</summary>
+        /// <summary>被击中的代理。</summary>
         public IDynamicTreeProxy? Entity;
 
-        /// <summary>The collision point on the moving query shape in world space at the sweep origin. Undefined when the shapes already overlap.</summary>
+        /// <summary>扫掠起点处，移动查询形状在世界空间中的碰撞点。当形状已经重叠时未定义。</summary>
         public JVector PointA;
 
-        /// <summary>The collision point on the hit object in world space at the sweep origin. Undefined when the shapes already overlap.</summary>
+        /// <summary>扫掠起点处，被击中物体在世界空间中的碰撞点。当形状已经重叠时未定义。</summary>
         public JVector PointB;
 
         /// <summary>
-        /// The collision normal in world space, or <see cref="JVector.Zero"/> if the shapes already overlap.
-        /// Do not use this to test whether a hit occurred.
+        /// 世界空间中的碰撞法线；若形状已经重叠则为 <see cref="JVector.Zero"/>。
+        /// 不要用它来判断是否发生命中。
         /// </summary>
         public JVector Normal;
 
-        /// <summary>The time of impact expressed in units of the sweep direction vector. Zero if the shapes already overlap.</summary>
+        /// <summary>撞击时间，以扫掠方向向量为单位。若形状已经重叠则为零。</summary>
         public Real Lambda;
     }
 
     /// <summary>
-    /// Delegate for filtering sweep results after the exact shape sweep test.
+    /// 在精确形状扫掠测试之后对扫掠结果进行过滤的委托。
     /// </summary>
-    /// <param name="result">The sweep result to evaluate.</param>
-    /// <returns><c>false</c> to filter out this hit; <c>true</c> to keep it.</returns>
+    /// <param name="result">要评估的扫掠结果。</param>
+    /// <returns><c>false</c> 表示过滤掉该命中；<c>true</c> 表示保留。</returns>
     public delegate bool SweepCastFilterPost(SweepCastResult result);
 
     /// <summary>
-    /// Delegate for filtering sweep candidates before the exact shape sweep test.
+    /// 在精确形状扫掠测试之前对扫掠候选进行过滤的委托。
     /// </summary>
-    /// <param name="proxy">The proxy to evaluate.</param>
-    /// <returns><c>false</c> to skip this proxy; <c>true</c> to test it.</returns>
+    /// <param name="proxy">要评估的代理。</param>
+    /// <returns><c>false</c> 表示跳过该代理；<c>true</c> 表示对其进行测试。</returns>
     public delegate bool SweepCastFilterPre(IDynamicTreeProxy proxy);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Sphere"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Sphere"/> 进行扫掠。
     /// </summary>
-    /// <param name="radius">The sphere radius.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="radius">球体半径。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastSphere(Real radius, in JVector position, in JVector direction,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -72,20 +72,20 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Sphere"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Sphere"/> 进行扫掠。
     /// </summary>
-    /// <param name="radius">The sphere radius.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="maxLambda">The maximum sweep parameter to consider.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="radius">球体半径。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="maxLambda">要考虑的最大扫掠参数。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastSphere(Real radius, in JVector position, in JVector direction, Real maxLambda,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -93,20 +93,20 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Box"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Box"/> 进行扫掠。
     /// </summary>
-    /// <param name="halfExtents">The half extents of the box.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="halfExtents">盒子的半尺寸。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastBox(in JVector halfExtents, in JQuaternion orientation, in JVector position, in JVector direction,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -114,21 +114,21 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Box"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Box"/> 进行扫掠。
     /// </summary>
-    /// <param name="halfExtents">The half extents of the box.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="maxLambda">The maximum sweep parameter to consider.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="halfExtents">盒子的半尺寸。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="maxLambda">要考虑的最大扫掠参数。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastBox(in JVector halfExtents, in JQuaternion orientation, in JVector position, in JVector direction, Real maxLambda,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -136,21 +136,21 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Capsule"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Capsule"/> 进行扫掠。
     /// </summary>
-    /// <param name="radius">The capsule radius.</param>
-    /// <param name="halfLength">Half the cylindrical section length of the capsule.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="radius">胶囊半径。</param>
+    /// <param name="halfLength">胶囊圆柱段长度的一半。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastCapsule(Real radius, Real halfLength, in JQuaternion orientation, in JVector position, in JVector direction,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -158,22 +158,22 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Capsule"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Capsule"/> 进行扫掠。
     /// </summary>
-    /// <param name="radius">The capsule radius.</param>
-    /// <param name="halfLength">Half the cylindrical section length of the capsule.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="maxLambda">The maximum sweep parameter to consider.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="radius">胶囊半径。</param>
+    /// <param name="halfLength">胶囊圆柱段长度的一半。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="maxLambda">要考虑的最大扫掠参数。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastCapsule(Real radius, Real halfLength, in JQuaternion orientation, in JVector position, in JVector direction, Real maxLambda,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -181,21 +181,21 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Cylinder"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Cylinder"/> 进行扫掠。
     /// </summary>
-    /// <param name="radius">The cylinder radius.</param>
-    /// <param name="halfHeight">Half the cylinder height.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="radius">圆柱半径。</param>
+    /// <param name="halfHeight">圆柱高度的一半。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastCylinder(Real radius, Real halfHeight, in JQuaternion orientation, in JVector position, in JVector direction,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -203,22 +203,22 @@ public partial class DynamicTree
             post, out proxy, out pointA, out pointB, out normal, out lambda);
 
     /// <summary>
-    /// Convenience overload of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that sweeps a <see cref="SupportPrimitives.Cylinder"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, Real, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的便捷重载，
+    /// 对 <see cref="SupportPrimitives.Cylinder"/> 进行扫掠。
     /// </summary>
-    /// <param name="radius">The cylinder radius.</param>
-    /// <param name="halfHeight">Half the cylinder height.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="maxLambda">The maximum sweep parameter to consider.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="radius">圆柱半径。</param>
+    /// <param name="halfHeight">圆柱高度的一半。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="maxLambda">要考虑的最大扫掠参数。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCastCylinder(Real radius, Real halfHeight, in JQuaternion orientation, in JVector position, in JVector direction, Real maxLambda,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda) =>
@@ -239,23 +239,23 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Sweeps a support-mapped query shape against all <see cref="ISweepTestable"/> proxies in the tree
-    /// and returns the closest exact hit.
+    /// 用支撑映射的查询形状对树中所有 <see cref="ISweepTestable"/> 代理进行扫掠，
+    /// 并返回最近的精确命中。
     /// </summary>
-    /// <param name="support">The query shape.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space at the start of the sweep.</param>
-    /// <param name="direction">The sweep direction vector in world space.</param>
-    /// <param name="pre">Optional pre-filter that can skip candidate proxies before the exact sweep test.</param>
-    /// <param name="post">Optional post-filter that can reject exact results and continue the search.</param>
-    /// <param name="proxy">The closest accepted hit proxy, or <c>null</c> if no hit is found.</param>
-    /// <param name="pointA">Collision point on the query shape in world space at the sweep origin. Undefined when the shapes already overlap.</param>
-    /// <param name="pointB">Collision point on the hit proxy in world space at the sweep origin. Undefined when the shapes already overlap.</param>
-    /// <param name="normal">Collision normal in world space, or <see cref="JVector.Zero"/> when the shapes already overlap.</param>
-    /// <param name="lambda">Time of impact in units of <paramref name="direction"/>. Zero when the shapes already overlap.</param>
+    /// <param name="support">查询形状。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">扫掠开始时查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向向量。</param>
+    /// <param name="pre">可选的前置过滤器，可在精确扫掠测试之前跳过候选代理。</param>
+    /// <param name="post">可选的后置过滤器，可拒绝精确结果并继续搜索。</param>
+    /// <param name="proxy">最近的被接受命中代理；若未找到命中则为 <c>null</c>。</param>
+    /// <param name="pointA">扫掠起点处查询形状在世界空间中的碰撞点。当形状已经重叠时未定义。</param>
+    /// <param name="pointB">扫掠起点处被击中代理在世界空间中的碰撞点。当形状已经重叠时未定义。</param>
+    /// <param name="normal">世界空间中的碰撞法线；当形状已经重叠时为 <see cref="JVector.Zero"/>。</param>
+    /// <param name="lambda">撞击时间，以 <paramref name="direction"/> 为单位。当形状已经重叠时为零。</param>
     /// <returns>
-    /// <c>true</c> if an accepted hit is found. This includes the overlapping case, where <paramref name="lambda"/>
-    /// is zero. <c>false</c> if no accepted hit is found, in which case <paramref name="proxy"/> is <c>null</c>.
+    /// <c>true</c> 表示找到被接受的命中。这也包括重叠的情况，此时 <paramref name="lambda"/>
+    /// 为零。<c>false</c> 表示未找到被接受的命中，此时 <paramref name="proxy"/> 为 <c>null</c>。
     /// </returns>
     public bool SweepCast<T>(in T support, in JQuaternion orientation, in JVector position, in JVector direction,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
@@ -281,21 +281,21 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Bounded variant of <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/>
-    /// that limits the sweep to <paramref name="maxLambda"/>.
+    /// <see cref="SweepCast{T}(in T, in JQuaternion, in JVector, in JVector, SweepCastFilterPre?, SweepCastFilterPost?, out IDynamicTreeProxy?, out JVector, out JVector, out JVector, out Real)"/> 的有界变体，
+    /// 将扫掠限制在 <paramref name="maxLambda"/> 内。
     /// </summary>
-    /// <param name="support">The query shape.</param>
-    /// <param name="orientation">The query shape orientation in world space.</param>
-    /// <param name="position">The query shape position in world space.</param>
-    /// <param name="direction">The sweep direction in world space.</param>
-    /// <param name="maxLambda">Maximum sweep parameter to consider along <paramref name="direction"/>.</param>
-    /// <param name="pre">Optional filter applied before the exact test.</param>
-    /// <param name="post">Optional filter applied after the exact test.</param>
-    /// <param name="proxy">The accepted proxy, or null if none is found.</param>
-    /// <param name="pointA">The contact point on the query shape in world space.</param>
-    /// <param name="pointB">The contact point on the found proxy in world space.</param>
-    /// <param name="normal">The result normal in world space.</param>
-    /// <param name="lambda">The sweep parameter at the first accepted hit; zero for initial overlap.</param>
+    /// <param name="support">查询形状。</param>
+    /// <param name="orientation">查询形状在世界空间中的朝向。</param>
+    /// <param name="position">查询形状在世界空间中的位置。</param>
+    /// <param name="direction">世界空间中的扫掠方向。</param>
+    /// <param name="maxLambda">沿 <paramref name="direction"/> 要考虑的最大扫掠参数。</param>
+    /// <param name="pre">在精确测试之前应用的可选过滤器。</param>
+    /// <param name="post">在精确测试之后应用的可选过滤器。</param>
+    /// <param name="proxy">被接受的代理；若未找到则为 null。</param>
+    /// <param name="pointA">世界空间中查询形状上的接触点。</param>
+    /// <param name="pointB">世界空间中所找到代理上的接触点。</param>
+    /// <param name="normal">世界空间中的结果法线。</param>
+    /// <param name="lambda">第一个被接受的命中处的扫掠参数；初始重叠时为零。</param>
     public bool SweepCast<T>(in T support, in JQuaternion orientation, in JVector position, in JVector direction, Real maxLambda,
         SweepCastFilterPre? pre, SweepCastFilterPost? post,
         out IDynamicTreeProxy? proxy, out JVector pointA, out JVector pointB, out JVector normal, out Real lambda)

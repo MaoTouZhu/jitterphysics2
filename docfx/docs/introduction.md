@@ -4,54 +4,54 @@ _disableContribution: true
 ---
 
 <div class="jp-hero">
-  <p class="jp-hero-eyebrow">Fast &middot; Lightweight &middot; Pure C# &middot; MIT License</p>
+  <p class="jp-hero-eyebrow">快速 &middot; 轻量 &middot; 纯 C# &middot; MIT 许可证</p>
   <h1 class="jp-hero-title">Jitter Physics 2</h1>
   <p class="jp-hero-sub">
-    An impulse-based 3D rigid-body physics engine for .NET &mdash;<br>
-    zero native dependencies, runs anywhere .NET runs.
+    面向 .NET 的基于冲量的 3D 刚体物理引擎 &mdash;<br>
+    零原生依赖，凡能运行 .NET 之处皆可运行。
   </p>
   <div class="jp-hero-ctas">
-    <a href="~/docs/tutorials/boxes/project-setup.md" class="jp-btn-primary">Get Started</a>
-    <a href="https://github.com/notgiven688/jitterphysics2" class="jp-btn-ghost">View on GitHub</a>
+    <a href="~/docs/tutorials/boxes/project-setup.md" class="jp-btn-primary">开始使用</a>
+    <a href="https://github.com/notgiven688/jitterphysics2" class="jp-btn-ghost">在 GitHub 上查看</a>
   </div>
   <div class="jp-badges">
-    <img src="https://img.shields.io/nuget/v/Jitter2?style=flat-square&label=NuGet&color=5ba8f5" alt="NuGet version">
-    <img src="https://img.shields.io/github/stars/notgiven688/jitterphysics2?style=flat-square&label=Stars&color=5ba8f5" alt="GitHub stars">
+    <img src="https://img.shields.io/nuget/v/Jitter2?style=flat-square&label=NuGet&color=5ba8f5" alt="NuGet 版本">
+    <img src="https://img.shields.io/github/stars/notgiven688/jitterphysics2?style=flat-square&label=Stars&color=5ba8f5" alt="GitHub 星标数">
     <img src="https://img.shields.io/badge/.NET-8%2B-blueviolet?style=flat-square" alt=".NET 8+">
-    <img src="https://img.shields.io/github/license/notgiven688/jitterphysics2?style=flat-square&color=22c55e" alt="MIT License">
+    <img src="https://img.shields.io/github/license/notgiven688/jitterphysics2?style=flat-square&color=22c55e" alt="MIT 许可证">
   </div>
 </div>
 
 <div class="jp-features">
   <div class="jp-feature-card">
     <div class="jp-feature-icon">&#9889;</div>
-    <div class="jp-feature-title">Zero Dependencies</div>
-    <div class="jp-feature-body">Pure C# with no native DLLs, no P/Invoke. Runs on any platform that supports .NET 8 or later.</div>
+    <div class="jp-feature-title">零依赖</div>
+    <div class="jp-feature-body">纯 C# 实现，无原生 DLL，无 P/Invoke。可在任何支持 .NET 8 或更高版本的平台上运行。</div>
   </div>
   <div class="jp-feature-card">
     <div class="jp-feature-icon">&#128296;</div>
-    <div class="jp-feature-title">Impulse-Based Dynamics</div>
-    <div class="jp-feature-body">Semi-implicit Euler integrator with sub-stepping for stable, stiff simulations at interactive frame rates.</div>
+    <div class="jp-feature-title">基于冲量的动力学</div>
+    <div class="jp-feature-body">半隐式欧拉积分器配合子步，在交互式帧率下实现稳定、高刚度的模拟。</div>
   </div>
   <div class="jp-feature-card">
     <div class="jp-feature-icon">&#129513;</div>
-    <div class="jp-feature-title">Deterministic Solver</div>
-    <div class="jp-feature-body">Optional cross-platform deterministic mode for reproducible simulations.</div>
+    <div class="jp-feature-title">确定性求解器</div>
+    <div class="jp-feature-body">可选的跨平台确定性模式，用于可复现的模拟。</div>
   </div>
   <div class="jp-feature-card">
     <div class="jp-feature-icon">&#127919;</div>
-    <div class="jp-feature-title">Speculative Contacts</div>
-    <div class="jp-feature-body">Linear-only speculative contacts reduce tunneling from fast translation. Tunneling caused by rotation is not covered.</div>
+    <div class="jp-feature-title">推测接触</div>
+    <div class="jp-feature-body">仅线性方向的推测接触可减少快速平移造成的穿透（隧穿）。旋转引起的穿透不在覆盖范围内。</div>
   </div>
   <div class="jp-feature-card">
     <div class="jp-feature-icon">&#128260;</div>
-    <div class="jp-feature-title">Float or Double Precision</div>
-    <div class="jp-feature-body">Compile-time precision switch &mdash; the same API and source code works with either <code>float</code> or <code>double</code>.</div>
+    <div class="jp-feature-title">单精度或双精度</div>
+    <div class="jp-feature-body">编译期精度切换 &mdash; 同一套 API 和源代码可配合 <code>float</code> 或 <code>double</code> 使用。</div>
   </div>
   <div class="jp-feature-card">
     <div class="jp-feature-icon">&#128085;</div>
-    <div class="jp-feature-title">Soft-Body Dynamics</div>
-    <div class="jp-feature-body">Cloth and deformable bodies coexist alongside rigid bodies in the same simulation world.</div>
+    <div class="jp-feature-title">软体动力学</div>
+    <div class="jp-feature-body">布料和可变形体可与刚体共存于同一个模拟世界。</div>
   </div>
 </div>
 
@@ -59,15 +59,15 @@ _disableContribution: true
 <div class="demo-shell">
   <div class="demo-card" id="demo_card">
     <div class="demo-copy">
-      <strong>Interactive Web Demo</strong>
-      <span>Run the physics engine live in your browser &mdash; no install required.</span>
+      <strong>交互式 Web 演示</strong>
+      <span>直接在浏览器中运行物理引擎 &mdash; 无需安装。</span>
     </div>
-    <button class="demo-button" id="load_demo_button" type="button">Launch Demo</button>
+    <button class="demo-button" id="load_demo_button" type="button">启动演示</button>
   </div>
   <div class="demo-frame-wrap" id="demo_frame_wrap" hidden>
     <iframe
       id="demo_frame"
-      title="Jitter2 Web Demo"
+      title="Jitter2 Web 演示"
       loading="lazy"
       allow="fullscreen"
       referrerpolicy="strict-origin-when-cross-origin"></iframe>
@@ -77,31 +77,31 @@ _disableContribution: true
 <div class="jp-nav-cards">
   <a class="jp-nav-card" href="~/docs/tutorials/boxes/project-setup.md">
     <div class="jp-nav-card-icon">&#128218;</div>
-    <div class="jp-nav-card-title">Hello World Tutorial</div>
-    <div class="jp-nav-card-body">Set up a project and simulate your first falling box in minutes.</div>
+    <div class="jp-nav-card-title">你好，世界教程</div>
+    <div class="jp-nav-card-body">几分钟内搭建项目并模拟第一个下落的箱子。</div>
   </a>
   <a class="jp-nav-card" href="~/docs/tutorials/teapots/project-setup.md">
     <div class="jp-nav-card-icon">&#127861;</div>
-    <div class="jp-nav-card-title">Teapot Stacking</div>
-    <div class="jp-nav-card-body">Load convex hull meshes and simulate a tower of Utah teapots.</div>
+    <div class="jp-nav-card-title">茶壶堆叠</div>
+    <div class="jp-nav-card-body">加载凸包网格并模拟一座 Utah 茶壶塔。</div>
   </a>
   <a class="jp-nav-card" href="~/docs/documentation/world.md">
     <div class="jp-nav-card-icon">&#128196;</div>
-    <div class="jp-nav-card-title">Documentation</div>
-    <div class="jp-nav-card-body">Dive into bodies, shapes, constraints, and the broad-phase tree.</div>
+    <div class="jp-nav-card-title">文档</div>
+    <div class="jp-nav-card-body">深入了解刚体、形状、约束以及宽相树。</div>
   </a>
   <a class="jp-nav-card" href="~/api/Jitter2.yml">
     <div class="jp-nav-card-icon">&#128214;</div>
-    <div class="jp-nav-card-title">API Reference</div>
-    <div class="jp-nav-card-body">Full generated reference for every public type in Jitter2.</div>
+    <div class="jp-nav-card-title">API 参考</div>
+    <div class="jp-nav-card-body">Jitter2 中每个公开类型的完整生成式参考。</div>
   </a>
 </div>
 
 <style>
-/* ── Accent & token ─────────────────────────────────────── */
+/* ── 强调色与令牌 ───────────────────────────────────────── */
 :root { --jp-accent: #5ba8f5; --jp-accent-hover: #7cbaf8; }
 
-/* ── Hero ───────────────────────────────────────────────── */
+/* ── 主视觉区 ───────────────────────────────────────────── */
 .jp-hero {
   padding: 2.5rem 0 2rem;
   text-align: center;
@@ -166,7 +166,7 @@ _disableContribution: true
 }
 .jp-badges img { height: 20px; border-radius: 4px; }
 
-/* ── Feature grid ───────────────────────────────────────── */
+/* ── 特性网格 ───────────────────────────────────────────── */
 .jp-features {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -201,7 +201,7 @@ _disableContribution: true
   line-height: 1.5;
 }
 
-/* ── Demo shell ─────────────────────────────────────────── */
+/* ── 演示外壳 ───────────────────────────────────────────── */
 .demo-shell { margin: 0 0 2rem; }
 .demo-card,
 .demo-frame-wrap {
@@ -249,7 +249,7 @@ html[data-bs-theme="light"] .demo-button:hover,
 html[data-bs-theme="light"] .demo-button:focus-visible { background: #314253; }
 .demo-frame-wrap iframe { display: block; width: 100%; height: 100%; border: 0; }
 
-/* ── Navigation cards ───────────────────────────────────── */
+/* ── 导航卡片 ───────────────────────────────────────────── */
 .jp-nav-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -276,7 +276,7 @@ html[data-bs-theme="light"] .demo-button:focus-visible { background: #314253; }
 .jp-nav-card-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; }
 .jp-nav-card-body { font-size: 0.82rem; color: var(--bs-secondary-color); line-height: 1.4; }
 
-/* ── Responsive tweaks ──────────────────────────────────── */
+/* ── 响应式微调 ─────────────────────────────────────────── */
 @media (max-width: 600px) {
   .jp-hero { padding: 1.5rem 0 1.25rem; }
   .demo-card { padding: 1.1rem; }

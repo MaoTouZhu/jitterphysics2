@@ -11,23 +11,23 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Parallelization;
 
 /// <summary>
-/// Provides parallel batch processing extension methods for collections used by the physics engine.
+/// 为物理引擎所用的集合提供并行批处理扩展方法。
 /// </summary>
 /// <remarks>
-/// These methods divide collections into batches and distribute them across worker threads.
-/// The batch count is determined by the task threshold and available threads.
+/// 这些方法将集合划分为批次，并分配到各工作线程。
+/// 批次数由任务阈值与可用线程数决定。
 /// </remarks>
 public static class ParallelExtensions
 {
     /// <summary>
-    /// Processes array elements in parallel batches.
+    /// 以并行批次处理数组元素。
     /// </summary>
-    /// <param name="array">The array to process.</param>
-    /// <param name="taskThreshold">Positive target batch size used to choose the number of batches;
-    /// actual batches can be smaller or larger.</param>
-    /// <param name="action">The callback to invoke for each batch.</param>
-    /// <param name="execute">If <see langword="true"/>, calls <see cref="ThreadPool.Execute"/> to start execution.</param>
-    /// <returns>The number of batches generated.</returns>
+    /// <param name="array">要处理的数组。</param>
+    /// <param name="taskThreshold">用于选择批次数的正目标批大小；
+    /// 实际批次可能更小或更大。</param>
+    /// <param name="action">要对每个批次调用的回调。</param>
+    /// <param name="execute">如果为 <see langword="true"/>，则调用 <see cref="ThreadPool.Execute"/> 开始执行。</param>
+    /// <returns>生成的批次数。</returns>
     public static int ParallelForBatch(this Array array, int taskThreshold,
         Action<Parallel.Batch> action, bool execute = true)
     {
@@ -40,15 +40,15 @@ public static class ParallelExtensions
     }
 
     /// <summary>
-    /// Processes active elements of a <see cref="PartitionedBuffer{T}"/> in parallel batches.
+    /// 以并行批次处理 <see cref="PartitionedBuffer{T}"/> 的活动元素。
     /// </summary>
-    /// <typeparam name="T">The unmanaged element type.</typeparam>
-    /// <param name="list">The buffer to process.</param>
-    /// <param name="taskThreshold">Positive target batch size used to choose the number of batches;
-    /// actual batches can be smaller or larger.</param>
-    /// <param name="action">The callback to invoke for each batch.</param>
-    /// <param name="execute">If <see langword="true"/>, calls <see cref="ThreadPool.Execute"/> to start execution.</param>
-    /// <returns>The number of batches generated.</returns>
+    /// <typeparam name="T">非托管元素类型。</typeparam>
+    /// <param name="list">要处理的缓冲区。</param>
+    /// <param name="taskThreshold">用于选择批次数的正目标批大小；
+    /// 实际批次可能更小或更大。</param>
+    /// <param name="action">要对每个批次调用的回调。</param>
+    /// <param name="execute">如果为 <see langword="true"/>，则调用 <see cref="ThreadPool.Execute"/> 开始执行。</param>
+    /// <returns>生成的批次数。</returns>
     public static int ParallelForBatch<T>(this PartitionedBuffer<T> list, int taskThreshold,
         Action<Parallel.Batch> action, bool execute = true) where T : unmanaged
     {
@@ -61,15 +61,15 @@ public static class ParallelExtensions
     }
 
     /// <summary>
-    /// Processes active elements of a <see cref="ReadOnlyPartitionedSet{T}"/> in parallel batches.
+    /// 以并行批次处理 <see cref="ReadOnlyPartitionedSet{T}"/> 的活动元素。
     /// </summary>
-    /// <typeparam name="T">The element type.</typeparam>
-    /// <param name="list">The set to process.</param>
-    /// <param name="taskThreshold">Positive target batch size used to choose the number of batches;
-    /// actual batches can be smaller or larger.</param>
-    /// <param name="action">The callback to invoke for each batch.</param>
-    /// <param name="execute">If <see langword="true"/>, calls <see cref="ThreadPool.Execute"/> to start execution.</param>
-    /// <returns>The number of batches generated.</returns>
+    /// <typeparam name="T">元素类型。</typeparam>
+    /// <param name="list">要处理的集合。</param>
+    /// <param name="taskThreshold">用于选择批次数的正目标批大小；
+    /// 实际批次可能更小或更大。</param>
+    /// <param name="action">要对每个批次调用的回调。</param>
+    /// <param name="execute">如果为 <see langword="true"/>，则调用 <see cref="ThreadPool.Execute"/> 开始执行。</param>
+    /// <returns>生成的批次数。</returns>
     public static int ParallelForBatch<T>(this ReadOnlyPartitionedSet<T> list, int taskThreshold,
         Action<Parallel.Batch> action, bool execute = true) where T : class, IPartitionedSetIndex
     {
@@ -82,15 +82,15 @@ public static class ParallelExtensions
     }
 
     /// <summary>
-    /// Processes active elements of a <see cref="PartitionedSet{T}"/> in parallel batches.
+    /// 以并行批次处理 <see cref="PartitionedSet{T}"/> 的活动元素。
     /// </summary>
-    /// <typeparam name="T">The element type.</typeparam>
-    /// <param name="partitionedSet">The set to process.</param>
-    /// <param name="taskThreshold">Positive target batch size used to choose the number of batches;
-    /// actual batches can be smaller or larger.</param>
-    /// <param name="action">The callback to invoke for each batch.</param>
-    /// <param name="execute">If <see langword="true"/>, calls <see cref="ThreadPool.Execute"/> to start execution.</param>
-    /// <returns>The number of batches generated.</returns>
+    /// <typeparam name="T">元素类型。</typeparam>
+    /// <param name="partitionedSet">要处理的集合。</param>
+    /// <param name="taskThreshold">用于选择批次数的正目标批大小；
+    /// 实际批次可能更小或更大。</param>
+    /// <param name="action">要对每个批次调用的回调。</param>
+    /// <param name="execute">如果为 <see langword="true"/>，则调用 <see cref="ThreadPool.Execute"/> 开始执行。</param>
+    /// <returns>生成的批次数。</returns>
     internal static int ParallelForBatch<T>(this PartitionedSet<T> partitionedSet, int taskThreshold,
         Action<Parallel.Batch> action, bool execute = true) where T : class, IPartitionedSetIndex
     {
@@ -103,15 +103,15 @@ public static class ParallelExtensions
     }
 
     /// <summary>
-    /// Processes elements of a <see cref="SlimBag{T}"/> in parallel batches.
+    /// 以并行批次处理 <see cref="SlimBag{T}"/> 的元素。
     /// </summary>
-    /// <typeparam name="T">The element type.</typeparam>
-    /// <param name="list">The bag to process.</param>
-    /// <param name="taskThreshold">Positive target batch size used to choose the number of batches;
-    /// actual batches can be smaller or larger.</param>
-    /// <param name="action">The callback to invoke for each batch.</param>
-    /// <param name="execute">If <see langword="true"/>, calls <see cref="ThreadPool.Execute"/> to start execution.</param>
-    /// <returns>The number of batches generated.</returns>
+    /// <typeparam name="T">元素类型。</typeparam>
+    /// <param name="list">要处理的袋。</param>
+    /// <param name="taskThreshold">用于选择批次数的正目标批大小；
+    /// 实际批次可能更小或更大。</param>
+    /// <param name="action">要对每个批次调用的回调。</param>
+    /// <param name="execute">如果为 <see langword="true"/>，则调用 <see cref="ThreadPool.Execute"/> 开始执行。</param>
+    /// <returns>生成的批次数。</returns>
     internal static int ParallelForBatch<T>(this SlimBag<T> list, int taskThreshold,
         Action<Parallel.Batch> action, bool execute = true) where T : class, IPartitionedSetIndex
     {

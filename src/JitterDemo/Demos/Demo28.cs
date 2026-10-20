@@ -7,10 +7,10 @@ using JitterDemo.Renderer;
 namespace JitterDemo;
 
 /*
- * Jitter2 Colosseum Demo
- * This demo logic is ported from BepuPhysics2
+ * Jitter2 斗兽场演示
+ * 此演示逻辑移植自 BepuPhysics2
  * https://github.com/bepu/bepuphysics2/blob/cfb5daa1837aef30a5437ac347ac583f2ffaf2b0/Demos/Demos/ColosseumDemo.cs
- * Original Copyright Ross Nordby.
+ * 原始版权归 Ross Nordby 所有。
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

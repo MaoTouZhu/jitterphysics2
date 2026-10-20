@@ -1,30 +1,30 @@
-#  <img src="./media/logo/jitterstringsmallsmall.png" alt="screenshot" width="240"/> Jitter Physics 2
+#  <img src="./media/logo/jitterstringsmallsmall.png" alt="截图" width="240"/> Jitter Physics 2
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/notgiven688/jitterphysics2/jitter-tests.yml?label=JitterTests)](https://github.com/notgiven688/jitterphysics2/actions/workflows/jitter-tests.yml)
 [![Nuget](https://img.shields.io/nuget/v/Jitter2?color=yellow)](https://www.nuget.org/packages/Jitter2/)
 [![Discord](https://img.shields.io/discord/1213790465225138197?logo=discord&logoColor=lightgray&label=discord&color=blue)](https://discord.gg/7jr3f4edmV)
 
-Jitter Physics 2 is a fast, dependency-free physics engine written in C#, with rigid-body and soft-body dynamics. It runs across platforms supported by .NET and is the successor to [Jitter Physics](https://github.com/notgiven688/jitterphysics).
+Jitter Physics 2 是一个用 C# 编写的快速、无依赖的物理引擎，支持刚体与软体动力学。它可运行于 .NET 支持的各平台，是 [Jitter Physics](https://github.com/notgiven688/jitterphysics) 的继任者。
 
-📦 Install [Jitter2](https://www.nuget.org/packages/Jitter2) from NuGet, or [Jitter2.Double](https://www.nuget.org/packages/Jitter2.Double) for double precision. See the [changelog](https://jitterphysics.com/docs/changelog).
+📦 从 NuGet 安装 [Jitter2](https://www.nuget.org/packages/Jitter2)，或安装 [Jitter2.Double](https://www.nuget.org/packages/Jitter2.Double) 以获得双精度。参见[变更日志](https://jitterphysics.com/docs/changelog)。
 
-▶️ Try the interactive demo and explore the docs at **[jitterphysics.com](https://jitterphysics.com/docs/introduction.html)**.
+▶️ 在 **[jitterphysics.com](https://jitterphysics.com/docs/introduction.html)** 体验交互式演示并浏览文档。
 
 ---
 
-<img src="./media/screenshots/jitter_screenshot0.png" alt="screenshot" width="400"/> <img src="./media/screenshots/jitter_screenshot1.png" alt="screenshot" width="400"/>
+<img src="./media/screenshots/jitter_screenshot0.png" alt="截图" width="400"/> <img src="./media/screenshots/jitter_screenshot1.png" alt="截图" width="400"/>
 
-<img src="./media/screenshots/jitter_screenshot2.png" alt="screenshot" width="400"/> <img src="./media/screenshots/jitter_screenshot4.png" alt="screenshot" width="400"/>
+<img src="./media/screenshots/jitter_screenshot2.png" alt="截图" width="400"/> <img src="./media/screenshots/jitter_screenshot4.png" alt="截图" width="400"/>
 
-## Getting Started
+## 快速开始
 
-Add Jitter to your .NET project:
+将 Jitter 添加到你的 .NET 项目：
 
 ```sh
 dotnet add package Jitter2
 ```
 
-Create a world, add a box, and simulate one second with a fixed time step:
+创建一个世界、添加一个盒子，并用固定时间步模拟一秒：
 
 ```csharp
 using System;
@@ -47,22 +47,22 @@ for (int i = 0; i < 60; i++)
 Console.WriteLine(box.Position);
 ```
 
-For a complete example with rendering, follow the [falling boxes tutorial](https://jitterphysics.com/docs/tutorials/boxes/project-setup.html).
+如需包含渲染的完整示例，请跟随[落箱教程](https://jitterphysics.com/docs/tutorials/boxes/project-setup.html)。
 
-## Running the Demos
+## 运行演示
 
-The `src` directory contains four projects:
+`src` 目录包含四个项目：
 
-| Project          | Description                                                |
+| 项目             | 说明                                                       |
 |------------------|------------------------------------------------------------|
-| Jitter2          | Physics library.                                           |
-| JitterDemo       | Interactive OpenGL demos.                                  |
-| JitterBenchmark  | BenchmarkDotNet benchmarks.                                |
-| JitterTests      | NUnit tests.                                               |
+| Jitter2          | 物理库。                                                   |
+| JitterDemo       | 交互式 OpenGL 演示。                                       |
+| JitterBenchmark  | BenchmarkDotNet 基准测试。                                 |
+| JitterTests      | NUnit 测试。                                               |
 
-To run the demo scenes:
+运行演示场景：
 
-Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), then run:
+安装 [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)，然后运行：
 
 ```sh
 git clone https://github.com/notgiven688/jitterphysics2.git
@@ -70,31 +70,31 @@ cd jitterphysics2/src/JitterDemo
 dotnet run -c Release
 ```
 
-JitterDemo uses [GLFW](https://www.glfw.org/) for accessing OpenGL and managing windows, and [VellumUI](https://www.nuget.org/packages/VellumUI/) for the demo UI overlay. The project contains the GLFW native binaries in precompiled form.
+JitterDemo 使用 [GLFW](https://www.glfw.org/) 访问 OpenGL 并管理窗口，使用 [VellumUI](https://www.nuget.org/packages/VellumUI/) 实现演示 UI 叠加层。该项目以预编译形式包含 GLFW 原生二进制文件。
 
-## Features
+## 特性
 
-- Rigid-body and soft-body dynamics.
-- Single or double precision, selected at compile time.
-- Optional cross-platform deterministic solver for reproducible simulations.
-- Impulse-based solver with a semi-implicit Euler integrator and substepping.
-- Linear-only speculative contacts to reduce tunneling from fast translation.
-- Constraints and motors with configurable softness.
-- Deactivation to reduce the cost of inactive rigid bodies.
-- Triangle meshes with filtering of internal edges.
-- Convex collision detection using EPA-aided MPR and one-shot contact manifolds.
-- Compound shapes and custom support mappings, alongside built-in boxes, spheres, capsules, cylinders, cones, convex hulls, point clouds, and triangles.
+- 刚体与软体动力学。
+- 单精度或双精度，在编译时选择。
+- 可选的跨平台确定性求解器，用于可复现的模拟。
+- 基于冲量的求解器，采用半隐式欧拉积分器与子步。
+- 仅线性的推测接触，减少快速平移导致的隧穿。
+- 约束与马达，柔软度可配置。
+- 停用以降低非活动刚体的开销。
+- 三角网格，支持内部边过滤。
+- 使用 EPA 辅助的 MPR 与一次性接触流形的凸体碰撞检测。
+- 复合形状与自定义支撑映射，以及内置的盒子、球体、胶囊体、圆柱体、圆锥体、凸包、点云和三角形。
 
-## Documentation
+## 文档
 
-Explore the [documentation and interactive demo](https://jitterphysics.com/docs/introduction.html) for tutorials, API details, and examples.
+浏览[文档与交互式演示](https://jitterphysics.com/docs/introduction.html)，获取教程、API 细节和示例。
 
-## Credits
+## 致谢
 
-Grateful acknowledgment to Erin Catto, Dirk Gregorius, Erwin Coumans, Gino van den Bergen, Daniel Chappuis, Marijn Tamis, Danny Chapman, Gary Snethen, and Christer Ericson for sharing their knowledge through forum posts, talks, code, papers, and books.
+衷心感谢 Erin Catto、Dirk Gregorius、Erwin Coumans、Gino van den Bergen、Daniel Chappuis、Marijn Tamis、Danny Chapman、Gary Snethen 和 Christer Ericson 通过论坛帖子、演讲、代码、论文和书籍分享知识。
 
-Special thanks also to the contributors of the predecessor projects JigLibX and Jitter.
+还要特别感谢前身项目 JigLibX 与 Jitter 的贡献者。
 
-## Contribute 👋
+## 参与贡献 👋
 
-Contributions of all forms are welcome! Feel free to fork the project and create a pull request.
+欢迎各种形式的贡献！请随意 fork 本项目并创建拉取请求。

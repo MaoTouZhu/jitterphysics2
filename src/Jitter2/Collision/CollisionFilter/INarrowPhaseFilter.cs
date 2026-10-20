@@ -10,27 +10,27 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Provides a hook into the narrowphase collision detection pipeline.
+/// 提供接入窄相碰撞检测管线的钩子。
 /// </summary>
 /// <remarks>
-/// Implement this interface to intercept collisions after contact generation.
-/// This can be used to modify contact data, implement custom collision responses,
-/// or filter out specific collisions.
+/// 实现此接口可在接触生成之后拦截碰撞。
+/// 可用于修改接触数据、实现自定义碰撞响应，
+/// 或过滤掉特定碰撞。
 /// </remarks>
 public interface INarrowPhaseFilter
 {
     /// <summary>
-    /// Called for each detected collision with its contact data.
+    /// 对每个检测到的碰撞及其接触数据调用。
     /// </summary>
-    /// <param name="shapeA">The first shape in the collision.</param>
-    /// <param name="shapeB">The second shape in the collision.</param>
-    /// <param name="pointA">Contact point on shape A (modifiable).</param>
-    /// <param name="pointB">Contact point on shape B (modifiable).</param>
-    /// <param name="normal">Collision normal used to solve the contact (modifiable). A positive normal
-    /// impulse pushes shape B along this direction and shape A against it.</param>
-    /// <param name="penetration">Signed penetration depth reported by the narrowphase. Changes to this value alone
-    /// do not affect the registered contact; its separation is derived from the contact points and normal.</param>
-    /// <returns><c>true</c> to keep the collision; <c>false</c> to discard it.</returns>
+    /// <param name="shapeA">碰撞中的第一个形状。</param>
+    /// <param name="shapeB">碰撞中的第二个形状。</param>
+    /// <param name="pointA">形状 A 上的接触点（可修改）。</param>
+    /// <param name="pointB">形状 B 上的接触点（可修改）。</param>
+    /// <param name="normal">用于求解接触的碰撞法线（可修改）。正的法线
+    /// 冲量会将形状 B 沿此方向推开，并将形状 A 反向推开。</param>
+    /// <param name="penetration">窄相报告的带符号穿透深度。仅修改此值
+    /// 不会影响已注册的接触；其分离量由接触点和法线推导得出。</param>
+    /// <returns><c>true</c> 表示保留该碰撞；<c>false</c> 表示丢弃该碰撞。</returns>
     [CallbackThread(ThreadContext.Any)]
     bool Filter(RigidBodyShape shapeA, RigidBodyShape shapeB,
         ref JVector pointA, ref JVector pointB,

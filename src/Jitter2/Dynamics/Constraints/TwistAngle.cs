@@ -13,8 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constrains the relative twist of two bodies. This constraint removes one angular
-/// degree of freedom when the limit is enforced.
+/// 约束两个刚体的相对扭转。当启用限位时，该约束移除一个角度
+/// 自由度。
 /// </summary>
 public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
 {
@@ -59,19 +59,19 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = (Real)0.0;
 
     /// <summary>
-    /// Initializes the constraint from world-space axes and angular limits.
+    /// 使用世界空间轴和角度限位初始化约束。
     /// </summary>
-    /// <param name="axis1">The twist axis for body 1 in world space.</param>
-    /// <param name="axis2">The twist axis for body 2 in world space.</param>
-    /// <param name="limit">The allowed relative twist angle range.</param>
+    /// <param name="axis1">刚体 1 在世界空间中的扭转轴。</param>
+    /// <param name="axis2">刚体 2 在世界空间中的扭转轴。</param>
+    /// <param name="limit">允许的相对扭转角范围。</param>
     /// <remarks>
-    /// Stores each axis in the local frame of its body and records the initial relative orientation.
-    /// Equal or reversed limits fix the twist at their midpoint.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>, <see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>.
+    /// 将每个轴存储在其刚体的局部坐标系中，并记录初始相对朝向。
+    /// 相等或反向的限位会将扭转固定在其中点。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>，<see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis1"/> or <paramref name="axis2"/> is zero or contains a non-finite value,
-    /// or when either value in <paramref name="limit"/> is not finite.
+    /// 当 <paramref name="axis1"/> 或 <paramref name="axis2"/> 为零或包含非有限值，
+    /// 或当 <paramref name="limit"/> 中任一值不是有限值时抛出。
     /// </exception>
     public void Initialize(JVector axis1, JVector axis2, AngularLimit limit)
     {
@@ -95,32 +95,32 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
         data.Angle2 = (Real)limit.To;
         data.FixedAngle = (Real)0.5 * (Real)limit.From + (Real)0.5 * (Real)limit.To;
 
-        // Calculate local axes
+        // 计算局部轴
         JVector u1 = JVector.ConjugatedTransform(axis1, body1.Orientation);
         data.B = JVector.ConjugatedTransform(axis2, body2.Orientation);
 
-        // 1. Calculate the initial relative orientation (Body1 -> Body2)
+        // 1. 计算初始相对朝向（Body1 -> Body2）
         JQuaternion q1 = body1.Orientation;
         JQuaternion q2 = body2.Orientation;
         JQuaternion qRel = q2.Conjugate() * q1;
 
-        // 2. Map u1 into Body2 space using the initial orientation
+        // 2. 使用初始朝向将 u1 映射到 Body2 空间
         JVector u1InB2 = JVector.Transform(u1, qRel);
 
-        // 3. Calculate the correction rotation to align u1_in_B2 to data.B (u2)
-        // This calculates the 'swing' offset between the two axes
+        // 3. 计算将 u1_in_B2 对齐到 data.B（u2）的修正旋转
+        // 由此得到两个轴之间的“摆动”偏移
         JQuaternion qCorrection = JQuaternion.CreateFromToRotation(u1InB2, data.B);
 
-        // 4. Apply correction to Q0.
-        // Q0 now represents a reference orientation where the axes are perfectly aligned.
+        // 4. 将修正应用到 Q0。
+        // 此时 Q0 表示两个轴完全对齐的参考朝向。
         data.Q0 = qCorrection * qRel;
     }
 
     /// <summary>
-    /// Sets the angular limits for the twist rotation.
+    /// 设置扭转旋转的角度限位。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when either assigned limit value is not finite.
+    /// 当任一赋值的限位值不是有限值时抛出。
     /// </exception>
     public AngularLimit Limit
     {
@@ -137,12 +137,12 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
     }
 
     /// <summary>
-    /// Initializes the constraint with a fixed twist angle (no rotation allowed).
+    /// 使用固定扭转角（不允许旋转）初始化约束。
     /// </summary>
-    /// <param name="axis1">The twist axis for body 1 in world space.</param>
-    /// <param name="axis2">The twist axis for body 2 in world space.</param>
+    /// <param name="axis1">刚体 1 在世界空间中的扭转轴。</param>
+    /// <param name="axis2">刚体 2 在世界空间中的扭转轴。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis1"/> or <paramref name="axis2"/> is zero or contains a non-finite value.
+    /// 当 <paramref name="axis1"/> 或 <paramref name="axis2"/> 为零或包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector axis1, JVector axis2)
     {
@@ -210,7 +210,7 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
     }
 
     /// <summary>
-    /// Gets the current twist angle relative to the initial pose.
+    /// 获取相对于初始位姿的当前扭转角。
     /// </summary>
     public JAngle Angle
     {
@@ -235,10 +235,10 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔顺性）。
     /// </summary>
     /// <value>
-    /// Default is <see cref="Constraint.DefaultAngularSoftness"/>. Higher values allow more angular error but improve stability.
+    /// 默认值为 <see cref="Constraint.DefaultAngularSoftness"/>。较高的值允许更大的角度误差，但可提升稳定性。
     /// </value>
     public Real Softness
     {
@@ -251,10 +251,10 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively angular error is corrected.
+    /// 获取或设置偏置因子，控制角度误差的修正强度。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct errors faster but may cause instability.
+    /// 默认值为 0.2。较高的值修正误差更快，但可能导致不稳定。
     /// </value>
     public Real Bias
     {
@@ -267,7 +267,7 @@ public unsafe class TwistAngle : Constraint<TwistAngle.TwistLimitData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一次已求解子步中累积的求解器冲量。
     /// </summary>
     public Real Impulse => Data.AccumulatedImpulse;
 

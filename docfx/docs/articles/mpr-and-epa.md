@@ -1,29 +1,29 @@
-# MPR and EPA for Penetration Depth
+# 用于计算穿透深度的 MPR 与 EPA
 
-A physics engine usually asks for contact information when two shapes are just touching or overlap by a small amount. Occasionally, however, it receives a pair that overlaps deeply: a body may have been teleported, a large timestep may have missed the first contact, or a stack may have compressed. The same collision query has to handle both cases.
+物理引擎通常在两个形状刚刚接触或只有少量重叠时请求接触信息。然而，它偶尔也会遇到深度重叠的一对形状：刚体可能被瞬移过，较大的时间步可能错过了首次接触，或者一个堆叠可能被压缩了。同一次碰撞查询必须能处理这两种情况。
 
-Minkowski Portal Refinement (MPR) and the Expanding Polytope Algorithm (EPA) fit together particularly well here. MPR finds a contact through a small, stable local search. EPA can check whether that contact is the *least* penetration and continue searching when it is not. The trick is to run EPA only when MPR's reported depth gives us reason to doubt the local answer.
+闵可夫斯基门户精化（Minkowski Portal Refinement，MPR）与扩展多面体算法（Expanding Polytope Algorithm，EPA）在这里配合得特别好。MPR 通过一个小而稳定的局部搜索找到接触。EPA 可以检查该接触是否是**最小**穿透，若不是则继续搜索。诀窍在于：只有当 MPR 报告的深度让我们有理由怀疑局部答案时，才运行 EPA。
 
-This article assumes familiarity with Minkowski differences and support maps. Gary Snethen introduced MPR in [XenoCollide](https://github.com/notgiven688/xenocollide).
+本文假定读者熟悉闵可夫斯基差与支撑映射。Gary Snethen 在 [XenoCollide](https://github.com/notgiven688/xenocollide) 中提出了 MPR。
 
-## Follow a portal to the surface
+## 沿门户走向表面
 
-Let $M=A-B$ be the Minkowski difference. Overlapping shapes put the origin inside $M$. The penetration depth is the shortest distance from the origin to its boundary; the direction to that nearest boundary gives a separating normal.
+令 $M=A-B$ 为闵可夫斯基差。形状重叠会使原点位于 $M$ 内部。穿透深度是原点到其边界的最短距离；指向该最近边界的方向给出了分离法线。
 
-MPR starts with a point $v_0$ in the interior of $M$ and keeps it fixed. It obtains three more points on the boundary from support queries. Together, the four points form a tetrahedron. Its outer triangular face is the **portal**: the origin lies in the wedge from $v_0$ through that face. MPR repeatedly asks the support map for a point beyond the portal, then replaces one portal vertex. In effect, it scans the part of the surface visible along that wedge without constructing a full boundary mesh.
+MPR 从 $M$ 内部的一个点 $v_0$ 开始，并保持它固定。它通过支撑查询在边界上再取得三个点。这四个点共同构成一个四面体。其外侧三角形面就是**门户**：原点位于从 $v_0$ 穿过该面所形成的楔形区域内。MPR 反复向支撑映射请求门户之外的一个点，然后替换一个门户顶点。实际上，它沿着该楔形扫描可见的那部分表面，而无需构造完整的边界网格。
 
-The resulting portal supplies a normal, a penetration estimate, and contact points. MPR turns out to be very robust.
+得到的门户提供了法线、穿透估计和接触点。事实证明 MPR 非常稳健。
 
-## Where a local answer goes wrong
+## 局部答案出错的情形
 
-Deep inside a long, thin Minkowski difference, the portal can settle on the wrong side. The figure shows a two-dimensional section, where the tetrahedron becomes a triangle. The origin lies inside the triangle made from an interior point $v_0$ and the two vertices on the right. Its right edge is a valid portal, with a normal pointing right. But the *top boundary of the Minkowski difference* is much closer to the origin.
+在一个细长的闵可夫斯基差深处，门户可能停留在错误的一侧。图中展示的是一个二维截面，其中四面体变成了三角形。原点位于由内部点 $v_0$ 与右侧两个顶点构成的三角形内。其右侧边是一个有效的门户，法线指向右方。但是，**闵可夫斯基差的顶部边界**离原点要近得多。
 
 <figure class="mpr-figure">
-  <img src="images/mpr-local-portal.svg" width="760" height="440" alt="A long thin Minkowski difference contains the origin. A triangle from an interior point to the two right vertices also contains it. The selected right portal has depth 2 and a rightward normal, while the nearest top boundary has depth 0.3 and an upward normal.">
-  <figcaption>The right edge is the portal selected by this local search. The top edge of the Minkowski difference is the global answer. The slanted sides of the triangle are interior chords, not candidate collision boundaries.</figcaption>
+  <img src="images/mpr-local-portal.svg" width="760" height="440" alt="一个细长的闵可夫斯基差包含原点。从内部点到右侧两个顶点的三角形也包含原点。选中的右侧门户深度为 2、法线向右，而最近的顶部边界深度为 0.3、法线向上。">
+  <figcaption>右侧边是这次局部搜索选中的门户。闵可夫斯基差的顶部边才是全局答案。三角形的斜边是内部弦，而不是候选的碰撞边界。</figcaption>
 </figure>
 
-In this example, the MPR direction gives depth $2$, while the minimum depth is $0.3$. MPR found a way out, just not the shortest way out. Notice that the reported depth is an **upper bound** on the true minimum. If $h_M(n)$ is the support plane distance of $M$ in unit direction $n$, then
+在这个例子中，MPR 方向给出的深度为 $2$，而最小深度为 $0.3$。MPR 找到了一条出路，只是不是最短的出路。注意，报告的深度是真实最小值的**上界**。若 $h_M(n)$ 是 $M$ 在单位方向 $n$ 上的支撑平面距离，则
 
 $$
 d_* = \min_{\lVert n\rVert=1} h_M(n)
@@ -31,31 +31,31 @@ d_* = \min_{\lVert n\rVert=1} h_M(n)
 d_* \le d_{\mathrm{MPR}} = h_M(n_{\mathrm{MPR}}).
 $$
 
-This asymmetry makes a simple handoff possible. If MPR reports a depth below a chosen tolerance, the true depth is no larger than that tolerance either. A larger reported depth leaves open the possibility that another direction is much shallower, as in the figure. The tolerance controls how much depth error we are willing to accept from the local answer. It does **not** certify that the MPR normal is globally correct: scaling the entire thin-bar example down can make its wrong rightward answer arbitrarily small.
+这种不对称性使得简单的交接成为可能。如果 MPR 报告的深度低于某个选定的容差，那么真实深度也不会大于该容差。而报告深度较大时，就存在另一种可能：某个其他方向要浅得多，如图中所示。该容差控制我们愿意接受多大的、来自局部答案的深度误差。它**并不**保证 MPR 法线在全局上正确：把整个细杆示例按比例缩小，可以使其错误的向右答案任意小。
 
-## Give the portal to EPA
+## 把门户交给 EPA
 
-EPA takes a convex polytope containing the origin and expands its closest face using support queries. When no support point significantly extends that face, it has found the nearest boundary within its numerical tolerance. In the thin-bar example, it does not have to accept the right portal: it can expand the triangle past its interior chords until the top boundary becomes the closest edge.
+EPA 取一个包含原点的凸多面体，并通过支撑查询扩展其最近的面。当没有支撑点能显著扩展该面时，它就在其数值容差内找到了最近的边界。在细杆示例中，它不必接受右侧门户：它可以越过内部弦扩展三角形，直到顶部边界成为最近的边。
 
-The awkward part is often obtaining a suitable starting polytope. GJK is excellent at distance queries for separated shapes and can also detect overlap. But once the origin is inside the Minkowski difference, its distance result is zero; it does not by itself give the penetration normal and depth. Near touching, a GJK simplex used to start EPA may be lower-dimensional or nearly degenerate. Implementations need extra work to create a useful enclosing tetrahedron. [Van den Bergen's original EPA description](https://graphics.stanford.edu/courses/cs468-01-fall/Papers/van-den-bergen.pdf) discusses these lower-dimensional cases. Spherical expansion followed by reduction is another way to make a near-touching query easier, but it adds geometry and bookkeeping. EPA is easier to initialize when the origin is comfortably enclosed, which is more likely with deeper overlap.
+棘手之处通常在于获得一个合适的起始多面体。GJK 非常擅长对分离形状做距离查询，也能检测重叠。但一旦原点位于闵可夫斯基差内部，其距离结果就是零；它本身并不给出穿透法线和深度。在接近接触的情况下，用于启动 EPA 的 GJK 单纯形可能是低维或接近退化的。实现方需要额外工作才能构造出有用的包围四面体。[Van den Bergen 对 EPA 的原始描述](https://graphics.stanford.edu/courses/cs468-01-fall/Papers/van-den-bergen.pdf)讨论了这些低维情形。先做球形扩展再缩减，是让接近接触的查询更简单的另一种方法，但它增加了几何与记录工作。当原点被舒适地包围时，EPA 更容易初始化，而深度重叠时这种情况更可能出现。
 
-MPR has already done the setup work. Its fixed interior point and three portal vertices form a tetrahedron containing the origin. If the MPR depth exceeds the chosen threshold, those four vertices can be passed straight to EPA. EPA then examines the closest face of that tetrahedron. If the existing portal was already the global answer, its support test can confirm that quickly. Otherwise, EPA grows the hull toward a closer boundary. The cost of that broader search is paid only for contacts beyond the threshold.
+MPR 已经完成了准备工作。其固定的内部点与三个门户顶点构成一个包含原点的四面体。如果 MPR 深度超过选定阈值，这四个顶点可以直接传给 EPA。EPA 随后检查该四面体最近的面。如果现有门户已经是全局答案，其支撑测试可以很快确认这一点。否则，EPA 会朝更近的边界扩展凸包。只有在接触超过阈值时，才需要付出这种更大范围搜索的开销。
 
-## Interactive example
+## 交互式示例
 
-Drag the circle across the fixed bar. Green shows the penetration normal when MPR finds a minimum-depth exit. When it finds a longer way out, its normal turns red and EPA's result appears in green. The readout gives both depths and normals; the arrows have a fixed length so their directions remain visible. Use **Near contact** and **Wrong portal** to jump between the two cases.
+将圆拖动到固定的杆上。绿色表示 MPR 找到最小深度出口时的穿透法线。当它找到一条更长的出路时，其法线变为红色，并以绿色显示 EPA 的结果。读数会给出两种深度和法线；箭头长度固定，以便其方向始终可见。使用 **Near contact** 与 **Wrong portal** 在两种情况之间切换。
 
-The lower view shows the Minkowski sum of the bar and a disk, shifted opposite the sphere's motion. The origin stays fixed while the shape moves. MPR's final triangle is drawn inside it, with the portal edge highlighted in green or red. The green line reaches EPA's nearest boundary point. When the results differ, a red dashed line shows MPR's depth to its support plane; the small tick at its end is not necessarily on the boundary.
+下方视图显示杆与圆盘的闵可夫斯基和，它沿球体运动的相反方向平移。当形状移动时，原点保持固定。MPR 的最终三角形绘制在其中，门户边以绿色或红色突出显示。绿线到达 EPA 的最近边界点。当结果不同时，红色虚线显示 MPR 到其支撑平面的深度；其末端的小标记不一定位于边界上。
 
-The demo runs EPA at every overlapping position so that the answers can be compared. The cutoff described above would skip EPA for sufficiently small MPR depths.
+该演示在每个重叠位置都运行 EPA，以便比较结果。上文所述的截断策略会对足够小的 MPR 深度跳过 EPA。
 
-<iframe class="mpr-demo" src="mpr-epa-demo.html" width="760" height="900" loading="lazy" title="Interactive MPR and EPA comparison for a draggable circle, fixed bar, and Minkowski sum"></iframe>
+<iframe class="mpr-demo" src="mpr-epa-demo.html" width="760" height="900" loading="lazy" title="针对可拖动圆、固定杆与闵可夫斯基和的 MPR 与 EPA 交互式对比"></iframe>
 
-The combination follows the needs of a physics engine: use MPR's local contact where shallow overlap makes that answer most useful, and let EPA search globally when the local estimate says there is room for a substantially shorter escape.
+这种组合符合物理引擎的需求：在浅重叠时使用 MPR 的局部接触，因为此时该答案最有用；而当局部估计表明可能存在短得多的逃逸方向时，就让 EPA 进行全局搜索。
 
-For a concrete implementation of this MPR–EPA handoff, see [NarrowPhase.cs](https://github.com/notgiven688/jitterphysics2/blob/main/src/Jitter2/Collision/NarrowPhase/NarrowPhase.cs).
+关于这种 MPR–EPA 交接的具体实现，参见 [NarrowPhase.cs](https://github.com/notgiven688/jitterphysics2/blob/main/src/Jitter2/Collision/NarrowPhase/NarrowPhase.cs)。
 
-*Disclosure: AI helped write this article. The observations and the idea of using a depth threshold to hand MPR's portal to EPA came from the author.*
+*声明：本文在 AI 的帮助下撰写。文中的观察以及利用深度阈值将 MPR 门户交给 EPA 的想法均来自作者。*
 
 <style>
 .mpr-figure { margin: 1.5rem 0; }

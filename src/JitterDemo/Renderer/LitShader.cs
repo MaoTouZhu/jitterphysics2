@@ -2,9 +2,9 @@ using JitterDemo.Renderer.OpenGL;
 
 namespace JitterDemo.Renderer;
 
-/// Phong lit shader consumed by <see cref="InstancedDrawable"/> for the lit pass.
-/// Samples <see cref="ShadowCaster.CascadeCount"/> shadow maps bound to texture
-/// units 0..CASCADES-1 and a diffuse texture bound to unit 3.
+/// 供 <see cref="InstancedDrawable"/> 在光照绘制阶段使用的 Phong 光照着色器。
+/// 采样绑定到纹理单元 0..CASCADES-1 的 <see cref="ShadowCaster.CascadeCount"/> 张阴影贴图，
+/// 以及绑定到单元 3 的漫反射纹理。
 public static class LitShader
 {
     public static Shader Create()
@@ -12,7 +12,7 @@ public static class LitShader
         var shader = new Shader(Vs, Fs);
         shader.Use();
 
-        // Bind the samplers to the fixed texture units matched by ShadowCaster / InstancedDrawable.
+        // 将采样器绑定到 ShadowCaster / InstancedDrawable 所匹配的固定纹理单元。
         shader.Set("uShadowNear", 0);
         shader.Set("uShadowMid", 1);
         shader.Set("uShadowFar", 2);
@@ -21,9 +21,9 @@ public static class LitShader
         return shader;
     }
 
-    // Vertex: 8-float vertex stream (pos, normal, uv) + per-instance mat4 + color.
-    // The normal is transformed by the inverse-transpose of the instance matrix so
-    // that non-uniform scale (which the demo uses heavily) does not warp shading.
+    // 顶点：8 个 float 的顶点流（位置、法线、uv）+ 逐实例 mat4 + 颜色。
+    // 法线通过实例矩阵的逆转置进行变换，这样
+    // 非均匀缩放（演示中大量使用）不会扭曲着色。
     private const string Vs = @"
 #version 330 core
 
@@ -52,9 +52,9 @@ void main()
 }
 ";
 
-    // Fragment: material struct matches fields set by InstancedDrawable.ApplyMaterial.
-    // Cascade count and split logic are hard-compiled to 3 for simplicity; change
-    // both the GLSL and ShadowCaster.CascadeCount together if you need more.
+    // 片元：材质结构体与 InstancedDrawable.ApplyMaterial 设置的字段对应。
+    // 为简单起见，级联数量和分割逻辑硬编码为 3；如需更多，
+    // 请同时修改 GLSL 和 ShadowCaster.CascadeCount。
     private const string Fs = @"
 #version 330 core
 

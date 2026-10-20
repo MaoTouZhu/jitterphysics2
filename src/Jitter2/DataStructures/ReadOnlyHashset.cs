@@ -10,9 +10,9 @@ using System.Collections.Generic;
 namespace Jitter2.DataStructures;
 
 /// <summary>
-/// A read-only wrapper around <see cref="HashSet{T}"/> that prevents modification while allowing enumeration and lookup.
+/// <see cref="HashSet{T}"/> 的只读包装器，禁止修改，同时允许枚举和查找。
 /// </summary>
-/// <typeparam name="T">The type of elements in the set.</typeparam>
+/// <typeparam name="T">集合中元素的类型。</typeparam>
 public readonly struct ReadOnlyHashSet<T>(HashSet<T> hashset) : IReadOnlyCollection<T>
 {
     public HashSet<T>.Enumerator GetEnumerator()
@@ -30,15 +30,15 @@ public readonly struct ReadOnlyHashSet<T>(HashSet<T> hashset) : IReadOnlyCollect
         return hashset.GetEnumerator();
     }
 
-    /// <summary>Determines whether the set contains the specified element.</summary>
+    /// <summary>确定集合是否包含指定元素。</summary>
     public bool Contains(T item) => hashset.Contains(item);
 
-    /// <summary>Copies the elements of the set to an array.</summary>
+    /// <summary>将集合的元素复制到数组。</summary>
     public void CopyTo(T[] array) => hashset.CopyTo(array);
 
-    /// <summary>Copies the elements of the set to an array, starting at a particular index.</summary>
+    /// <summary>将集合的元素复制到数组，从指定索引开始。</summary>
     public void CopyTo(T[] array, int arrayIndex) => hashset.CopyTo(array, arrayIndex);
 
-    /// <summary>Gets the number of elements in the set.</summary>
+    /// <summary>获取集合中元素的数量。</summary>
     public int Count => hashset.Count;
 }

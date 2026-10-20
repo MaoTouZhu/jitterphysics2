@@ -62,7 +62,7 @@ public partial class Program : Node3D
 	private World world = null!;
 	private JitterCubes jitterCubes = null!;
 	
-	// Called when the node enters the scene tree for the first time.
+	// 当节点首次进入场景树时调用。
 	public override void _Ready()
 	{
 		var button = new Button();
@@ -85,7 +85,7 @@ public partial class Program : Node3D
 		jitterCubes.Clear();
 		world.Clear();
 		
-		// floor shape
+		// 地板形状
 		RigidBody floor = world.CreateRigidBody();
 		floor.AddShape(new BoxShape(40));
 		floor.Position = new JVector(0, -20, 0);
@@ -115,8 +115,8 @@ public partial class Program : Node3D
 			world.Step(fixedStep, true);
 			accumulatedTime -= fixedStep;
 
-			// we can not keep up with the real time, i.e. the simulation
-			// is running slower than the real time is passing.
+			// 我们无法跟上实时时间，即模拟
+			// 运行得比真实时间流逝更慢。
 			if (++steps >= 4) return;
 		}
 	}

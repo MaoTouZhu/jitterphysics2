@@ -12,19 +12,19 @@ using Jitter2.LinearMath;
 namespace Jitter2.SoftBodies;
 
 /// <summary>
-/// Abstract base class for shapes used in soft body simulations.
+/// 软体模拟中所用形状的抽象基类。
 /// </summary>
 public abstract class SoftBodyShape : Shape
 {
     /// <summary>
-    /// Gets the rigid body closest to the specified position.
+    /// 获取距离指定位置最近的刚体。
     /// </summary>
-    /// <param name="pos">The position in world coordinates.</param>
-    /// <returns>The closest rigid body (vertex) of this shape.</returns>
+    /// <param name="pos">世界坐标系中的位置。</param>
+    /// <returns>此形状中最近的刚体（顶点）。</returns>
     public abstract RigidBody GetClosest(in JVector pos);
 
     /// <summary>
-    /// Gets the soft body instance this shape belongs to.
+    /// 获取此形状所属的软体实例。
     /// </summary>
     public SoftBody SoftBody { get; internal init; } = null!;
 

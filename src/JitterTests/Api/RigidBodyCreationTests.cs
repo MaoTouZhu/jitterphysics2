@@ -1,7 +1,7 @@
 namespace JitterTests.Api;
 
 /// <summary>
-/// Tests for the initial state of a RigidBody after creation.
+/// 测试 RigidBody 创建后的初始状态。
 /// </summary>
 public class RigidBodyCreationTests
 {

@@ -20,8 +20,8 @@ internal static class AngularConstraintMath
         return angle;
     }
 
-    // Quaternion logarithm: half of the shortest relative rotation vector.
-    // Unlike the quaternion vector part, its derivative remains nonsingular at pi.
+    // 四元数对数：最短相对旋转向量的一半。
+    // 与四元数的向量部分不同，其导数在 pi 处仍然非奇异。
     internal static JVector RotationLog(in JQuaternion quaternion)
     {
         JQuaternion q = quaternion;
@@ -45,7 +45,7 @@ internal static class AngularConstraintMath
             jacobian *= -1;
         }
 
-        // Use the projection angle throughout, so softness and impulses have angular units.
+        // 全程使用投影角度，因此柔软度和冲量具有角度单位。
         Real derivativeSquared = jacobian.LengthSquared();
         if (derivativeSquared > 0)
         {
@@ -53,7 +53,7 @@ internal static class AngularConstraintMath
         }
         else
         {
-            // At a half turn, use the one-sided derivative along the twist direction.
+            // 在旋转半圈处，使用沿扭转方向的单侧导数。
             jacobian = -JVector.Transform(axis, right);
         }
 
@@ -77,8 +77,8 @@ internal static class AngularConstraintMath
             JVector axis = q.Vector * ((Real)1 / sine);
             error = axis * halfAngle;
 
-            // Inverse left Jacobian of SO(3), expressed using the half angle.
-            // halfAngle*cot(halfAngle) is finite at both zero and pi/2.
+            // SO(3) 的左雅可比逆，用半角表示。
+            // halfAngle*cot(halfAngle) 在零和 pi/2 处均为有限值。
             Real diagonal = halfAngle * q.W / sine;
             derivative = diagonal * JMatrix.Identity +
                 ((Real)1 - diagonal) * JSymmetricMatrix.Outer(axis).ToMatrix() -
@@ -90,7 +90,7 @@ internal static class AngularConstraintMath
             derivative = JMatrix.Identity;
         }
 
-        // qdot = -.5 * (left * angularVelocityDifference * conjugate(left)) * q.
+        // qdot = -.5 * (left * angularVelocityDifference * conjugate(left)) * q。
         return -(Real)0.5 * derivative * JMatrix.CreateFromQuaternion(left);
     }
 }

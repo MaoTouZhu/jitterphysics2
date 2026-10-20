@@ -13,9 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Constrains a fixed point in the reference frame of one body to a line that is fixed in
-/// the reference frame of another body. This constraint removes two degrees of translational
-/// freedom; three if the limit is enforced.
+/// 将一个刚体参考系中的固定点约束到另一个刚体参考系中固定的直线上。该约束移除两个
+/// 平动自由度；若启用限位则移除三个。
 /// </summary>
 public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
 {
@@ -72,22 +71,22 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
     }
 
     /// <summary>
-    /// Initializes the constraint from world-space parameters.
+    /// 使用世界空间参数初始化约束。
     /// </summary>
-    /// <param name="axis">The line axis in world space, fixed in the reference frame of body 1.</param>
-    /// <param name="anchor1">Anchor point on body 1 defining the line origin in world space.</param>
-    /// <param name="anchor2">Anchor point on body 2 constrained to the line in world space.</param>
-    /// <param name="limit">Distance limit along the axis.</param>
+    /// <param name="axis">世界空间中的直线轴，固定于刚体 1 的参考系。</param>
+    /// <param name="anchor1">刚体 1 上的锚点，在世界空间中定义直线原点。</param>
+    /// <param name="anchor2">刚体 2 上的锚点，在世界空间中约束到该直线。</param>
+    /// <param name="limit">沿轴的距离限位。</param>
     /// <remarks>
-    /// Computes local anchor points and axis from the current body poses.
-    /// Equal or reversed distance limits fix the point at their midpoint.
-    /// Default values: <see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>, <see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>,
-    /// <see cref="LimitSoftness"/> = <see cref="Constraint.DefaultLinearLimitSoftness"/>, <see cref="LimitBias"/> = <see cref="Constraint.DefaultLinearLimitBias"/>.
+    /// 根据当前刚体位姿计算局部锚点和轴。
+    /// 相等或反向的距离限位会将点固定在其中点。
+    /// 默认值：<see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>，<see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>，
+    /// <see cref="LimitSoftness"/> = <see cref="Constraint.DefaultLinearLimitSoftness"/>，<see cref="LimitBias"/> = <see cref="Constraint.DefaultLinearLimitBias"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis"/> is zero or contains a non-finite value, when
-    /// <paramref name="anchor1"/> or <paramref name="anchor2"/> contains a non-finite value,
-    /// or when either value in <paramref name="limit"/> is NaN.
+    /// 当 <paramref name="axis"/> 为零或包含非有限值、当
+    /// <paramref name="anchor1"/> 或 <paramref name="anchor2"/> 包含非有限值，
+    /// 或当 <paramref name="limit"/> 中任一值为 NaN 时抛出。
     /// </exception>
     public void Initialize(JVector axis, JVector anchor1, JVector anchor2, LinearLimit limit)
     {
@@ -121,7 +120,7 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
     }
 
     /// <summary>
-    /// Gets the current distance of the anchor point from the line origin along the axis.
+    /// 获取锚点沿轴方向距离直线原点的当前距离。
     /// </summary>
     public Real Distance
     {
@@ -271,7 +270,7 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
             data.CouplingY = data.EffectiveMass.M23;
         }
 
-        // An inactive limit must not set the scale used to identify responsive rows.
+        // 未启用的限位不得设置用于识别可响应行的尺度。
         if (data.Clamp == 0) data.EffectiveMass.M33 = 0;
         data.EffectiveMass = MathHelper.InverseSymmetric(data.EffectiveMass);
 
@@ -280,7 +279,7 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
         data.Bias.Y *= data.BiasFactor;
         data.Bias.Z *= data.LimitBias;
 
-        // A changed limit must not warm start with an impulse of the opposite sign.
+        // 限位发生变化时，不得用符号相反的冲量进行热启动。
         if (data.Clamp == 1) data.AccumulatedImpulse.Z = MathR.Min(0, data.AccumulatedImpulse.Z);
         else if (data.Clamp == 2) data.AccumulatedImpulse.Z = MathR.Max(0, data.AccumulatedImpulse.Z);
 
@@ -300,10 +299,10 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔顺性）。
     /// </summary>
     /// <value>
-    /// Default is 0.00001. Higher values allow more positional error but improve stability.
+    /// 默认值为 0.00001。较高的值允许更大的位置误差，但可提升稳定性。
     /// </value>
     public Real Softness
     {
@@ -316,10 +315,10 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively positional error is corrected.
+    /// 获取或设置偏置因子，控制位置误差的修正强度。
     /// </summary>
     /// <value>
-    /// Default is <see cref="Constraint.DefaultLinearBias"/>. Higher values correct errors faster but may cause instability.
+    /// 默认值为 <see cref="Constraint.DefaultLinearBias"/>。较高的值修正误差更快，但可能导致不稳定。
     /// </value>
     public Real Bias
     {
@@ -332,15 +331,15 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一次已求解子步中累积的求解器冲量。
     /// </summary>
     public JVector Impulse => Data.AccumulatedImpulse;
 
     /// <summary>
-    /// Gets or sets the softness (compliance) applied when distance limits are active.
+    /// 获取或设置距离限位启用时所应用的柔软度（柔顺性）。
     /// </summary>
     /// <value>
-    /// Default is 0.0001. Higher values allow more limit violation but improve stability.
+    /// 默认值为 0.0001。较高的值允许更大的限位违反量，但可提升稳定性。
     /// </value>
     public Real LimitSoftness
     {
@@ -353,10 +352,10 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor for distance limit correction.
+    /// 获取或设置用于距离限位修正的偏置因子。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct limit violations faster.
+    /// 默认值为 0.2。较高的值修正限位违反更快。
     /// </value>
     public Real LimitBias
     {
@@ -432,8 +431,8 @@ public unsafe class PointOnLine : Constraint<PointOnLine.PointOnLineData>
         if ((data.Clamp == 1 && data.AccumulatedImpulse.Z > 0) ||
             (data.Clamp == 2 && data.AccumulatedImpulse.Z < 0))
         {
-            // Fix the limit impulse at its bound and solve the bilateral rows again.
-            // Their full block solution assumed that the discarded limit impulse was applied.
+            // 将限位冲量固定在其边界上，并重新求解双边行。
+            // 它们的完整块求解假设被丢弃的限位冲量已被施加。
             lambda.Z = -origAcc.Z;
             Real x = residual.X + data.CouplingX * lambda.Z;
             Real y = residual.Y + data.CouplingY * lambda.Z;

@@ -1,76 +1,76 @@
-# General
+# 概述
 
-This section covers fundamental design decisions and configuration options.
+本节介绍基本的设计决策和配置选项。
 
-## Collision Detection Philosophy
+## 碰撞检测理念
 
-Jitter2 takes a unified approach to collision detection that differs from many other physics engines. Unlike engines that implement dedicated algorithms for specific shape pairs (sphere-sphere, box-box, capsule-capsule, etc.), Jitter2 treats all collision detection uniformly using implicit shapes. Every shape is represented through a support function, and collisions are resolved via MPR (Minkowski Portal Refinement), falling back to EPA (Expanding Polytope Algorithm) for deep penetrations. This design simplifies the codebase and makes it straightforward to add custom shapes—any shape that provides a support mapping automatically works with all other shapes.
+Jitter2 采用统一的碰撞检测方式，这与许多其他物理引擎不同。不同于为特定形状对（球-球、盒-盒、胶囊-胶囊等）实现专用算法的引擎，Jitter2 使用隐式形状统一处理所有碰撞检测。每个形状都通过支撑函数表示，碰撞通过 MPR（Minkowski Portal Refinement，闵可夫斯基门户细化）求解，深度穿透时回退到 EPA（Expanding Polytope Algorithm，扩展多面体算法）。这种设计简化了代码库，并使添加自定义形状变得简单直接——任何提供支撑映射的形状都能自动与所有其他形状配合工作。
 
-Traditional physics engines use a three-phase collision pipeline: broad phase (spatial partitioning), mid-phase (hierarchical bounding volumes for complex meshes), and narrow phase (exact shape intersection). Jitter2 eliminates the mid-phase entirely. Instead of building internal acceleration structures for complex geometry, Jitter2 relies on [collision filters](filters.md) to handle large-scale environments. This enables user-defined spatial partitioning strategies—heightmaps, detailed triangle meshes, or even infinite voxel worlds can be implemented by generating collision geometry on-demand within filter callbacks.
+传统物理引擎使用三阶段碰撞管线：宽相（空间划分）、中相（针对复杂网格的层次包围体）和窄相（精确形状相交）。Jitter2 完全消除了中相。Jitter2 不为复杂几何构建内部加速结构，而是依赖[碰撞过滤器](filters.md)来处理大规模环境。这使得用户自定义的空间划分策略成为可能——高度图、精细三角网格，甚至无限体素世界，都可以通过在过滤器回调中按需生成碰撞几何来实现。
 
-## Precision
+## 精度
 
-Jitter2 supports both single-precision (`float`) and double-precision (`double`) floating-point arithmetic, selected at compile time. To build with double precision, either uncomment `#define USE_DOUBLE_PRECISION` in [Precision.cs](https://github.com/notgiven688/jitterphysics2/blob/main/src/Jitter2/Precision.cs), or use the command line option:
+Jitter2 同时支持单精度（`float`）和双精度（`double`）浮点运算，在编译时选择。要以双精度构建，可以取消 [Precision.cs](https://github.com/notgiven688/jitterphysics2/blob/main/src/Jitter2/Precision.cs) 中的 `#define USE_DOUBLE_PRECISION` 注释，或使用命令行选项：
 
 ```bash
 dotnet build -c Release -p:DoublePrecision=true
 ```
 
-The active precision mode can be checked at runtime via `Precision.IsDoublePrecision`. In single precision, `JVector.X` is a `float`; in double precision, it is a `double`.
+可以在运行时通过 `Precision.IsDoublePrecision` 检查当前生效的精度模式。在单精度下，`JVector.X` 是 `float`；在双精度下，它是 `double`。
 
-## Build Configuration and Validation
+## 构建配置与校验
 
-Object creation and configuration validate values that would leave the engine in an invalid state, such as shape dimensions, masses, constraint axes, and invalid limits. These checks throw normal .NET exceptions in Debug and Release builds.
+对象创建和配置会校验那些会使引擎处于无效状态的值，例如形状尺寸、质量、约束轴和无效限位。这些检查在 Debug 和 Release 构建中都会抛出常规的 .NET 异常。
 
-Debug builds add extra sanity checks on runtime state mutation paths, such as non-finite positions, velocities, forces, and non-normalized orientations. These checks are compiled behind the `DEBUG` symbol and are stripped from Release builds.
+Debug 构建会在运行时状态修改路径上增加额外的健全性检查，例如非有限的位置、速度、力以及未归一化的朝向。这些检查在 `DEBUG` 符号下编译，并从 Release 构建中剔除。
 
-NuGet packages are Release builds. When Jitter2 is consumed from NuGet, only the Release-visible contract checks are present. To get the additional Debug-only sanity checks, reference or build Jitter2 from source using a Debug configuration.
+NuGet 包是 Release 构建。从 NuGet 使用 Jitter2 时，只存在 Release 可见的契约检查。要获得额外仅 Debug 的健全性检查，请以 Debug 配置引用或从源码构建 Jitter2。
 
-## Deterministic Simulation
+## 确定性模拟
 
-Jitter2 provides an optional cross-platform deterministic solver mode via <xref:Jitter2.SolveMode>:
+Jitter2 通过 <xref:Jitter2.SolveMode> 提供可选的跨平台确定性求解器模式：
 
 ```cs
 world.SolveMode = SolveMode.Deterministic;
 ```
 
-This mode is intended for reproducible simulation across platforms when the same Jitter2 version, precision mode, and stepping inputs are used. It is useful for automated tests, replay systems, debugging, and lockstep-style simulation.
+此模式旨在使用相同 Jitter2 版本、精度模式和步进输入时，在不同平台上获得可复现的模拟。它适用于自动化测试、回放系统、调试和锁步式模拟。
 
-The important requirement is not that the entire world matches. What matters is that each interacting island is assembled in the same order: the bodies, shapes, and constraints that participate in that island must be added in the same sequence. If the same island is created in the same order and receives the same inputs, it will evolve the same even if unrelated parts of the world were built differently.
+重要的要求并不是整个世界完全一致。关键在于每个相互作用的岛都以相同的顺序组装：参与该岛的刚体、形状和约束必须以相同顺序添加。如果同一个岛以相同顺序创建并接收相同的输入，即使世界中不相关的部分以不同方式构建，它也会以相同方式演化。
 
-The deterministic path keeps contacts and constraints in a stable order and uses internal stable trigonometric helpers (`StableMath`) so critical math does not depend on platform-specific `Math`/`MathF` behavior.
+确定性路径让接触和约束保持稳定顺序，并使用内部稳定的三角函数辅助方法（`StableMath`），因此关键数学运算不依赖平台特定的 `Math`/`MathF` 行为。
 
-| Configuration | What is guaranteed | What must match | What is not guaranteed |
+| 配置 | 保证的内容 | 必须一致的内容 | 不保证的内容 |
 | --- | --- | --- | --- |
-| `SolveMode.Deterministic` | Cross-platform reproducible simulation results, independent of threading mode and internal SIMD/scalar execution path | Same Jitter2 version, same precision mode, same step sequence / fixed time step, same order in which the participating bodies, shapes, and constraints are added within each interacting island | Float and double matching each other, results across different engine versions |
-| `SolveMode.Regular` with `multiThread: false` | Reproducibility only in the narrow sense that the exact same world build can produce the same result again within the same .NET process | Exact same construction path, exact same addition order, same step sequence, same .NET process / runtime run | Cross-platform determinism, rebuilding the same final scene through a different history, matching results across different process launches |
-| `SolveMode.Regular` with `multiThread: true` | No deterministic guarantee | None | Reproducible ordering or cross-platform bit identity |
+| `SolveMode.Deterministic` | 跨平台可复现的模拟结果，与线程模式和内部 SIMD/标量执行路径无关 | 相同的 Jitter2 版本、相同的精度模式、相同的步进序列/固定时间步、在每个相互作用的岛内添加参与刚体、形状和约束的顺序相同 | float 与 double 相互匹配、不同引擎版本之间的结果 |
+| `SolveMode.Regular` 且 `multiThread: false` | 仅在狭义上可复现：完全相同的世界构建在同一 .NET 进程内可以再次产生相同结果 | 完全相同的构建路径、完全相同的添加顺序、相同的步进序列、相同的 .NET 进程/运行时运行 | 跨平台确定性、通过不同历史重建相同的最终场景、不同进程启动之间的结果匹配 |
+| `SolveMode.Regular` 且 `multiThread: true` | 无确定性保证 | 无 | 可复现的顺序或跨平台位级一致性 |
 
 > [!WARNING]
-> To the best of our current knowledge, this feature is cross-platform deterministic for the cases described above, but the claim is based on the current implementation and test coverage. At the time of writing, CI exercises the deterministic hash test on `ubuntu-latest`, `windows-latest`, and `macos-latest`, which currently correspond to x64 Linux, x64 Windows, and arm64 macOS on GitHub-hosted runners.
+> 据我们目前所知，该功能在上述情形下是跨平台确定性的，但这一说法基于当前实现和测试覆盖。撰写本文时，CI 在 `ubuntu-latest`、`windows-latest` 和 `macos-latest` 上运行确定性哈希测试，这些目前分别对应 GitHub 托管运行器上的 x64 Linux、x64 Windows 和 arm64 macOS。
 
-`SolveMode.Deterministic` can be significantly slower than `SolveMode.Regular`, which remains the default and recommended option for normal gameplay or interactive sandbox scenes.
+`SolveMode.Deterministic` 可能明显慢于 `SolveMode.Regular`，后者仍是默认且推荐的选项，适用于常规游戏玩法或交互式沙盒场景。
 
-## Coordinate System
+## 坐标系
 
-Jitter2 uses a right-handed coordinate system.
-The engine itself is coordinate-system agnostic and does not enforce any particular axis convention.
+Jitter2 使用右手坐标系。
+引擎本身与坐标系无关，不强制任何特定的轴约定。
 
-The only default that assumes a specific orientation is `World.Gravity`, which is initialized to `(0, -9.81, 0)`, treating the Y-axis as up.
-This can be changed:
+唯一假定特定朝向的默认值是 `World.Gravity`，它初始化为 `(0, -9.81, 0)`，将 Y 轴视为向上。
+这可以更改：
 
 ```cs
-world.Gravity = new JVector(0, 0, -9.81f);  // Z-up convention
+world.Gravity = new JVector(0, 0, -9.81f);  // Z 轴向上的约定
 ```
 
-## Tracing and Logging
+## 追踪与日志
 
-Jitter2 provides mechanisms for logging and performance profiling.
+Jitter2 提供了用于日志记录和性能分析的机制。
 
-### Logging
+### 日志
 
-The `Logger` class provides a simple logging interface with three severity levels: `Information`, `Warning`, and `Error`.
-To receive log messages, register a listener:
+`Logger` 类提供了简单的日志记录接口，包含三个严重级别：`Information`、`Warning` 和 `Error`。
+要接收日志消息，请注册监听器：
 
 ```cs
 Logger.Listener = (level, message) =>
@@ -79,60 +79,60 @@ Logger.Listener = (level, message) =>
 };
 ```
 
-The engine logs warnings for events such as EPA convergence issues or memory allocation fallbacks.
+引擎会为 EPA 收敛问题或内存分配回退等事件记录警告。
 
-### Performance Tracing
+### 性能追踪
 
-When compiled with the `PROFILE` symbol, Jitter2 records detailed timing information for each simulation phase (broad phase, narrow phase, solver iterations, etc.).
-The trace data is stored in thread-local buffers for minimal overhead.
+使用 `PROFILE` 符号编译时，Jitter2 会记录每个模拟阶段（宽相、窄相、求解器迭代等）的详细计时信息。
+跟踪数据存储在每线程缓冲区中，以尽量减少开销。
 
-To export the recorded data:
+要导出记录的数据：
 
 ```cs
 Tracer.WriteToFile("trace.json");
 ```
 
-The output file uses the Chrome Trace Event format and can be visualized in:
+输出文件使用 Chrome Trace Event 格式，可在以下位置可视化：
 
-- `chrome://tracing` (paste in Chrome's address bar)
+- `chrome://tracing`（粘贴到 Chrome 地址栏中）
 - [Perfetto UI](https://ui.perfetto.dev/)
 
-When `PROFILE` is not defined, all tracing calls are completely stripped by the compiler via `[Conditional]` attributes, resulting in zero runtime overhead.
+未定义 `PROFILE` 时，所有追踪调用都会通过 `[Conditional]` 特性被编译器完全剥离，因此运行时开销为零。
 
-## Custom Math Types
+## 自定义数学类型
 
-Jitter2 defines its own math types (`JVector`, `JMatrix`, `JSymmetricMatrix`, `JQuaternion`, `JBoundingBox`) rather than using `System.Numerics`. This allows precision to be switched globally between `float` and `double` without code changes, gives explicit control over memory layout using `[StructLayout(LayoutKind.Explicit)]`, and avoids dependencies on external math library behavior.
+Jitter2 定义了自己的数学类型（`JVector`、`JMatrix`、`JSymmetricMatrix`、`JQuaternion`、`JBoundingBox`），而不是使用 `System.Numerics`。这使得精度可以在 `float` 和 `double` 之间全局切换而无需修改代码，通过 `[StructLayout(LayoutKind.Explicit)]` 显式控制内存布局，并避免依赖外部数学库的行为。
 
-The explicit field offsets guarantee a predictable memory layout, enabling zero-copy conversion to and from other libraries' types:
+显式的字段偏移保证了可预测的内存布局，从而实现与其他库类型之间的零拷贝转换：
 
 ```cs
-// Convert to any layout-compatible type
+// 转换为任何布局兼容的类型
 MyVector3 myVec = jitterVector.UnsafeAs<MyVector3>();
 
-// Convert from any layout-compatible type
+// 从任何布局兼容的类型转换
 JVector jitterVector = JVector.UnsafeFrom(myVec);
 ```
 
-For convenience, implicit conversions to and from `System.Numerics` types are also provided:
+为方便起见，还提供了与 `System.Numerics` 类型之间的隐式转换：
 
 ```cs
-System.Numerics.Vector3 sysVec = jitterVector;  // implicit conversion
-JVector jitterVec = sysVec;                      // implicit conversion
+System.Numerics.Vector3 sysVec = jitterVector;  // 隐式转换
+JVector jitterVec = sysVec;                      // 隐式转换
 ```
 
-These conversions involve copying and potential precision loss when converting from double to float.
+这些转换涉及复制，并且从 double 转换为 float 时可能丢失精度。
 
-### Vector and matrix convention
+### 向量与矩阵约定
 
-Jitter2 treats vectors as **column vectors**.
-A vector $v$ is transformed by a matrix $M$ using $M \cdot v$ (post-multiplication):
+Jitter2 将向量视为**列向量**。
+向量 $v$ 通过 $M \cdot v$（后乘）被矩阵 $M$ 变换：
 
 ```cs
-JVector result = JVector.Transform(v, M);  // computes M * v
+JVector result = JVector.Transform(v, M);  // 计算 M * v
 ```
 
-This is the standard convention used in mathematics, physics, and most graphics APIs (e.g., OpenGL, Vulkan/GLSL).
-`System.Numerics` uses the opposite convention: vectors are **row vectors** and transformation is written as $v \cdot M$ (pre-multiplication).
+这是数学、物理和大多数图形 API（例如 OpenGL、Vulkan/GLSL）中使用的标准约定。
+`System.Numerics` 使用相反的约定：向量是**行向量**，变换写作 $v \cdot M$（前乘）。
 
-As a consequence, when converting transformation matrices between Jitter2 and `System.Numerics`, the matrices must be transposed.
-Jitter2's `JMatrix` also stores its elements in column-major order in memory (i.e., `M11`, `M21`, `M31` are contiguous), whereas `System.Numerics.Matrix4x4` uses row-major storage.
+因此，在 Jitter2 与 `System.Numerics` 之间转换变换矩阵时，必须对矩阵进行转置。
+Jitter2 的 `JMatrix` 在内存中还以列主序存储元素（即 `M11`、`M21`、`M31` 是连续的），而 `System.Numerics.Matrix4x4` 使用行主序存储。

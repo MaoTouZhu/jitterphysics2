@@ -26,10 +26,10 @@ public class ConstraintBodyWriteTests
         ref ConstraintData data = ref constraint.Handle.Data;
         var step = new TimeStep((Real)0.01);
 
-        // Produce a cached impulse before checking either warm starting or another solver iteration.
+        // 在检查热启动或另一次求解器迭代之前，先生成一个缓存的冲量。
         data.PrepareForIteration(ref data, step);
         data.Iterate(ref data, step);
-        // Signed zero exposes zero-valued arithmetic writes that ordinary equality would miss.
+        // 带符号零可暴露出普通相等比较会遗漏的零值算术写入。
         Real negativeZero = MathR.CopySign((Real)0, (Real)(-1));
         support.Data.Velocity = new JVector(negativeZero);
         support.Data.AngularVelocity = new JVector(negativeZero);

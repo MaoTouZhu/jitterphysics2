@@ -1,4 +1,4 @@
-// Frozen headless adaptation of JitterDemo/Demos/Common.cs (MIT).
+// 由 JitterDemo/Demos/Common.cs（MIT）改造而来的冻结无头版本。
 using System;
 using System.Collections.Generic;
 using Jitter2;
@@ -159,7 +159,7 @@ public static class Ragdolls
         var armRight = new HingeJoint(world, lowerArmRight, upperArmRight,
             new JVector(-0.42f, -0.2f, 0), JVector.UnitY, AngularLimit.FromDegree(0, 160));
 
-        // Soften the limits for the hinge joints
+        // 柔化铰链关节的限位
         kneeLeft.HingeAngle.LimitSoftness = kneeLeft.HingeAngle.Softness = 1;
         kneeRight.HingeAngle.LimitSoftness = kneeRight.HingeAngle.Softness = 1;
         armLeft.HingeAngle.LimitSoftness = armLeft.HingeAngle.Softness = 1;

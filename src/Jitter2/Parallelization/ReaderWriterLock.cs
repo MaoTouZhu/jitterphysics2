@@ -12,22 +12,22 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Parallelization;
 
 /// <summary>
-/// Provides a lightweight reader-writer lock optimized for rare write operations.
+/// 提供一个轻量级的读写锁，针对罕见的写操作进行了优化。
 /// </summary>
 /// <remarks>
 /// <para>
-/// Multiple readers can hold the lock concurrently, but writers have exclusive access.
-/// This implementation uses spin-waiting and is best suited for short critical sections.
+/// 多个读取者可同时持有该锁，但写入者拥有独占访问权。
+/// 此实现使用自旋等待，最适合较短的临界区。
 /// </para>
 /// <para>
-/// This lock is non-recursive and thread-affine. Each successful acquisition must be
-/// released exactly once by the same thread that acquired it. Recursive acquisition,
-/// read-to-write upgrades, write-to-read downgrades, and releasing a lock acquired by
-/// another thread are not supported.
+/// 该锁不可重入且与线程绑定。每次成功获取都必须由获取它的同一线程
+/// 恰好释放一次。不支持递归获取、
+/// 读锁升级为写锁、写锁降级为读锁，以及释放由
+/// 其他线程获取的锁。
 /// </para>
 /// <para>
-/// Thread-safe when used according to this contract. All synchronization is performed
-/// using atomic operations and memory barriers.
+/// 按此约定使用时是线程安全的。所有同步均通过
+/// 原子操作和内存屏障完成。
 /// </para>
 /// </remarks>
 public sealed class ReaderWriterLock
@@ -36,21 +36,21 @@ public sealed class ReaderWriterLock
     private const int SleepThreshold = 128;
     private const int ReaderSlotCount = 128;
 
-    // Give each thread a stable reader slot. This allows readers to usually update
-    // separate counters instead of contending on one shared counter and causing
-    // cache-line bouncing.
+    // 为每个线程分配一个稳定的读取者槽位。这样读取者通常可以更新
+    // 各自独立的计数器，而不是争用一个共享计数器，从而避免
+    // 缓存行抖动。
     [ThreadStatic]
     private static int readerSlotPlusOne;
 
-    // Slot assignment is shared across lock instances so that a thread normally
-    // reuses the same slot for every ReaderWriterLock instance.
+    // 槽位分配在多个锁实例之间共享，因此一个线程通常会在
+    // 每个 ReaderWriterLock 实例中复用同一个槽位。
     private static int nextReaderSlot;
 
     private int writer;
 
-    // Reader counters are padded so counters in adjacent slots do not normally
-    // occupy the same cache line. Together with per-thread slot assignment, this
-    // reduces cache-line bouncing between concurrent readers.
+    // 读取者计数器经过填充，使相邻槽位的计数器通常不会
+    // 占用同一缓存行。结合按线程分配槽位，这
+    // 减少了并发读取者之间的缓存行抖动。
     private readonly MemoryHelper.PaddedInt[] readers =
         new MemoryHelper.PaddedInt[ReaderSlotCount];
 
@@ -80,8 +80,8 @@ public sealed class ReaderWriterLock
         int slot = readerSlotPlusOne - 1;
         if (slot >= 0) return slot;
 
-        // If the number of participating threads exceeds ReaderSlotCount, slots
-        // are shared. This increases contention but does not affect correctness.
+        // 如果参与的线程数超过 ReaderSlotCount，槽位将被
+        // 共享。这会增加争用，但不影响正确性。
         slot = (int)((uint)(Interlocked.Increment(ref nextReaderSlot) - 1) %
                      ReaderSlotCount);
 
@@ -90,16 +90,16 @@ public sealed class ReaderWriterLock
     }
 
     /// <summary>
-    /// Acquires the read lock.
+    /// 获取读锁。
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Multiple threads can hold the read lock simultaneously. This method blocks
-    /// while a writer holds the lock.
+    /// 多个线程可以同时持有读锁。当写入者持有锁时，
+    /// 此方法会阻塞。
     /// </para>
     /// <para>
-    /// The lock must be released exactly once by the acquiring thread using
-    /// <see cref="ExitReadLock"/>.
+    /// 该锁必须由获取它的线程使用 <see cref="ExitReadLock"/>
+    /// 恰好释放一次。
     /// </para>
     /// </remarks>
     public void EnterReadLock()
@@ -127,15 +127,15 @@ public sealed class ReaderWriterLock
     }
 
     /// <summary>
-    /// Acquires the write lock with exclusive access.
+    /// 以独占方式获取写锁。
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This method blocks until all readers and other writers have released the lock.
+    /// 此方法会阻塞，直到所有读取者和其他写入者都已释放该锁。
     /// </para>
     /// <para>
-    /// The lock must be released exactly once by the acquiring thread using
-    /// <see cref="ExitWriteLock"/>.
+    /// 该锁必须由获取它的线程使用 <see cref="ExitWriteLock"/>
+    /// 恰好释放一次。
     /// </para>
     /// </remarks>
     public void EnterWriteLock()
@@ -172,11 +172,11 @@ public sealed class ReaderWriterLock
     }
 
     /// <summary>
-    /// Releases a read lock previously acquired by the current thread.
+    /// 释放当前线程先前获取的读锁。
     /// </summary>
     /// <remarks>
-    /// Must be called exactly once for each successful call to
-    /// <see cref="EnterReadLock"/> and on the same thread that acquired the lock.
+    /// 每次成功调用 <see cref="EnterReadLock"/> 后必须恰好调用一次，
+    /// 且必须在获取该锁的同一线程上调用。
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ExitReadLock()
@@ -185,11 +185,11 @@ public sealed class ReaderWriterLock
     }
 
     /// <summary>
-    /// Releases the write lock held by the current thread.
+    /// 释放当前线程持有的写锁。
     /// </summary>
     /// <remarks>
-    /// Must be called exactly once after a successful call to
-    /// <see cref="EnterWriteLock"/> and on the same thread that acquired the lock.
+    /// 成功调用 <see cref="EnterWriteLock"/> 后必须恰好调用一次，
+    /// 且必须在获取该锁的同一线程上调用。
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ExitWriteLock()

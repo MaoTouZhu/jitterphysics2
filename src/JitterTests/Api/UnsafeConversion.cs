@@ -5,7 +5,7 @@ namespace JitterTests.Api;
 [TestFixture]
 public sealed class UnsafeConversion
 {
-    // Layout-compatible targets (float build)
+    // 布局兼容的目标类型（浮点构建）
     [StructLayout(LayoutKind.Sequential)]
     private struct Vec3R { public Real X, Y, Z; }
 
@@ -46,7 +46,7 @@ public sealed class UnsafeConversion
         Assert.That((float)back.W, Is.EqualTo(4));
     }
 
-    // --- Guard rails ----------------------------------------------------------
+    // --- 防护检查 --------------------------------------------------------------
 
     [Test]
     public void JVector_UnsafeAs_SizeMismatch_Throws()

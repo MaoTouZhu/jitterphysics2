@@ -45,7 +45,7 @@ public class Demo32 : IDemo
             link.AllowedMotion = MotionAxes.PlaneXY;
             link.Damping = (0.001f, 0.001f);
 
-            // The allowed axes provide planar rotation; each connection only needs a ball socket.
+            // 允许的运动轴提供平面内的旋转；每个连接只需要一个球窝。
             BallSocket socket = world.CreateConstraint<BallSocket>(previous, link);
             socket.Initialize(anchor);
             socket.Softness = 0;

@@ -15,21 +15,21 @@ using Jitter2.Unmanaged;
 namespace Jitter2.SoftBodies;
 
 /// <summary>
-/// Constrains two bodies to maintain a target distance between anchor points,
-/// applying spring-like forces. Removes one translational degree of freedom along
-/// the line connecting the anchors.
+/// 约束两个刚体，在锚点之间维持目标距离，
+/// 并施加类似弹簧的力。沿连接两个锚点的直线
+/// 移除一个平移自由度。
 /// </summary>
 /// <remarks>
-/// This constraint is designed for soft body vertices, which act as mass points.
-/// Angular velocities of the connected bodies are not taken into account.
-/// The spring behavior is controlled by <see cref="Softness"/> and <see cref="Bias"/>,
-/// which can be set directly or computed from physical parameters using
-/// <see cref="SetSpringParameters"/>.
+/// 此约束专为软体顶点设计，这些顶点充当质点。
+/// 不考虑相连刚体的角速度。
+/// 弹簧行为由 <see cref="Softness"/> 和 <see cref="Bias"/> 控制，
+/// 既可以直接设置，也可以通过 <see cref="SetSpringParameters"/>
+/// 由物理参数计算得出。
 /// </remarks>
 public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
 {
     /// <summary>
-    /// Low-level data for the spring constraint, stored in unmanaged memory.
+    /// 弹簧约束的底层数据，存储于非托管内存中。
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct SpringData
@@ -69,17 +69,17 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = (Real)0.0;
 
     /// <summary>
-    /// Initializes the constraint from world-space anchor points.
+    /// 从世界空间中的锚点初始化该约束。
     /// </summary>
-    /// <param name="anchor1">Anchor point on the first rigid body, in world space.</param>
-    /// <param name="anchor2">Anchor point on the second rigid body, in world space.</param>
+    /// <param name="anchor1">第一个刚体上的锚点，位于世界空间。</param>
+    /// <param name="anchor2">第二个刚体上的锚点，位于世界空间。</param>
     /// <remarks>
-    /// Computes local anchor offsets from the current body positions.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>, <see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>.
-    /// The <see cref="TargetDistance"/> is set to the initial distance between the anchors.
+    /// 根据当前刚体位置计算局部锚点偏移。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultLinearSoftness"/>，<see cref="Bias"/> = <see cref="Constraint.DefaultLinearBias"/>。
+    /// <see cref="TargetDistance"/> 设为初始化时两锚点之间的初始距离。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="anchor1"/> or <paramref name="anchor2"/> contains a non-finite value.
+    /// 当 <paramref name="anchor1"/> 或 <paramref name="anchor2"/> 包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector anchor1, JVector anchor2)
     {
@@ -100,20 +100,20 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Sets the spring parameters using physical properties. This method calculates and sets
-    /// the <see cref="Softness"/> and <see cref="Bias"/> properties. It assumes that the mass
-    /// of the involved bodies, their translation locks, the anchor direction, and the timestep size do not change.
+    /// 使用物理属性设置弹簧参数。此方法会计算并设置
+    /// <see cref="Softness"/> 和 <see cref="Bias"/> 属性。它假定所涉及的刚体的质量、
+    /// 其平移锁定、锚点方向以及时间步长均不发生变化。
     /// </summary>
     /// <remarks>
-    /// At coincident anchors, the most responsive translation axis
-    /// determines the effective mass used to configure the spring.
+    /// 当锚点重合时，响应最快的平移轴
+    /// 决定用于配置弹簧的有效质量。
     /// </remarks>
-    /// <param name="frequency">The frequency in Hz.</param>
-    /// <param name="damping">The damping ratio (0 = no damping, 1 = critical damping).</param>
-    /// <param name="dt">The timestep of the simulation.</param>
+    /// <param name="frequency">频率，单位为 Hz。</param>
+    /// <param name="damping">阻尼比（0 = 无阻尼，1 = 临界阻尼）。</param>
+    /// <param name="dt">模拟的时间步长。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="frequency"/> or <paramref name="dt"/> is less than or equal to zero,
-    /// when <paramref name="damping"/> is negative, or when any value is not finite.
+    /// 当 <paramref name="frequency"/> 或 <paramref name="dt"/> 小于等于零、
+    /// 当 <paramref name="damping"/> 为负数，或当任一值非有限值时抛出。
     /// </exception>
     public void SetSpringParameters(Real frequency, Real damping, Real dt)
     {
@@ -136,8 +136,8 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
         }
         else
         {
-            // An undefined direction does not imply infinite mass. For unrestricted bodies
-            // this recovers their scalar inverse mass; restricted bodies use a responsive axis.
+            // 方向未定义并不意味着质量无限大。对于不受限制的刚体，
+            // 这会恢复其标量逆质量；受限制的刚体则使用响应最快的轴。
             inverseEffectiveMass = JVector.MaxAbs(body1.InverseMassVector + body2.InverseMassVector);
         }
 
@@ -159,7 +159,7 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一个已求解子步累积的求解器冲量。
     /// </summary>
     public Real Impulse
     {
@@ -171,7 +171,7 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets or sets the anchor point on the first body in world space.
+    /// 获取或设置第一个刚体上的锚点，位于世界空间。
     /// </summary>
     public JVector Anchor1
     {
@@ -193,7 +193,7 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets or sets the anchor point on the second body in world space.
+    /// 获取或设置第二个刚体上的锚点，位于世界空间。
     /// </summary>
     public JVector Anchor2
     {
@@ -215,9 +215,9 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets or sets the target resting distance of the spring.
+    /// 获取或设置弹簧的目标静止距离。
     /// </summary>
-    /// <value>Units: meters. Default is the initial distance between anchors at initialization.</value>
+    /// <value>单位：米。默认值为初始化时两锚点之间的初始距离。</value>
     public Real TargetDistance
     {
         set
@@ -231,7 +231,7 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets the current distance between the anchor points.
+    /// 获取两锚点之间的当前距离。
     /// </summary>
     public Real Distance
     {
@@ -251,10 +251,10 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Prepares the spring constraint for iteration.
+    /// 为迭代准备弹簧约束。
     /// </summary>
-    /// <param name="constraint">The constraint data reference.</param>
-    /// <param name="timeStep">The full step and substep timing information.</param>
+    /// <param name="constraint">约束数据引用。</param>
+    /// <param name="timeStep">完整步和子步的计时信息。</param>
     public static void PrepareForIterationSpringConstraint(ref ConstraintData constraint, in TimeStep timeStep)
     {
         ref var data = ref Unsafe.As<ConstraintData, SpringData>(ref constraint);
@@ -301,11 +301,11 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the spring constraint.
+    /// 获取或设置弹簧约束的柔软度（柔顺性）。
     /// </summary>
     /// <value>
-    /// Default is <see cref="Constraint.DefaultLinearSoftness"/>. Higher values allow more positional error but produce a softer spring.
-    /// Scaled by inverse timestep during solving.
+    /// 默认值为 <see cref="Constraint.DefaultLinearSoftness"/>。值越大，允许的位置误差越大，但弹簧越软。
+    /// 求解时按时间步长的倒数进行缩放。
     /// </value>
     public Real Softness
     {
@@ -318,10 +318,10 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor (error correction strength) of the spring constraint.
+    /// 获取或设置弹簧约束的偏置因子（误差修正强度）。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct distance errors more aggressively.
+    /// 默认值为 0.2。值越大，修正距离误差越激进。
     /// </value>
     public Real Bias
     {
@@ -334,10 +334,10 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Performs one iteration of the spring constraint solver.
+    /// 执行弹簧约束求解器的一次迭代。
     /// </summary>
-    /// <param name="constraint">The constraint data reference.</param>
-    /// <param name="timeStep">The full step and substep timing information.</param>
+    /// <param name="constraint">约束数据引用。</param>
+    /// <param name="timeStep">完整步和子步的计时信息。</param>
     public static void IterateSpringConstraint(ref ConstraintData constraint, in TimeStep timeStep)
     {
         ref var data = ref Unsafe.As<ConstraintData, SpringData>(ref constraint);
@@ -375,8 +375,8 @@ public unsafe class SpringConstraint : Constraint<SpringConstraint.SpringData>
     }
 
     /// <summary>
-    /// Draws the spring with a caller-owned coil reference. Retain this direction between frames
-    /// to keep the coil continuous through arbitrary motion, including a reversal of the spring axis.
+    /// 使用调用方持有的螺旋参考方向绘制弹簧。在各帧之间保留此方向，
+    /// 可使螺旋在任意运动（包括弹簧轴反向）中保持连续。
     /// </summary>
     public void DebugDraw(IDebugDrawer drawer, ref JVector reference, in DebugDrawSettings settings)
     {

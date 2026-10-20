@@ -10,43 +10,43 @@ using System.Diagnostics;
 namespace Jitter2.Parallelization;
 
 /// <summary>
-/// Provides methods and structures for parallel batch processing within the Jitter physics engine.
+/// 为 Jitter 物理引擎内的并行批处理提供方法与结构。
 /// </summary>
 /// <remarks>
-/// This class is used internally to distribute work across worker threads via <see cref="ThreadPool"/>.
+/// 此类在内部使用，通过 <see cref="ThreadPool"/> 将工作分配到各工作线程。
 /// </remarks>
 public static class Parallel
 {
     /// <summary>
-    /// Represents a half-open index range processed by a parallel batch.
-    /// This struct is used by <see cref="ForBatch"/> to split a for-loop into worker tasks.
+    /// 表示由并行批次处理的半开索引区间。
+    /// 该结构由 <see cref="ForBatch"/> 使用，将 for 循环拆分为工作线程任务。
     /// </summary>
     public readonly struct Batch(int start, int end)
     {
-        /// <summary>Returns a string representation of the batch.</summary>
+        /// <summary>返回批次的字符串表示形式。</summary>
         public override string ToString()
         {
             return $"Batch(Start: {Start}, End: {End})";
         }
 
-        /// <summary>The inclusive start index of the batch.</summary>
+        /// <summary>批次的起始索引（含）。</summary>
         public readonly int Start = start;
 
-        /// <summary>The exclusive end index of the batch.</summary>
+        /// <summary>批次的结束索引（不含）。</summary>
         public readonly int End = end;
     }
 
     /// <summary>
-    /// Computes the start and end indices for a specific part of an evenly divided range.
+    /// 计算均分区间中某一部分的起始与结束索引。
     /// </summary>
-    /// <param name="numElements">The total number of elements to divide.</param>
-    /// <param name="numDivisions">The number of divisions (parts).</param>
-    /// <param name="part">The zero-based index of the part.</param>
-    /// <param name="start">The inclusive start index for the specified part.</param>
-    /// <param name="end">The exclusive end index for the specified part.</param>
+    /// <param name="numElements">要划分的元素总数。</param>
+    /// <param name="numDivisions">划分份数（部分数）。</param>
+    /// <param name="part">部分的从零开始的索引。</param>
+    /// <param name="start">指定部分的起始索引（含）。</param>
+    /// <param name="end">指定部分的结束索引（不含）。</param>
     /// <remarks>
-    /// Distributes remainder elements across the first parts. For example, with 14 elements
-    /// and 4 divisions: part 0 gets [0,4), part 1 gets [4,8), part 2 gets [8,11), part 3 gets [11,14).
+    /// 将余数元素分配到前面的部分。例如，14 个元素
+    /// 和 4 个部分：部分 0 得到 [0,4)，部分 1 得到 [4,8)，部分 2 得到 [8,11)，部分 3 得到 [11,14)。
     /// </remarks>
     public static void GetBounds(int numElements, int numDivisions, int part, out int start, out int end)
     {
@@ -61,17 +61,17 @@ public static class Parallel
     private static readonly ThreadPool threadPool = ThreadPool.Instance;
 
     /// <summary>
-    /// Executes tasks in parallel by dividing the work into batches using the <see cref="ThreadPool"/>.
+    /// 通过使用 <see cref="ThreadPool"/> 将工作划分为批次，并行执行任务。
     /// </summary>
-    /// <param name="lower">The inclusive lower bound of the range to be processed.</param>
-    /// <param name="upper">The exclusive upper bound of the range to be processed.</param>
-    /// <param name="numTasks">The number of batches to create.</param>
-    /// <param name="action">The callback to execute for each batch.</param>
-    /// <param name="execute">Whether to execute the queued batches immediately.</param>
+    /// <param name="lower">要处理区间的下界（含）。</param>
+    /// <param name="upper">要处理区间的上界（不含）。</param>
+    /// <param name="numTasks">要创建的批次数。</param>
+    /// <param name="action">要对每个批次执行的回调。</param>
+    /// <param name="execute">是否立即执行已排队的批次。</param>
     /// <remarks>
-    /// This method splits the range [lower, upper) into <paramref name="numTasks"/> batches and processes each batch in parallel.
-    /// The <paramref name="action"/> callback is invoked for each batch, which is represented by a <see cref="Batch"/> struct.
-    /// If <paramref name="execute"/> is true, the method will call <see cref="ThreadPool.Execute"/> to start executing the tasks.
+    /// 该方法将区间 [lower, upper) 拆分为 <paramref name="numTasks"/> 个批次，并并行处理每个批次。
+    /// <paramref name="action"/> 回调会对每个批次调用，批次由 <see cref="Batch"/> 结构表示。
+    /// 如果 <paramref name="execute"/> 为 true，方法会调用 <see cref="ThreadPool.Execute"/> 开始执行任务。
     /// </remarks>
     public static void ForBatch(int lower, int upper, int numTasks, Action<Batch> action, bool execute = true)
     {

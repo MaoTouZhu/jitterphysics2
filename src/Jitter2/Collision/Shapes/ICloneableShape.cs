@@ -7,19 +7,19 @@
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Defines a method to create a new instance of a shape for use with another rigid body.
+/// 定义一种方法，用于创建形状的新实例以便与另一个刚体配合使用。
 /// </summary>
 /// <typeparam name="T">
-/// The concrete shape type implementing this interface.
+/// 实现此接口的具体形状类型。
 /// </typeparam>
 public interface ICloneableShape<out T> where T : Shape
 {
     /// <summary>
-    /// Creates a copy of the current shape instance that shares underlying geometry data.
+    /// 创建当前形状实例的副本，该副本共享底层几何数据。
     /// </summary>
     /// <returns>
-    /// A new shape instance of type <typeparamref name="T"/> that shares immutable data
-    /// with the original but has its own instance state.
+    /// 类型为 <typeparamref name="T"/> 的新形状实例，它与原始实例共享不可变数据，
+    /// 但拥有自己的实例状态。
     /// </returns>
     T Clone();
 }

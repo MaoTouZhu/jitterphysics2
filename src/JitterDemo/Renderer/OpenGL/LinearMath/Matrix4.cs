@@ -39,26 +39,25 @@ public struct Matrix4
         M44 = m44;
     }
 
-    // In memory the matrix entries are layed out in column
-    // major format. This implies, that the Matrix entries M{row}{column}
+    // 在内存中，矩阵元素按列主序布局。这意味着矩阵元素 M{行}{列}
     //
     //      M11 M12 M13 M14
     // M =  M21 M22 M23 M24
     //      M31 M32 M33 M34
     //      M41 M42 M43 M44
     //
-    // are stored column wise in memory, i.e.
+    // 在内存中按列存储，即
     //
     // M11 M21 M31 M41 M12 M22 M32 M42 M13 M23 M33 M43 M14 M24 M34 M44
     //
-    // Vector4 represents a column vector. Multiplication follows the usual convention
+    // Vector4 表示列向量。乘法遵循通常的约定
     //
     //      M11 M12 M13 M14       a      a*M11 + b*M12 + c*M13 + d*M14
     //      M21 M22 M23 M24   x   b   =  a*M12 + b*M22 + c*M23 + ...
     //      M31 M32 M33 M34       c      ...
     //      M41 M42 M43 M44       d      ...
     //
-    // and
+    // 以及
     //
     //      A11 A12 A13 A14       B11 B12 B13 B14       A11*B11+A12*B21+A13*B31+A14*B41 ...
     //      A21 A22 A23 A24   x   B21 B22 B23 B24   =   ...
@@ -157,7 +156,7 @@ public struct Matrix4
     {
         Matrix4 result;
 
-        // First row
+        // 第一行
         result.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 +
                      value1.M14 * value2.M41;
         result.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 +
@@ -167,7 +166,7 @@ public struct Matrix4
         result.M14 = value1.M11 * value2.M14 + value1.M12 * value2.M24 + value1.M13 * value2.M34 +
                      value1.M14 * value2.M44;
 
-        // Second row
+        // 第二行
         result.M21 = value1.M21 * value2.M11 + value1.M22 * value2.M21 + value1.M23 * value2.M31 +
                      value1.M24 * value2.M41;
         result.M22 = value1.M21 * value2.M12 + value1.M22 * value2.M22 + value1.M23 * value2.M32 +
@@ -177,7 +176,7 @@ public struct Matrix4
         result.M24 = value1.M21 * value2.M14 + value1.M22 * value2.M24 + value1.M23 * value2.M34 +
                      value1.M24 * value2.M44;
 
-        // Third row
+        // 第三行
         result.M31 = value1.M31 * value2.M11 + value1.M32 * value2.M21 + value1.M33 * value2.M31 +
                      value1.M34 * value2.M41;
         result.M32 = value1.M31 * value2.M12 + value1.M32 * value2.M22 + value1.M33 * value2.M32 +
@@ -187,7 +186,7 @@ public struct Matrix4
         result.M34 = value1.M31 * value2.M14 + value1.M32 * value2.M24 + value1.M33 * value2.M34 +
                      value1.M34 * value2.M44;
 
-        // Fourth row
+        // 第四行
         result.M41 = value1.M41 * value2.M11 + value1.M42 * value2.M21 + value1.M43 * value2.M31 +
                      value1.M44 * value2.M41;
         result.M42 = value1.M41 * value2.M12 + value1.M42 * value2.M22 + value1.M43 * value2.M32 +

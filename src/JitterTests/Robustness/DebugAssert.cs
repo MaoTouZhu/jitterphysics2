@@ -21,7 +21,7 @@ internal static class DebugAssert
 
         try
         {
-            // Stop at the assertion before the operation can access invalid native data.
+            // 在断言处停止，避免操作访问无效的原生数据。
             FailCore.SetValue(null, (Action<string, string?, string?, string>)
                 ((_, _, _, _) => throw new DebugAssertionException()));
             previousProvider = SetProvider.Invoke(null, [DefaultProvider]);

@@ -150,7 +150,7 @@ public class MotionTypeTests
 
     private void PrepareTwoStack(World world, out RigidBody platform, out List<RigidBody> boxes)
     {
-        // Create a static body
+        // 创建一个静态刚体
         platform = world.CreateRigidBody();
         platform.AddShape(new BoxShape(10, 2, 10));
         platform.Position = (0, -1, 0);
@@ -158,7 +158,7 @@ public class MotionTypeTests
 
         boxes = new List<RigidBody>();
 
-        // Create two boxes stacked
+        // 创建两个堆叠的盒子
         for (int i = 0; i < 2; i++)
         {
             var box = world.CreateRigidBody();
@@ -169,15 +169,15 @@ public class MotionTypeTests
 
         Helper.AdvanceWorld(world, 1, 1.0f / 100.0f, false);
 
-        // Static bodies actually do NOT build connections. We will have
-        // two islands here.
+        // 静态刚体实际上不会建立连接。这里将得到
+        // 两个岛。
         Assert.That(platform.Connections, Is.Empty);
         Assert.That(boxes[0].Connections, Has.Count.EqualTo(1));
         Assert.That(boxes[1].Connections, Has.Count.EqualTo(1));
         Assert.That(platform.Island, Is.Not.EqualTo(boxes[0].Island));
         Assert.That(boxes[1].Island, Is.EqualTo(boxes[0].Island));
 
-        // We do store contacts/constraints
+        // 我们确实会存储接触/约束
         Assert.That(platform.Contacts, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Contacts, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Contacts, Has.Count.EqualTo(1));
@@ -190,63 +190,63 @@ public class MotionTypeTests
 
         PrepareTwoStack(world, out var platform, out var boxes);
 
-        // Switch from static to dynamic. The platform should now be part of the island.
+        // 从静态切换为动态。平台现在应成为岛的一部分。
         platform.MotionType = MotionType.Dynamic;
 
-        // Same as before
+        // 与之前相同
         Assert.That(platform.Contacts, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Contacts, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Contacts, Has.Count.EqualTo(1));
 
-        // Different contact graph
+        // 接触图不同
         Assert.That(platform.Connections, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Connections, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Connections, Has.Count.EqualTo(1));
         Assert.That(platform.Island, Is.EqualTo(boxes[0].Island));
         Assert.That(boxes[1].Island, Is.EqualTo(boxes[0].Island));
 
-        // Switch from dynamic to kinematic. Contact graph should stay the same
+        // 从动态切换为运动学。接触图应保持不变
         platform.MotionType = MotionType.Kinematic;
 
-        // Same as before
+        // 与之前相同
         Assert.That(platform.Contacts, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Contacts, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Contacts, Has.Count.EqualTo(1));
 
-        // Same as before
+        // 与之前相同
         Assert.That(platform.Connections, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Connections, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Connections, Has.Count.EqualTo(1));
         Assert.That(platform.Island, Is.EqualTo(boxes[0].Island));
         Assert.That(boxes[1].Island, Is.EqualTo(boxes[0].Island));
 
-        // Simulate a bit and check that nothing changed
+        // 模拟一小段时间，检查没有任何变化
         Helper.AdvanceWorld(world, 1, 1.0f / 100.0f, false);
 
-        // Same as before
+        // 与之前相同
         Assert.That(platform.Contacts, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Contacts, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Contacts, Has.Count.EqualTo(1));
 
-        // Same as before
+        // 与之前相同
         Assert.That(platform.Connections, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Connections, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Connections, Has.Count.EqualTo(1));
         Assert.That(platform.Island, Is.EqualTo(boxes[0].Island));
         Assert.That(boxes[1].Island, Is.EqualTo(boxes[0].Island));
 
-        // Switch from kinematic to static.
+        // 从运动学切换为静态。
         platform.MotionType = MotionType.Static;
 
-        // Static bodies actually do NOT build connections. We will have
-        // two islands here.
+        // 静态刚体实际上不会建立连接。这里将得到
+        // 两个岛。
         Assert.That(platform.Connections, Is.Empty);
         Assert.That(boxes[0].Connections, Has.Count.EqualTo(1));
         Assert.That(boxes[1].Connections, Has.Count.EqualTo(1));
         Assert.That(platform.Island, Is.Not.EqualTo(boxes[0].Island));
         Assert.That(boxes[1].Island, Is.EqualTo(boxes[0].Island));
 
-        // We do store contacts/constraints
+        // 我们确实会存储接触/约束
         Assert.That(platform.Contacts, Has.Count.EqualTo(1));
         Assert.That(boxes[0].Contacts, Has.Count.EqualTo(2));
         Assert.That(boxes[1].Contacts, Has.Count.EqualTo(1));
@@ -263,12 +263,12 @@ public class MotionTypeTests
 
         boxes[0].MotionType = MotionType.Kinematic;
 
-        // Stop motion inherited from the dynamic state so this island can sleep.
+        // 停止从动态状态继承的运动，以便该岛可以休眠。
         boxes[0].Velocity = JVector.Zero;
         boxes[0].AngularVelocity = JVector.Zero;
 
-        // Jitter should now remove the contacts connecting a static and a kinematic body.
-        // Only dynamic <-> kinematic contacts should remain.
+        // Jitter 现在应移除连接静态刚体与运动学刚体的接触。
+        // 只应保留动态 <-> 运动学接触。
 
         Assert.That(platform.Contacts, Is.Empty);
         Assert.That(boxes[0].Contacts, Has.Count.EqualTo(1));

@@ -1,12 +1,12 @@
 namespace JitterTests.Api;
 
 /// <summary>
-/// Tests for World properties and lifecycle management.
+/// 测试 World 的属性与生命周期管理。
 /// </summary>
 public class WorldTests
 {
     // -------------------------------------------------------------------------
-    // Default properties
+    // 默认属性
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -31,14 +31,14 @@ public class WorldTests
     public void DefaultRigidBodies_ContainsOnlyNullBody()
     {
         var world = new World();
-        // NullBody is always present
+        // NullBody 始终存在
         Assert.That(world.RigidBodies, Has.Count.EqualTo(1));
         Assert.That(world.RigidBodies, Does.Contain(world.NullBody));
         world.Dispose();
     }
 
     // -------------------------------------------------------------------------
-    // Property setters
+    // 属性 setter
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -91,7 +91,7 @@ public class WorldTests
     }
 
     // -------------------------------------------------------------------------
-    // Body management
+    // 刚体管理
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -128,7 +128,7 @@ public class WorldTests
     }
 
     // -------------------------------------------------------------------------
-    // Step
+    // 步
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -299,7 +299,7 @@ public class WorldTests
     }
 
     // -------------------------------------------------------------------------
-    // Events
+    // 事件
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -354,7 +354,7 @@ public class WorldTests
     }
 
     // -------------------------------------------------------------------------
-    // Gravity effect on bodies
+    // 重力对刚体的影响
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -387,7 +387,7 @@ public class WorldTests
     [TestCase]
     public void AffectedByGravity_False_BodyDoesNotFall()
     {
-        // Gravity is on, but the specific body opts out.
+        // 重力已启用，但该刚体选择不受重力影响。
         var world = new World();
         world.AllowDeactivation = false;
         var body = world.CreateRigidBody();
@@ -402,7 +402,7 @@ public class WorldTests
     [TestCase]
     public void AffectedByGravity_OnlyAffectsOptedOutBody()
     {
-        // One body opts out; a second body far away still falls.
+        // 一个刚体选择不受重力影响；远处另一个刚体仍会下落。
         var world = new World();
         world.AllowDeactivation = false;
         var floating = world.CreateRigidBody();
@@ -411,7 +411,7 @@ public class WorldTests
         floating.Position = new JVector(0, 0, 0);
         var falling = world.CreateRigidBody();
         falling.AddShape(new SphereShape(1));
-        falling.Position = new JVector(100, 0, 0);  // far away, no interaction
+        falling.Position = new JVector(100, 0, 0);  // 距离很远，不会发生相互作用
         var startY = floating.Position.Y;
         Helper.AdvanceWorld(world, 1, 1f / 100f, false);
         Assert.That(floating.Position.Y, Is.EqualTo(startY).Within(1e-4f));

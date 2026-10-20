@@ -14,13 +14,12 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Implements the Gilbert-Johnson-Keerthi (GJK) simplex solver for finding the closest point
-/// to the origin on a simplex (point, line segment, triangle, or tetrahedron).
+/// 实现 Gilbert-Johnson-Keerthi (GJK) 单纯形求解器，用于在单纯形（点、线段、三角形或四面体）上
+/// 寻找距原点最近的点。
 /// </summary>
 /// <remarks>
-/// This solver iteratively reduces the simplex to the feature closest to the origin.
-/// It handles degeneracy by falling back to lower-dimensional features when the current
-/// simplex is near-degenerate.
+/// 该求解器迭代地将单纯形缩减为距原点最近的特征。
+/// 当当前单纯形接近退化时，它会回退到更低维的特征来处理退化情况。
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct SimplexSolver
@@ -35,7 +34,7 @@ public unsafe struct SimplexSolver
     private uint usageMask;
 
     /// <summary>
-    /// Resets the solver to an empty simplex.
+    /// 将求解器重置为空单纯形。
     /// </summary>
     public void Reset()
     {
@@ -73,7 +72,7 @@ public unsafe struct SimplexSolver
 
         mask = (1u << i0) | (1u << i1);
 
-        // Project directly onto the line to avoid cancellation between weighted vertices.
+        // 直接投影到直线上，以避免加权顶点之间发生抵消。
         // return lambda0 * a + lambda1 * b;
         return JVector.Cross(v, JVector.Cross(a, v)) * ((Real)1.0 / vsq);
     }
@@ -146,7 +145,7 @@ public unsafe struct SimplexSolver
 
         mask = (1u << i0) | (1u << i1) | (1u << i2);
 
-        // Project directly onto the plane to preserve small distances on large triangles.
+        // 直接投影到平面上，以在大三角形上保留微小距离。
         // return lambda0 * a + lambda1 * b + lambda2 * c;
         return normal * (JVector.Dot(normal, a) * it);
     }
@@ -230,15 +229,15 @@ public unsafe struct SimplexSolver
     }
 
     /// <summary>
-    /// Adds a vertex to the simplex and computes the new closest point to the origin.
+    /// 向单纯形中添加一个顶点，并计算新的距原点最近点。
     /// </summary>
-    /// <param name="vertex">The vertex to add (a point on the Minkowski difference).</param>
+    /// <param name="vertex">要添加的顶点（闵可夫斯基差上的一个点）。</param>
     /// <param name="closest">
-    /// When this method returns, contains the point on the reduced simplex closest to the origin.
+    /// 此方法返回时，包含缩减后的单纯形上距原点最近的点。
     /// </param>
     /// <returns>
-    /// <c>true</c> if the origin is not contained within the simplex;
-    /// <c>false</c> if the origin is enclosed by the tetrahedron.
+    /// 如果原点不包含在单纯形内，则为 <c>true</c>；
+    /// 如果原点被四面体包围，则为 <c>false</c>。
     /// </returns>
     [SkipLocalsInit]
     public bool AddVertex(in JVector vertex, out JVector closest)

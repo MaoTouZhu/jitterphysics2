@@ -1,4 +1,4 @@
-name: Build and deploy documentation
+name: 构建并部署文档
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: Build and deploy documentation
+    name: 构建并部署文档
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,18 +15,18 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Install docfx
+      - name: 安装 docfx
         run: dotnet tool install -g docfx
 
-      - name: Generate API metadata
+      - name: 生成 API 元数据
         run: docfx metadata
         working-directory: docfx
 
-      - name: Build documentation
+      - name: 构建文档
         run: docfx build
         working-directory: docfx
 
-      - name: Deploy to GitHub Pages
+      - name: 部署到 GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

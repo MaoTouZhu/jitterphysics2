@@ -1,8 +1,8 @@
 /*
- * Error-free sum/difference and expansion accumulation adapted from
- * Jonathan Richard Shewchuk's public-domain predicates.c.
+ * 无误差求和/求差及展开累加，改编自
+ * Jonathan Richard Shewchuk 的公有领域 predicates.c。
  * https://www.cs.cmu.edu/~quake/robust.html
- * Products use a fused multiply-add to recover the exact residual.
+ * 乘积使用融合乘加来恢复精确残差。
  */
 
 using System;
@@ -11,10 +11,10 @@ using Jitter2.LinearMath;
 
 namespace Jitter2.Collision;
 
-// Exact sums of nonoverlapping doubles, stored from least to most significant.
-// Callers must keep coordinates inside PlaneFilter's safe range: error-free
-// transforms require that both products and their residuals avoid underflow.
-// Scratch storage is read only through initialized prefix lengths.
+// 由互不重叠的 double 组成的精确和，按从最低位到最高位存储。
+// 调用方必须将坐标保持在 PlaneFilter 的安全范围内：无误差变换
+// 要求乘积及其残差都不发生下溢。
+// 暂存存储只按已初始化的前缀长度读取。
 internal static class ExpansionArithmetic
 {
     [SkipLocalsInit]
@@ -27,8 +27,8 @@ internal static class ExpansionArithmetic
         int nx = Difference(a.X, b.X, ux), ny = Difference(a.Y, b.Y, uy), nz = Difference(a.Z, b.Z, uz);
         int mx = Difference(a.X, c.X, vx), my = Difference(a.Y, c.Y, vy), mz = Difference(a.Z, c.Z, vz);
         int px = Difference(point.X, a.X, dx), py = Difference(point.Y, a.Y, dy), pz = Difference(point.Z, a.Z, dz);
-        // Each cross component has at most 16 terms. Multiplying it by a
-        // two-term displacement adds at most 64 terms; three components fit 192.
+        // 每个叉积分量最多有 16 项。将其与两项的位移相乘
+        // 最多增加 64 项；三个分量共可容纳 192 项。
         Span<double> cross = stackalloc double[16];
         Span<double> determinant = stackalloc double[192];
         int length = Cross(uy[..ny], vz[..mz], uz[..nz], vy[..my], cross);
@@ -84,8 +84,8 @@ internal static class ExpansionArithmetic
         return length;
     }
 
-    // grow_expansion_zeroelim can operate in place: it never overwrites an
-    // input component that has not yet been read.
+    // grow_expansion_zeroelim 可以就地运算：它绝不会覆盖
+    // 尚未读取的输入分量。
     private static int Grow(Span<double> expansion, int length, double value)
     {
         int count = 0;

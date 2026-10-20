@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace JitterDemo.Renderer;
 
 /// <summary>
-/// Resolve native libraries from runtime directory.
+/// 从运行时目录解析原生库。
 /// </summary>
 public static class ImportResolver
 {

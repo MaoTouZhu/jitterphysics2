@@ -11,7 +11,7 @@ internal struct Instance
     public Vector3 Color;
 }
 
-/// Per-group material override (used by multi-material meshes such as the demo car).
+/// 逐组材质覆盖（用于演示汽车等多材质网格）。
 public struct MaterialSlot
 {
     public int GroupIndex;
@@ -25,9 +25,9 @@ public struct MaterialSlot
 }
 
 /// <summary>
-/// Owns the GPU resources for a single mesh and a growable buffer of per-instance
-/// transforms + colors. Callers use <see cref="Push"/> each frame; the engine uploads
-/// and draws all instances once, both for the shadow pass and the lit pass.
+/// 持有单个网格的 GPU 资源，以及可增长的逐实例变换 + 颜色缓冲。
+/// 调用方每帧使用 <see cref="Push"/>；引擎会一次性上传并绘制所有实例，
+/// 阴影绘制阶段和光照绘制阶段都是如此。
 /// </summary>
 public class InstancedDrawable
 {
@@ -35,15 +35,15 @@ public class InstancedDrawable
 
     public Material Material = Material.Default;
 
-    /// Optional per-group material overrides. When null, <see cref="Material"/>
-    /// applies to every triangle. When set, groups not listed fall back to
-    /// <see cref="Material"/>.
+    /// 可选的逐组材质覆盖。为 null 时，<see cref="Material"/>
+    /// 应用于所有三角形。设置后，未列出的组回退到
+    /// <see cref="Material"/>。
     public MaterialSlot[]? Groups;
 
-    /// Draw both sides of the mesh (two draw calls, normals flipped on the second).
+    /// 绘制网格的双面（两次绘制调用，第二次翻转法线）。
     public bool TwoSided;
 
-    /// Disable back-face culling during the shadow pass (useful for thin geometry).
+    /// 在阴影绘制阶段禁用背面剔除（对薄几何体很有用）。
     public bool ShadowsDoubleSided;
 
     private Instance[] instances = new Instance[64];
@@ -69,9 +69,9 @@ public class InstancedDrawable
     protected void CreateBuffers()
     {
         Vao = new Vao();
-        // GL_ELEMENT_ARRAY_BUFFER binding is VAO state: bind our VAO first so the
-        // index upload below associates the EBO with this VAO rather than
-        // silently corrupting whatever VAO happened to be bound before.
+        // GL_ELEMENT_ARRAY_BUFFER 的绑定属于 VAO 状态：先绑定我们的 VAO，
+        // 这样下面的索引上传会把 EBO 关联到这个 VAO，而不是
+        // 悄悄破坏之前恰好绑定的那个 VAO。
         Vao.Bind();
 
         Vbo = GpuBuffer.Vertex();
@@ -83,12 +83,12 @@ public class InstancedDrawable
         InstanceVbo = GpuBuffer.Vertex();
 
         int sof = sizeof(float);
-        // Vertex stream: position(3) + normal(3) + uv(2) = 8 floats
+        // 顶点流：位置(3) + 法线(3) + uv(2) = 8 个 float
         Vao.Attrib(0, Vbo, 3, AttribType.Float, 8 * sof, 0 * sof);
         Vao.Attrib(1, Vbo, 3, AttribType.Float, 8 * sof, 3 * sof);
         Vao.Attrib(2, Vbo, 2, AttribType.Float, 8 * sof, 6 * sof);
 
-        // Instance stream: mat4(4 attribs, locations 3..6) + color(1 attrib, location 7)
+        // 实例流：mat4（4 个属性，位置 3..6）+ 颜色（1 个属性，位置 7）
         int instStride = 19 * sof;
         Vao.Attrib(3, InstanceVbo, 4, AttribType.Float, instStride, 0 * sof, divisor: 1);
         Vao.Attrib(4, InstanceVbo, 4, AttribType.Float, instStride, 4 * sof, divisor: 1);
@@ -118,14 +118,14 @@ public class InstancedDrawable
 
     public void Clear() => count = 0;
 
-    /// Called by the engine once per frame before any draw pass.
+    /// 引擎在每帧所有绘制阶段之前调用一次。
     public void UploadInstances()
     {
         if (count == 0) return;
         InstanceVbo.Stream<Instance>(instances, count);
     }
 
-    /// Invoked by the shadow pass. Default implementation draws the entire mesh.
+    /// 由阴影绘制阶段调用。默认实现绘制整个网格。
     public virtual void DrawShadow()
     {
         if (count == 0) return;
@@ -141,8 +141,8 @@ public class InstancedDrawable
         GLDevice.CullFace(CullMode.Back);
     }
 
-    /// Invoked by the lit pass. Default implementation binds the material and
-    /// draws the whole mesh. Override to vary material across the mesh.
+    /// 由光照绘制阶段调用。默认实现绑定材质并
+    /// 绘制整个网格。可重写以在网格上变化材质。
     public virtual void DrawLit(Shader shader)
     {
         if (count == 0) return;
@@ -179,10 +179,9 @@ public class InstancedDrawable
         int sof = sizeof(float);
         var groups = Groups!;
 
-        // Pass 1: draw every index range NOT covered by a group override, using
-        // the default material. This assumes the override slots are sorted by
-        // GroupIndex (which, given contiguous groups from the OBJ loader, just
-        // means "in declaration order").
+        // 第 1 遍：用默认材质绘制所有未被组覆盖的索引范围。
+        // 这里假设覆盖槽按 GroupIndex 排序（考虑到 OBJ 加载器产生的组是
+        // 连续的，这实际上就等于“按声明顺序”）。
         ApplyMaterial(shader, Material);
         int cursor = 0;
         for (int i = 0; i < groups.Length; i++)
@@ -193,9 +192,9 @@ public class InstancedDrawable
         }
         if (cursor < Mesh.Indices.Length) DrawRange(cursor, Mesh.Indices.Length);
 
-        // Pass 2: draw each override group. Deferring these to the end ensures
-        // translucent slots (e.g. the car's glass canopy) blend over the opaque
-        // geometry rather than depth-culling it.
+        // 第 2 遍：绘制每个覆盖组。把这些推迟到最后，可确保
+        // 半透明槽（例如汽车的玻璃座舱）在不透明几何体之上混合，
+        // 而不是被不透明几何体的深度剔除。
         for (int i = 0; i < groups.Length; i++)
         {
             ApplyMaterial(shader, groups[i].Material);
@@ -221,8 +220,8 @@ public class InstancedDrawable
         shader.Set("uMat.textureWeight", material.TextureWeight);
         shader.Set("uMat.normalFlip", material.FlipNormals ? -1f : 1f);
 
-        // Always bind SOMETHING to texture unit 3 so the fragment shader's
-        // diffuse sample is deterministic regardless of what was bound last.
+        // 始终向纹理单元 3 绑定某个纹理，这样无论之前绑定了什么，
+        // 片元着色器的漫反射采样都是确定性的。
         (material.Texture ?? Texture2D.Empty()).Bind(3);
     }
 }

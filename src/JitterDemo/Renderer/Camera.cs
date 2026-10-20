@@ -38,7 +38,7 @@ public sealed class FreeCamera : Camera
             Theta += mouse.DeltaPosition.Y * MouseSensitivity;
         }
 
-        // Keep the camera from flipping at the poles.
+        // 防止相机在两极处翻转。
         if (Theta > Math.PI - 0.1) Theta = Math.PI - 0.1;
         if (Theta < 0.1) Theta = 0.1;
 

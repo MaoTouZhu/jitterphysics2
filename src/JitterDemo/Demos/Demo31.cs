@@ -10,14 +10,14 @@ using JitterDemo.Renderer.OpenGL;
 namespace JitterDemo;
 
 /*
- * Realtime Fracture Demo
- * Code generated and optimized with OpenAI Codex
+ * 实时破碎演示
+ * 代码由 OpenAI Codex 生成并优化
  *
- * Features:
- * - Runtime Voronoi fracture for convex bodies
- * - Recursive fracture for large enough fragments
- * - PointCloudShape fragments with center-of-mass shifted local frames
- * - Dynamic mesh rendering for fractured pieces
+ * 特性：
+ * - 对凸体进行运行时 Voronoi 破碎
+ * - 对足够大的碎片进行递归破碎
+ * - 使用 PointCloudShape 碎片，并将局部坐标系平移至质心
+ * - 对破碎碎片进行动态网格渲染
  */
 
 public sealed class FractureFragment(RigidBody body, JVector[] localVertices, Vector3 color)
@@ -522,7 +522,7 @@ public sealed class Demo31 : IDemo, IDrawUpdate, ICleanDemo
             }
             catch (Exception)
             {
-                // Degenerate cells can happen when fracture sites nearly coincide.
+                // 当破碎点几乎重合时，可能会产生退化单元。
             }
         }
 

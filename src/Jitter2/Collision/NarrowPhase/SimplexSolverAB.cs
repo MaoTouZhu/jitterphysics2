@@ -16,13 +16,11 @@ using Vertex = Jitter2.Collision.MinkowskiDifference.Vertex;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Implements the Gilbert-Johnson-Keerthi (GJK) simplex solver with support for retrieving
-/// the closest points on the original shapes (A and B spaces).
+/// 实现 Gilbert-Johnson-Keerthi (GJK) 单纯形求解器，并支持获取原始形状（A 空间和 B 空间）上的最近点。
 /// </summary>
 /// <remarks>
-/// Unlike <see cref="SimplexSolver"/>, this solver tracks barycentric coordinates and
-/// the original support points, enabling extraction of the closest points on each shape
-/// via <see cref="GetClosest"/>.
+/// 与 <see cref="SimplexSolver"/> 不同，此求解器会记录重心坐标和
+/// 原始支撑点，从而可以通过 <see cref="GetClosest"/> 提取每个形状上的最近点。
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct SimplexSolverAB
@@ -52,7 +50,7 @@ public unsafe struct SimplexSolverAB
     private uint usageMask;
 
     /// <summary>
-    /// Resets the solver to an empty simplex.
+    /// 将求解器重置为空单纯形。
     /// </summary>
     public void Reset()
     {
@@ -98,7 +96,7 @@ public unsafe struct SimplexSolverAB
         bc[i1] = t;
         mask = (1u << i0) | (1u << i1);
 
-        // Keep barycentrics for the witnesses, but calculate the search vector directly.
+        // 为见证点保留重心坐标，但直接计算搜索向量。
         // return lambda0 * a + lambda1 * b;
         return JVector.Cross(v, JVector.Cross(a, v)) * ((Real)1.0 / vsq);
     }
@@ -179,7 +177,7 @@ public unsafe struct SimplexSolverAB
 
         mask = (1u << i0) | (1u << i1) | (1u << i2);
 
-        // Keep barycentrics for the witnesses, but calculate the search vector directly.
+        // 为见证点保留重心坐标，但直接计算搜索向量。
         // return lambda0 * a + lambda1 * b + lambda2 * c;
         return normal * (JVector.Dot(normal, a) * it);
     }
@@ -273,11 +271,10 @@ public unsafe struct SimplexSolverAB
     }
 
     /// <summary>
-    /// Computes the closest points on the original shapes A and B using the current simplex
-    /// and barycentric coordinates.
+    /// 使用当前单纯形和重心坐标计算原始形状 A 和 B 上的最近点。
     /// </summary>
-    /// <param name="pointA">The closest point on shape A.</param>
-    /// <param name="pointB">The closest point on shape B.</param>
+    /// <param name="pointA">形状 A 上的最近点。</param>
+    /// <param name="pointB">形状 B 上的最近点。</param>
     public void GetClosest(out JVector pointA, out JVector pointB)
     {
         pointA = JVector.Zero;
@@ -294,16 +291,16 @@ public unsafe struct SimplexSolverAB
     }
 
     /// <summary>
-    /// Adds a vertex (with full A/B support point data) to the simplex and computes
-    /// the new closest point to the origin.
+    /// 向单纯形中添加一个顶点（包含完整的 A/B 支撑点数据），并计算
+    /// 新的距原点最近点。
     /// </summary>
-    /// <param name="vertex">The Minkowski difference vertex including support points from both shapes.</param>
+    /// <param name="vertex">闵可夫斯基差顶点，包含两个形状各自的支撑点。</param>
     /// <param name="closest">
-    /// When this method returns, contains the point on the reduced simplex closest to the origin.
+    /// 此方法返回时，包含缩减后的单纯形上距原点最近的点。
     /// </param>
     /// <returns>
-    /// <c>true</c> if the origin is not contained within the simplex;
-    /// <c>false</c> if the origin is enclosed by the tetrahedron.
+    /// 如果原点不包含在单纯形内，则为 <c>true</c>；
+    /// 如果原点被四面体包围，则为 <c>false</c>。
     /// </returns>
     [SkipLocalsInit]
     public bool AddVertex(in Vertex vertex, out JVector closest)

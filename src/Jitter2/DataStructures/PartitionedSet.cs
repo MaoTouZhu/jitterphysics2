@@ -13,52 +13,52 @@ using System.Runtime.CompilerServices;
 namespace Jitter2.DataStructures;
 
 /// <summary>
-/// Defines an index property used by <see cref="PartitionedSet{T}"/> to track element positions.
+/// 定义 <see cref="PartitionedSet{T}"/> 用于跟踪元素位置的索引属性。
 /// </summary>
 public interface IPartitionedSetIndex
 {
     /// <summary>
-    /// Gets or sets the index of the element within the <see cref="PartitionedSet{T}"/>.
-    /// A value of -1 indicates the element is not part of any set.
+    /// 获取或设置元素在 <see cref="PartitionedSet{T}"/> 中的索引。
+    /// 值为 -1 表示该元素不属于任何集合。
     /// </summary>
     int SetIndex { get; set; }
 }
 
 /// <summary>
-/// A read-only wrapper around <see cref="PartitionedSet{T}"/>.
+/// <see cref="PartitionedSet{T}"/> 的只读包装器。
 /// </summary>
-/// <typeparam name="T">The type of elements in the set.</typeparam>
+/// <typeparam name="T">集合中元素的类型。</typeparam>
 public readonly struct ReadOnlyPartitionedSet<T>(PartitionedSet<T> partitionedSet) : IEnumerable<T>
     where T : class, IPartitionedSetIndex
 {
-    /// <summary>Gets the number of active elements.</summary>
+    /// <summary>获取活动元素的数量。</summary>
     public int ActiveCount => partitionedSet.ActiveCount;
 
-    /// <summary>Gets the total number of elements.</summary>
+    /// <summary>获取元素总数。</summary>
     public int Count => partitionedSet.Count;
 
     /// <summary>
-    /// Returns a read-only span of all elements in the set.
+    /// 返回集合中所有元素的只读跨度。
     /// </summary>
     public ReadOnlySpan<T> Elements => partitionedSet.Elements;
 
     /// <summary>
-    /// Returns a read-only span of the active elements in the set.
+    /// 返回集合中活动元素的只读跨度。
     /// </summary>
     public ReadOnlySpan<T> Active => partitionedSet.Active;
 
     /// <summary>
-    /// Returns a read-only span of the inactive elements in the set.
+    /// 返回集合中非活动元素的只读跨度。
     /// </summary>
     public ReadOnlySpan<T> Inactive => partitionedSet.Inactive;
 
-    /// <summary>Gets the element at the specified index.</summary>
+    /// <summary>获取指定索引处的元素。</summary>
     public T this[int i] => partitionedSet[i];
 
-    /// <summary>Determines whether the set contains the specified element.</summary>
+    /// <summary>确定集合是否包含指定元素。</summary>
     public bool Contains(T element) => partitionedSet.Contains(element);
 
-    /// <summary>Determines whether the specified element is in the active partition.</summary>
+    /// <summary>确定指定元素是否位于活动分区中。</summary>
     public bool IsActive(T element) => partitionedSet.IsActive(element);
 
     public PartitionedSet<T>.Enumerator GetEnumerator()
@@ -78,13 +78,13 @@ public readonly struct ReadOnlyPartitionedSet<T>(PartitionedSet<T> partitionedSe
 }
 
 /// <summary>
-/// Represents a collection of objects that can be partitioned into active and inactive subsets.
+/// 表示一个可划分为活动与非活动子集的对象的集合。
 /// </summary>
-/// <typeparam name="T">The type of elements in the set, which must implement <see cref="IPartitionedSetIndex"/>.</typeparam>
+/// <typeparam name="T">集合中元素的类型，必须实现 <see cref="IPartitionedSetIndex"/>。</typeparam>
 /// <remarks>
-/// The methods <see cref="Add(T, bool)"/>, <see cref="Remove(T)"/>, <see cref="Contains(T)"/>, <see cref="IsActive(T)"/>,
-/// <see cref="MoveToActive(T)"/>, and <see cref="MoveToInactive(T)"/> operate in O(1) time,
-/// except that <see cref="Add(T, bool)"/> can take O(n) time when the backing array grows.
+/// 方法 <see cref="Add(T, bool)"/>、<see cref="Remove(T)"/>、<see cref="Contains(T)"/>、<see cref="IsActive(T)"/>、
+/// <see cref="MoveToActive(T)"/> 和 <see cref="MoveToInactive(T)"/> 的时间复杂度均为 O(1)，
+/// 但当底层数组扩容时 <see cref="Add(T, bool)"/> 可能耗时 O(n)。
 /// </remarks>
 public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSetIndex
 {
@@ -131,13 +131,13 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
     private T[] elements;
     private int version;
 
-    /// <summary>Gets the number of active elements in the set.</summary>
+    /// <summary>获取集合中活动元素的数量。</summary>
     public int ActiveCount { get; private set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PartitionedSet{T}"/> class.
+    /// 初始化 <see cref="PartitionedSet{T}"/> 类的新实例。
     /// </summary>
-    /// <param name="initialSize">The initial capacity of the internal array.</param>
+    /// <param name="initialSize">内部数组的初始容量。</param>
     public PartitionedSet(int initialSize = 1024)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(initialSize, 1);
@@ -146,22 +146,22 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
         elements = new T[initialSize];
     }
 
-    /// <summary>Gets the number of elements the set can hold before the next resize.</summary>
+    /// <summary>获取集合在下一次扩容前可容纳的元素数量。</summary>
     public int Capacity => elements.Length;
 
-    /// <summary>Gets the element at the specified index.</summary>
+    /// <summary>获取指定索引处的元素。</summary>
     public T this[int i] => elements[i];
 
-    /// <summary>Returns a span of all elements in the set.</summary>
+    /// <summary>返回集合中所有元素的跨度。</summary>
     public ReadOnlySpan<T> Elements => elements.AsSpan()[..Count];
 
-    /// <summary>Returns a span of active elements in the set.</summary>
+    /// <summary>返回集合中活动元素的跨度。</summary>
     public ReadOnlySpan<T> Active => elements.AsSpan()[..ActiveCount];
 
-    /// <summary>Returns a span of inactive elements in the set.</summary>
+    /// <summary>返回集合中非活动元素的跨度。</summary>
     public ReadOnlySpan<T> Inactive => elements.AsSpan()[ActiveCount..Count];
 
-    /// <summary>Removes all elements from the set.</summary>
+    /// <summary>从集合中移除所有元素。</summary>
     public void Clear()
     {
         for (int i = 0; i < Count; i++)
@@ -175,13 +175,13 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
         version++;
     }
 
-    /// <summary>Gets the total number of elements in the set.</summary>
+    /// <summary>获取集合中元素的总数。</summary>
     public int Count { get; private set; }
 
     /// <summary>
-    /// Shrinks the internal storage to the smallest retained capacity that can hold the current elements.
+    /// 将内部存储收缩到能容纳当前元素的最小保留容量。
     /// </summary>
-    /// <returns><see langword="true"/> if the set was resized; otherwise, <see langword="false"/>.</returns>
+    /// <returns>如果集合被调整了大小，则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
     public bool Trim()
     {
         int newSize = initialSize;
@@ -197,14 +197,14 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
         return true;
     }
 
-    /// <summary>Returns a span of all elements in the set.</summary>
+    /// <summary>返回集合中所有元素的跨度。</summary>
     public Span<T> AsSpan() => this.elements.AsSpan(0, Count);
 
     /// <summary>
-    /// Adds an element to the set.
+    /// 向集合中添加一个元素。
     /// </summary>
-    /// <param name="element">The element to add.</param>
-    /// <param name="active">If <see langword="true"/>, the element is added to the active partition.</param>
+    /// <param name="element">要添加的元素。</param>
+    /// <param name="active">如果为 <see langword="true"/>，则将该元素添加到活动分区。</param>
     public void Add(T element, bool active = false)
     {
         Debug.Assert(element.SetIndex == -1);
@@ -231,10 +231,10 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
     }
 
     /// <summary>
-    /// Determines whether the specified element is in the active partition.
+    /// 确定指定元素是否位于活动分区中。
     /// </summary>
-    /// <param name="element">The element to check.</param>
-    /// <returns><see langword="true"/> if the element is active; otherwise, <see langword="false"/>.</returns>
+    /// <param name="element">要检查的元素。</param>
+    /// <returns>如果该元素处于活动状态，则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsActive(T element)
     {
@@ -245,10 +245,10 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
     }
 
     /// <summary>
-    /// Moves an element to the active partition.
+    /// 将元素移动到活动分区。
     /// </summary>
-    /// <param name="element">The element to move.</param>
-    /// <returns><see langword="true"/> if the element was moved; <see langword="false"/> if it was already active.</returns>
+    /// <param name="element">要移动的元素。</param>
+    /// <returns>如果元素被移动，则为 <see langword="true"/>；如果它已经处于活动状态，则为 <see langword="false"/>。</returns>
     public bool MoveToActive(T element)
     {
         Debug.Assert(element.SetIndex != -1);
@@ -263,10 +263,10 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
     }
 
     /// <summary>
-    /// Moves an element to the inactive partition.
+    /// 将元素移动到非活动分区。
     /// </summary>
-    /// <param name="element">The element to move.</param>
-    /// <returns><see langword="true"/> if the element was moved; <see langword="false"/> if it was already inactive.</returns>
+    /// <param name="element">要移动的元素。</param>
+    /// <returns>如果元素被移动，则为 <see langword="true"/>；如果它已经处于非活动状态，则为 <see langword="false"/>。</returns>
     public bool MoveToInactive(T element)
     {
         Debug.Assert(element.SetIndex != -1);
@@ -281,10 +281,10 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
     }
 
     /// <summary>
-    /// Determines whether the set contains the specified element.
+    /// 确定集合是否包含指定元素。
     /// </summary>
-    /// <param name="element">The element to locate.</param>
-    /// <returns><see langword="true"/> if the element is found; otherwise, <see langword="false"/>.</returns>
+    /// <param name="element">要查找的元素。</param>
+    /// <returns>如果找到该元素，则为 <see langword="true"/>；否则为 <see langword="false"/>。</returns>
     public bool Contains(T element)
     {
         if (element.SetIndex >= Count || element.SetIndex < 0) return false;
@@ -292,9 +292,9 @@ public class PartitionedSet<T> : IEnumerable<T> where T : class, IPartitionedSet
     }
 
     /// <summary>
-    /// Removes the specified element from the set.
+    /// 从集合中移除指定元素。
     /// </summary>
-    /// <param name="element">The element to remove.</param>
+    /// <param name="element">要移除的元素。</param>
     public void Remove(T element)
     {
         Debug.Assert(element.SetIndex != -1);

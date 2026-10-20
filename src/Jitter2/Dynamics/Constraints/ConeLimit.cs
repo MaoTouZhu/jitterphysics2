@@ -13,11 +13,11 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Limits the relative tilt between two bodies, removing one angular degree of freedom when active.
+/// 限制两个刚体之间的相对倾斜，激活时移除一个角度自由度。
 /// </summary>
 /// <remarks>
-/// Fixed tilts must lie strictly between zero and pi. Use <see cref="HingeAngle"/> with
-/// <see cref="AngularLimit.Full"/> to keep axes aligned while allowing rotation about them.
+/// 固定倾角必须严格位于零与 pi 之间。使用 <see cref="HingeAngle"/> 配合
+/// <see cref="AngularLimit.Full"/>，可在保持轴对齐的同时允许绕轴旋转。
 /// </remarks>
 public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
 {
@@ -62,22 +62,22 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = 0;
 
     /// <summary>
-    /// Initializes the cone limit using two world-space axes and an angular range.
+    /// 使用两个世界空间轴和一个角度范围初始化锥形限位。
     /// </summary>
-    /// <param name="axisBody1">The reference axis for body 1 in world space.</param>
-    /// <param name="axisBody2">The reference axis for body 2 in world space.</param>
-    /// <param name="limit">The minimum and maximum allowed tilt angles.</param>
+    /// <param name="axisBody1">刚体 1 在世界空间中的参考轴。</param>
+    /// <param name="axisBody2">刚体 2 在世界空间中的参考轴。</param>
+    /// <param name="limit">允许的最小与最大倾角。</param>
     /// <remarks>
-    /// Each axis is stored as a local axis on the corresponding body. The constraint measures
-    /// the angle between these axes and restricts it to the given range.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>, <see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>.
+    /// 每个轴都存储为对应刚体上的局部轴。该约束测量
+    /// 这些轴之间的夹角，并将其限制在给定范围内。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>，<see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axisBody1"/> or <paramref name="axisBody2"/> is zero or contains a non-finite value.
+    /// 当 <paramref name="axisBody1"/> 或 <paramref name="axisBody2"/> 为零或包含非有限值时抛出。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="limit"/> is outside the range [0, pi], or when its upper value is smaller
-    /// than its lower value, or when the limit fixes the tilt at zero or pi.
+    /// 当 <paramref name="limit"/> 超出范围 [0, pi]，或其上限小于
+    /// 下限，或该限位将倾角固定为零或 pi 时抛出。
     /// </exception>
     public void Initialize(JVector axisBody1, JVector axisBody2, AngularLimit limit)
     {
@@ -107,21 +107,21 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Initializes the cone limit using a world-space axis and an angular range.
+    /// 使用一个世界空间轴和一个角度范围初始化锥形限位。
     /// </summary>
-    /// <param name="axis">The reference axis in world space for the initial pose.</param>
-    /// <param name="limit">The minimum and maximum allowed tilt angles.</param>
+    /// <param name="axis">用于初始姿态的世界空间参考轴。</param>
+    /// <param name="limit">允许的最小与最大倾角。</param>
     /// <remarks>
-    /// Stores the axis as a local axis on each body. The constraint measures the angle between
-    /// these axes and restricts it to the given range.
-    /// Default values: <see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>, <see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>.
+    /// 将该轴存储为每个刚体上的局部轴。该约束测量
+    /// 这些轴之间的夹角，并将其限制在给定范围内。
+    /// 默认值：<see cref="Softness"/> = <see cref="Constraint.DefaultAngularSoftness"/>，<see cref="Bias"/> = <see cref="Constraint.DefaultAngularBias"/>。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis"/> is zero or contains a non-finite value.
+    /// 当 <paramref name="axis"/> 为零或包含非有限值时抛出。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="limit"/> is outside the range [0, pi], or when its upper value is smaller
-    /// than its lower value, or when the limit fixes the tilt at zero or pi.
+    /// 当 <paramref name="limit"/> 超出范围 [0, pi]，或其上限小于
+    /// 下限，或该限位将倾角固定为零或 pi 时抛出。
     /// </exception>
     public void Initialize(JVector axis, AngularLimit limit)
     {
@@ -135,12 +135,12 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
                 nameof(Initialize));
         }
 
-        // Same axis for both bodies → rest angle is zero.
+        // 两个刚体使用同一根轴 → 静止角为零。
         Initialize(axis, axis, limit);
     }
 
     /// <summary>
-    /// Gets the current angle between the two body axes.
+    /// 获取两个刚体轴之间的当前夹角。
     /// </summary>
     public JAngle Angle
     {
@@ -159,10 +159,10 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the reference axis of body 1 in world space.
+    /// 获取或设置刚体 1 在世界空间中的参考轴。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when the assigned value is zero or contains a non-finite value.
+    /// 当所赋值为零或包含非有限值时抛出。
     /// </exception>
     public JVector AxisBody1
     {
@@ -189,10 +189,10 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the reference axis of body 2 in world space.
+    /// 获取或设置刚体 2 在世界空间中的参考轴。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when the assigned value is zero or contains a non-finite value.
+    /// 当所赋值为零或包含非有限值时抛出。
     /// </exception>
     public JVector AxisBody2
     {
@@ -219,11 +219,11 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the angular limit of the cone.
+    /// 获取或设置锥形限位的角度限位。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the assigned limit is outside the range [0, pi], or when its upper value is smaller
-    /// than its lower value, or when the limit fixes the tilt at zero or pi.
+    /// 当所赋限位超出范围 [0, pi]，或其上限小于
+    /// 下限，或该限位将倾角固定为零或 pi 时抛出。
     /// </exception>
     public AngularLimit Limit
     {
@@ -275,9 +275,9 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
         Real error = JVector.Dot(a1, a2);
         Real lower = -data.MinAngle, upper = -data.MaxAngle;
 
-        // Use an angle coordinate throughout, so softness and cached impulses keep
-        // the same units. The residual uses its negative to retain the limit order;
-        // the Jacobian and the negated bias below use the positive angle.
+        // 全程使用角度坐标，使柔软度和缓存的冲量保持
+        // 相同的单位。残差使用其负值以保留限位顺序；
+        // 下面的雅可比和取负的偏置使用正角度。
         Real sineSquared = jacobian[0].LengthSquared();
         Real sine = MathR.Sqrt(sineSquared);
         if (sine > 0)
@@ -286,8 +286,8 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
         }
         else
         {
-            // At an endpoint the angle has a cusp. Choose a one-sided derivative
-            // about a responsive perpendicular axis.
+            // 在端点处角度存在尖点。围绕一个响应良好的垂直轴
+            // 选取单侧导数。
             JVector axis = MathHelper.CreateOrthonormal(a1);
             JVector other = a1 % axis;
             JSymmetricMatrix inverseInertia = body1.InverseInertiaWorld + body2.InverseInertiaWorld;
@@ -347,10 +347,10 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the softness (compliance) of the constraint.
+    /// 获取或设置约束的柔软度（柔量）。
     /// </summary>
     /// <value>
-    /// Default is 0.001. Higher values allow more angular error but improve stability.
+    /// 默认为 0.001。值越大允许的角度误差越大，但稳定性越好。
     /// </value>
     public Real Softness
     {
@@ -363,10 +363,10 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Gets or sets the bias factor controlling how aggressively angular error is corrected.
+    /// 获取或设置偏置因子，用于控制角度误差的修正强度。
     /// </summary>
     /// <value>
-    /// Default is 0.2. Higher values correct errors faster but may cause instability.
+    /// 默认为 0.2。值越大误差修正越快，但可能引起不稳定。
     /// </value>
     public Real Bias
     {
@@ -379,7 +379,7 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一个已求解子步累积的求解器冲量。
     /// </summary>
     public Real Impulse => Data.AccumulatedImpulse;
 
@@ -435,7 +435,7 @@ public unsafe class ConeLimit : Constraint<ConeLimit.ConeLimitData>
         VerifyNotZero();
         JVector origin = GetDebugDrawOrigin(settings);
         JVector axis = AxisBody1;
-        // Choose the reference in body 1's local frame so the wire geometry rotates with it.
+        // 在刚体 1 的局部坐标系中选择参考方向，使线框几何随其一起旋转。
         JVector reference = JVector.Transform(MathHelper.CreateOrthonormal(Data.LocalAxis1), Body1.Orientation);
         AngularLimit limit = Limit;
         drawer.DrawArrow(origin, axis * settings.GuideSize, settings.ReferenceColor, settings);

@@ -14,12 +14,12 @@ using IslandSet = Jitter2.DataStructures.PartitionedSet<Jitter2.Collision.Island
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Helper class to update islands. Methods must not be called concurrently for the same world.
+/// 用于更新岛的辅助类。不得对同一个世界并发调用其方法。
 /// </summary>
 /// <remarks>
-/// Search scratch data is stored per thread. Pooled islands are stored by the owning world.
-/// Separate worlds may use this helper concurrently on different external threads as long as
-/// each individual world is not used concurrently.
+/// 搜索临时数据按线程存储。池化的岛由所属世界存储。
+/// 各独立世界可在不同的外部线程上并发使用该辅助类，前提是
+/// 每个单独的世界都不会被并发使用。
 /// </remarks>
 internal static class IslandHelper
 {
@@ -237,7 +237,7 @@ internal static class IslandHelper
         }
     }
 
-    // Both bodies must be !static
+    // 两个刚体都必须是非静态的
     private static void MergeIslands(IslandSet islands, Stack<Island> islandPool, RigidBody body1, RigidBody body2)
     {
         if (body1.InternalIsland == body2.InternalIsland) return;
@@ -245,7 +245,7 @@ internal static class IslandHelper
         bool needsUpdate = body1.InternalIsland.NeedsUpdate || body2.InternalIsland.NeedsUpdate;
         bool markedAsActive = body1.InternalIsland.MarkedAsActive || body2.InternalIsland.MarkedAsActive;
 
-        // merge smaller into larger
+        // 将较小的岛合并到较大的岛中
         RigidBody smallIslandOwner, largeIslandOwner;
 
         if (body1.InternalIsland.InternalBodies.Count > body2.InternalIsland.InternalBodies.Count)

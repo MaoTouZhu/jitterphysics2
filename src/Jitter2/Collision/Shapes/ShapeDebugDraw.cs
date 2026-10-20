@@ -53,7 +53,7 @@ internal static class ShapeDebugDraw
         }
     }
 
-    // Join two horizontal rings, using a single fan triangle at either pole.
+    // 连接两个水平圆环，并在每个极点处使用单个扇形三角形。
     private static void Band<TSink>(ref TSink sink, ReadOnlySpan<JVector> circle,
         Real lowerRadius, Real lowerY, Real upperRadius, Real upperY) where TSink : ISink<JTriangle>
     {

@@ -9,20 +9,20 @@ using Jitter2.LinearMath;
 
 namespace Jitter2;
 
-/// <summary>Renderer-independent drawing geometry emitted through <see cref="IDebugDrawer"/>.</summary>
-/// <remarks>Directions must be finite and nonzero. Reference directions are projected onto the drawing plane.</remarks>
+/// <summary>通过 <see cref="IDebugDrawer"/> 发出的与渲染器无关的绘制几何体。</summary>
+/// <remarks>方向必须有限且非零。参考方向会被投影到绘制平面上。</remarks>
 public static class DebugDrawGeometry
 {
-    /// <summary>Draws a white line segment between two points in world space.</summary>
+    /// <summary>在世界空间中两点之间绘制一条白色线段。</summary>
     public static void DrawSegment(this IDebugDrawer drawer, in JVector from, in JVector to) =>
         drawer.DrawSegment(from, to, DebugDrawColors.White);
 
-    /// <summary>Draws a spherical point marker.</summary>
-    /// <remarks>A zero radius draws nothing.</remarks>
-    /// <param name="drawer">The debug drawer receiving the triangles.</param>
-    /// <param name="point">The center of the marker in world space.</param>
-    /// <param name="radius">The sphere radius in world units. Must be finite and nonnegative.</param>
-    /// <param name="color">The color packed as <c>0xRRGGBBAA</c>.</param>
+    /// <summary>绘制一个球面点标记。</summary>
+    /// <remarks>半径为零时不绘制任何内容。</remarks>
+    /// <param name="drawer">接收三角形的调试绘制器。</param>
+    /// <param name="point">标记在世界空间中的中心。</param>
+    /// <param name="radius">球体半径，以世界单位计。必须有限且非负。</param>
+    /// <param name="color">打包为 <c>0xRRGGBBAA</c> 的颜色。</param>
     public static void DrawPoint(this IDebugDrawer drawer, JVector point, Real radius, uint color)
     {
         ArgumentCheck.NonNegative(radius, nameof(radius));
@@ -53,7 +53,7 @@ public static class DebugDrawGeometry
             };
             for (int i = 0; i < vertices.Length; i++) vertices[i] = JVector.Normalize(vertices[i]);
 
-            // Outward-facing icosahedron faces. Subdivision preserves their winding.
+            // 朝外的二十面体面。细分会保持其绕序。
             ReadOnlySpan<int> faces =
             [
                 0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11,
@@ -92,7 +92,7 @@ public static class DebugDrawGeometry
         if (segments < 3 || segments > 4096) throw new ArgumentOutOfRangeException(nameof(segments));
     }
 
-    /// <summary>Draws a circular arc. Angles are measured from the reference direction around the axis.</summary>
+    /// <summary>绘制一段圆弧。角度从参考方向开始绕轴测量。</summary>
     public static void DrawArc(this IDebugDrawer drawer, JVector center, JVector axis, JVector reference,
         JAngle from, JAngle to, Real radius, uint color, int segments = 48)
     {
@@ -111,12 +111,12 @@ public static class DebugDrawGeometry
         }
     }
 
-    /// <summary>Draws a circle in the plane perpendicular to the axis.</summary>
+    /// <summary>在垂直于轴的平面内绘制一个圆。</summary>
     public static void DrawCircle(this IDebugDrawer drawer, JVector center, JVector axis, JVector reference,
         Real radius, uint color, int segments = 48) =>
         drawer.DrawArc(center, axis, reference, (JAngle)0, (JAngle)(2 * MathR.PI), radius, color, segments);
 
-    /// <summary>Draws three perpendicular great circles.</summary>
+    /// <summary>绘制三个互相垂直的大圆。</summary>
     public static void DrawSphere(this IDebugDrawer drawer, JVector center, Real radius, uint color, int segments = 48)
     {
         drawer.DrawCircle(center, JVector.UnitX, JVector.UnitY, radius, color, segments);
@@ -124,7 +124,7 @@ public static class DebugDrawGeometry
         drawer.DrawCircle(center, JVector.UnitZ, JVector.UnitX, radius, color, segments);
     }
 
-    /// <summary>Draws an elliptical cone on a sphere, using angular radii along two perpendicular directions.</summary>
+    /// <summary>在球面上绘制一个椭圆锥，沿两个互相垂直的方向使用角半径。</summary>
     public static void DrawCone(this IDebugDrawer drawer, JVector origin, JVector axis, JVector reference,
         JAngle alongReference, JAngle alongPerpendicular, Real radius, uint color, int segments = 48, int spokeOffset = 0)
     {
@@ -148,7 +148,7 @@ public static class DebugDrawGeometry
         }
     }
 
-    /// <summary>Draws a finite grid representing an infinite plane.</summary>
+    /// <summary>绘制表示无限平面的有限网格。</summary>
     public static void DrawPlane(this IDebugDrawer drawer, JVector center, JVector normal, JVector reference,
         Real halfExtent, uint color)
     {
@@ -164,12 +164,12 @@ public static class DebugDrawGeometry
         }
     }
 
-    /// <summary>Draws an arrow using the default visualization settings.</summary>
+    /// <summary>使用默认可视化设置绘制一个箭头。</summary>
     public static void DrawArrow(this IDebugDrawer drawer, JVector origin, JVector vector, uint color)
         => drawer.DrawArrow(origin, vector, color, DebugDrawSettings.Default);
 
-    /// <summary>Draws a wire arrow using the default arrowhead size, with every base vertex connected to the tip.</summary>
-    /// <param name="segments">Number of segments around the head's base, from 3 to 4096. Default is 12.</param>
+    /// <summary>使用默认箭头头部大小绘制一个线框箭头，每个底部顶点都连接到尖端。</summary>
+    /// <param name="segments">头部底部周围的段数，从 3 到 4096。默认为 12。</param>
     public static void DrawWireArrow(this IDebugDrawer drawer, JVector origin, JVector vector, uint color,
         int segments = 12)
         => DrawWireArrow(drawer, origin, vector, color, DebugDrawSettings.Default.ArrowHeadSize, segments);
@@ -198,7 +198,7 @@ public static class DebugDrawGeometry
         }
     }
 
-    /// <summary>Draws an arrow using the settings' style, shaft thickness, arrowhead size, and detail.</summary>
+    /// <summary>使用设置中的样式、杆身粗细、箭头头部大小和细节绘制一个箭头。</summary>
     public static void DrawArrow(this IDebugDrawer drawer, JVector origin, JVector vector, uint color,
         in DebugDrawSettings settings)
     {
@@ -210,13 +210,13 @@ public static class DebugDrawGeometry
                 settings.ArrowSegments);
     }
 
-    /// <summary>Draws a closed solid arrow with a cylindrical shaft and a cone head.</summary>
+    /// <summary>绘制一个闭合的实心箭头，带有圆柱形杆身和锥形头部。</summary>
     /// <remarks>
-    /// Triangles face outward so the arrow can be rendered with back-face culling.
-    /// Zero-radius and very short arrows are represented by a segment.
+    /// 三角形朝外，因此可以使用背面剔除来渲染箭头。
+    /// 零半径和极短的箭头用线段表示。
     /// </remarks>
-    /// <param name="radius">Shaft radius in world units, clamped to 5% of the arrow length and half the head's base radius. Must be finite and nonnegative.</param>
-    /// <param name="segments">Number of sides around the shaft and head, from 3 to 4096. Default is 12.</param>
+    /// <param name="radius">杆身半径，以世界单位计，限制为箭头长度的 5% 和头部底部半径的一半。必须有限且非负。</param>
+    /// <param name="segments">杆身和头部周围的边数，从 3 到 4096。默认为 12。</param>
     public static void DrawSolidArrow(this IDebugDrawer drawer, JVector origin, JVector vector, Real radius,
         uint color, int segments = 12)
         => DrawSolidArrowCore(drawer, origin, vector, radius, DebugDrawSettings.Default.ArrowHeadSize, color, segments);
@@ -260,15 +260,15 @@ public static class DebugDrawGeometry
         }
     }
 
-    /// <summary>Draws the three axes of an orientation using the default visualization settings.</summary>
+    /// <summary>使用默认可视化设置绘制一个朝向的三个轴。</summary>
     public static void DrawFrame(this IDebugDrawer drawer, JVector center, JQuaternion orientation)
         => drawer.DrawFrame(center, orientation, DebugDrawSettings.Default);
 
-    /// <summary>Draws an orientation frame with the requested size and a single color.</summary>
+    /// <summary>使用请求的大小和单一颜色绘制一个朝向坐标系。</summary>
     public static void DrawFrame(this IDebugDrawer drawer, JVector center, JQuaternion orientation, Real size, uint color)
         => drawer.DrawFrame(center, orientation, size, color, color, color);
 
-    /// <summary>Draws an orientation frame with the requested size and axis colors.</summary>
+    /// <summary>使用请求的大小和轴颜色绘制一个朝向坐标系。</summary>
     public static void DrawFrame(this IDebugDrawer drawer, JVector center, JQuaternion orientation, Real size,
         uint xColor, uint yColor, uint zColor)
         => drawer.DrawFrame(center, orientation, DebugDrawSettings.Default with
@@ -279,20 +279,20 @@ public static class DebugDrawGeometry
             AxisZColor = zColor
         });
 
-    /// <summary>Draws a wire orientation frame with a single color.</summary>
-    /// <param name="segments">Number of segments around each arrowhead base, from 3 to 4096. Default is 12.</param>
+    /// <summary>使用单一颜色绘制一个线框朝向坐标系。</summary>
+    /// <param name="segments">每个箭头头部底部周围的段数，从 3 到 4096。默认为 12。</param>
     public static void DrawWireFrame(this IDebugDrawer drawer, JVector center, JQuaternion orientation, Real size, uint color,
         int segments = 12)
         => drawer.DrawWireFrame(center, orientation, size, color, color, color, segments);
 
     /// <summary>
-    /// Draws a wire orientation frame with a separate color for each local axis.
-    /// The colors follow the axes as the orientation changes.
+    /// 使用为每个局部轴单独指定的颜色绘制线框朝向坐标系。
+    /// 颜色会随朝向变化而跟随各轴。
     /// </summary>
-    /// <param name="xColor">Color of the local X axis, packed as <c>0xRRGGBBAA</c>.</param>
-    /// <param name="yColor">Color of the local Y axis, packed as <c>0xRRGGBBAA</c>.</param>
-    /// <param name="zColor">Color of the local Z axis, packed as <c>0xRRGGBBAA</c>.</param>
-    /// <param name="segments">Number of segments around each arrowhead base, from 3 to 4096. Default is 12.</param>
+    /// <param name="xColor">局部 X 轴的颜色，打包为 <c>0xRRGGBBAA</c>。</param>
+    /// <param name="yColor">局部 Y 轴的颜色，打包为 <c>0xRRGGBBAA</c>。</param>
+    /// <param name="zColor">局部 Z 轴的颜色，打包为 <c>0xRRGGBBAA</c>。</param>
+    /// <param name="segments">每个箭头头部底部周围的段数，从 3 到 4096。默认为 12。</param>
     public static void DrawWireFrame(this IDebugDrawer drawer, JVector center, JQuaternion orientation, Real size,
         uint xColor, uint yColor, uint zColor, int segments = 12)
     {
@@ -302,8 +302,8 @@ public static class DebugDrawGeometry
     }
 
     /// <summary>
-    /// Draws an orientation frame using the settings' frame size, axis colors, and arrowhead detail.
-    /// Axis length uses FrameSize; shaft radius and arrowhead size stay fixed in world units.
+    /// 使用设置中的坐标系大小、轴颜色和箭头头部细节绘制一个朝向坐标系。
+    /// 轴长度使用 FrameSize；杆身半径和箭头头部大小保持以世界单位固定。
     /// </summary>
     public static void DrawFrame(this IDebugDrawer drawer, JVector center, JQuaternion orientation,
         in DebugDrawSettings settings)
@@ -313,7 +313,7 @@ public static class DebugDrawGeometry
         drawer.DrawArrow(center, orientation.GetBasisZ() * settings.FrameSize, settings.AxisZColor, settings);
     }
 
-    /// <summary>Draws a cross perpendicular to an axis, for marking a linear stop.</summary>
+    /// <summary>绘制一个垂直于轴的十字，用于标记线性限位。</summary>
     public static void DrawStop(this IDebugDrawer drawer, JVector center, JVector axis, Real size, uint color)
     {
         Basis(axis, JVector.Zero, out JVector first, out JVector second);
@@ -322,8 +322,8 @@ public static class DebugDrawGeometry
     }
 
     /// <summary>
-    /// Draws a spring. Keep a separate reference direction for each spring and pass it back on each
-    /// call to keep the coil's orientation continuous as the anchors move.
+    /// 绘制一个弹簧。为每个弹簧保留单独的参考方向，并在每次调用时传回，
+    /// 以便线圈的朝向在锚点移动时保持连续。
     /// </summary>
     public static void DrawSpring(this IDebugDrawer drawer, JVector from, JVector to, ref JVector reference,
         Real radius, uint color, int segments = 96)

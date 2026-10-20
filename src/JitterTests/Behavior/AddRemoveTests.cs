@@ -124,7 +124,7 @@ public class AddRemoveTests
         TinyStep();
         Assert.That(world.DynamicTree.HashSetInfo.Count == 3);
         TinyStep();
-        // NullBody cannot be removed; remove the shape directly instead
+        // NullBody 无法移除；改为直接移除形状
         world.NullBody.RemoveShape(nullShape);
         Assert.That(world.DynamicTree.HashSetInfo.Count == 1);
         TinyStep();

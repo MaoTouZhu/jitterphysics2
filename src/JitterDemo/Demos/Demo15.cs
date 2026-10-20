@@ -22,7 +22,7 @@ public class Demo15 : IDemo, ICleanDemo, IDrawUpdate
 
         pg.AddFloor();
 
-        // Prepare Jitter to handle soft bodies.
+        // 配置 Jitter 以处理软体。
         world.DynamicTree.Filter = DynamicTreeCollisionFilter.Filter;
         world.BroadPhaseFilter = new BroadPhaseCollisionFilter(world);
 

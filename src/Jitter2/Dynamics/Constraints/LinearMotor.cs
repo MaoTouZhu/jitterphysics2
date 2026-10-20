@@ -13,8 +13,7 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// A motor constraint that drives relative translational velocity along an axis fixed
-/// in the reference frame of each body.
+/// 一种马达约束，驱动相对线速度沿各自刚体参考系中固定的轴运动。
 /// </summary>
 public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
 {
@@ -53,10 +52,10 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
     public override void ResetWarmStart() => Data.AccumulatedImpulse = (Real)0.0;
 
     /// <summary>
-    /// Gets or sets the motor axis on the first body in local space.
+    /// 获取或设置第一个刚体在局部空间中的马达轴。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when the assigned value is not finite or normalized.
+    /// 当赋值的值不是有限值或未归一化时抛出。
     /// </exception>
     public JVector LocalAxis1
     {
@@ -68,10 +67,10 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
     }
 
     /// <summary>
-    /// Gets or sets the motor axis on the second body in local space.
+    /// 获取或设置第二个刚体在局部空间中的马达轴。
     /// </summary>
     /// <exception cref="ArgumentException">
-    /// Thrown when the assigned value is not finite or normalized.
+    /// 当赋值的值不是有限值或未归一化时抛出。
     /// </exception>
     public JVector LocalAxis2
     {
@@ -83,16 +82,16 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
     }
 
     /// <summary>
-    /// Initializes the motor with axes for each body.
+    /// 使用每个刚体的轴初始化马达。
     /// </summary>
-    /// <param name="axis1">Motor axis on the first body in world space.</param>
-    /// <param name="axis2">Motor axis on the second body in world space.</param>
+    /// <param name="axis1">第一个刚体在世界空间中的马达轴。</param>
+    /// <param name="axis2">第二个刚体在世界空间中的马达轴。</param>
     /// <remarks>
-    /// Stores the axes in local frames. Both axes are normalized internally.
-    /// Default values: <see cref="TargetVelocity"/> = 0, <see cref="MaximumForce"/> = 0.
+    /// 将轴存储在局部坐标系中。两个轴都会在内部归一化。
+    /// 默认值：<see cref="TargetVelocity"/> = 0，<see cref="MaximumForce"/> = 0。
     /// </remarks>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="axis1"/> or <paramref name="axis2"/> is zero or contains a non-finite value.
+    /// 当 <paramref name="axis1"/> 或 <paramref name="axis2"/> 为零或包含非有限值时抛出。
     /// </exception>
     public void Initialize(JVector axis1, JVector axis2)
     {
@@ -115,9 +114,9 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
     }
 
     /// <summary>
-    /// Gets or sets the target linear velocity in units per second.
+    /// 获取或设置目标线速度，单位为每秒。
     /// </summary>
-    /// <value>Default is 0.</value>
+    /// <value>默认值为 0。</value>
     public Real TargetVelocity
     {
         get => Data.Velocity;
@@ -129,11 +128,11 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
     }
 
     /// <summary>
-    /// Gets or sets the maximum force the motor can apply.
+    /// 获取或设置马达可施加的最大力。
     /// </summary>
-    /// <value>Default is 0. Must be non-negative.</value>
+    /// <value>默认值为 0。必须为非负值。</value>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is negative.
+    /// 当 <paramref name="value"/> 为负时抛出。
     /// </exception>
     public Real MaximumForce
     {
@@ -145,7 +144,7 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
     }
 
     /// <summary>
-    /// Gets the accumulated solver impulse from the last solved substep.
+    /// 获取上一次已求解子步中累积的求解器冲量。
     /// </summary>
     public Real Impulse => Data.AccumulatedImpulse;
 
@@ -192,7 +191,7 @@ public unsafe class LinearMotor : Constraint<LinearMotor.LinearMotorData>
         if (data.Velocity != 0)
         {
             Real sign = data.Velocity > 0 ? 1 : -1;
-            // The solver drives dot(axis2, v2) - dot(axis1, v1) toward TargetVelocity.
+            // 求解器将 dot(axis2, v2) - dot(axis1, v1) 驱向 TargetVelocity。
             drawer.DrawArrow(referenceOrigin, -first * (sign * settings.GuideSize * (Real)0.5),
                 settings.ReferenceColor, settings);
             drawer.DrawArrow(secondOrigin, second * (sign * settings.GuideSize * (Real)0.5),

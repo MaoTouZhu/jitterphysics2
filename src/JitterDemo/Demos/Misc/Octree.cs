@@ -207,10 +207,10 @@ public class Octree
             uint childIdx = node.Neighbors[i];
             if (childIdx == 0) continue;
 
-            // TODO: Optimize traversal by only visiting child nodes whose bounding boxes
-            // intersect the ray at a distance less than the current closest hit (lambda).
-            // Sort the child nodes by ray-box intersection distance to prioritize nearer hits,
-            // potentially avoiding unnecessary deeper traversal.
+            // TODO: 优化遍历，仅访问那些包围盒与射线相交距离
+            // 小于当前最近命中（lambda）的子节点。
+            // 按射线与盒的相交距离对子节点排序，优先处理更近的命中，
+            // 从而可能避免不必要的深层遍历。
 
             if (InternalRaycast(origin, direction, childIdx,  ref normal, ref lambda))
             {
@@ -251,7 +251,7 @@ public class Octree
         JVector.Add(result.Min, parent.Min, out result.Min);
         JVector.Add(result.Min, dims, out result.Max);
 
-        const float margin = 1e-6f; // expand boxes by a tiny amount
+        const float margin = 1e-6f; // 将包围盒略微扩展
         JVector.Multiply(dims, margin, out var temp);
         JVector.Subtract(result.Min, temp, out result.Min);
         JVector.Add(result.Max, temp, out result.Max);

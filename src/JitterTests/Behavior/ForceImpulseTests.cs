@@ -1,12 +1,12 @@
 namespace JitterTests.Behavior;
 
 /// <summary>
-/// Tests for AddForce and ApplyImpulse behavior.
+/// 测试 AddForce 与 ApplyImpulse 的行为。
 /// </summary>
 public class ForceImpulseTests
 {
     // -------------------------------------------------------------------------
-    // ApplyImpulse — immediate velocity change, no step required
+    // ApplyImpulse — 立即改变速度，无需步进
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -39,7 +39,7 @@ public class ForceImpulseTests
         var world = new World();
         var body = world.CreateRigidBody();
         body.AddShape(new SphereShape(1));
-        // Apply impulse off-center to produce angular velocity
+        // 在偏离中心处施加冲量以产生角速度
         body.ApplyImpulse(new JVector(0, 1, 0), new JVector(1, 0, 0));
         Assert.That(body.AngularVelocity.LengthSquared(), Is.GreaterThan(0));
         world.Dispose();
@@ -65,7 +65,7 @@ public class ForceImpulseTests
         body.AddShape(new SphereShape(1));
         body.MotionType = MotionType.Static;
         body.ApplyImpulse(new JVector(1, 0, 0));
-        // Static bodies have zero InverseMassVector; velocity stays zero
+        // 静态刚体的 InverseMassVector 为零；速度保持为零
         Assert.That(body.Velocity, Is.EqualTo(JVector.Zero));
         world.Dispose();
     }
@@ -82,7 +82,7 @@ public class ForceImpulseTests
     }
 
     // -------------------------------------------------------------------------
-    // AddForce — accumulated and applied next step
+    // AddForce — 累积并在下一步中应用
     // -------------------------------------------------------------------------
 
     [TestCase]
@@ -125,18 +125,18 @@ public class ForceImpulseTests
     [TestCase]
     public void AddForce_ChangesVelocityAfterStep()
     {
-        // Force applied before step N is converted to DeltaVelocity in UpdateBodies at
-        // the end of step N, and applied to Velocity at the start of step N+1.
-        // Two steps are therefore needed to observe the velocity change.
+        // 在第 N 步之前施加的力会在第 N 步结束时由 UpdateBodies 转换为 DeltaVelocity，
+        // 并在第 N+1 步开始时应用到 Velocity。
+        // 因此需要两步才能观察到速度变化。
         var world = new World();
         world.AllowDeactivation = false;
         world.Gravity = JVector.Zero;
         var body = world.CreateRigidBody();
         body.AddShape(new SphereShape(1));
-        world.Step(1f / 60f, false);   // warmup: body active, no forces yet
+        world.Step(1f / 60f, false);   // 预热：刚体处于活动状态，尚未施加力
         body.AddForce(new JVector(100, 0, 0));
-        world.Step(1f / 60f, false);   // DeltaVelocity computed from Force
-        world.Step(1f / 60f, false);   // DeltaVelocity applied to Velocity
+        world.Step(1f / 60f, false);   // 由 Force 计算 DeltaVelocity
+        world.Step(1f / 60f, false);   // 将 DeltaVelocity 应用到 Velocity
         Assert.That(body.Velocity.X, Is.GreaterThan(0));
         world.Dispose();
     }
@@ -227,7 +227,7 @@ public class ForceImpulseTests
         var world = new World();
         var body = world.CreateRigidBody();
         body.AddShape(new SphereShape(1));
-        // Force applied off-center should produce torque
+        // 在偏离中心处施加力应产生力矩
         body.AddForce(new JVector(0, 10, 0), new JVector(1, 0, 0));
         Assert.That(body.Torque.LengthSquared(), Is.GreaterThan(0));
         world.Dispose();

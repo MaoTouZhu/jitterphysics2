@@ -10,7 +10,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a cone shape defined by a base radius and height.
+/// 表示由底面半径和高度定义的圆锥形状。
 /// </summary>
 public class ConeShape : RigidBodyShape
 {
@@ -24,10 +24,10 @@ public class ConeShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the radius of the cone at its base.
+    /// 获取或设置圆锥底面的半径。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when radius is less than or equal to zero.
+    /// 当半径小于或等于零时抛出。
     /// </exception>
     public Real Radius
     {
@@ -40,10 +40,10 @@ public class ConeShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the height of the cone.
+    /// 获取或设置圆锥的高度。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is less than or equal to zero.
+    /// 当 <paramref name="value"/> 小于或等于零时抛出。
     /// </exception>
     public Real Height
     {
@@ -56,12 +56,12 @@ public class ConeShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Initializes a new instance of the ConeShape class with specified radius and height. The symmetry axis of the cone is aligned along the Y-axis.
+    /// 使用指定的半径和高度初始化 ConeShape 类的新实例。圆锥的对称轴沿 Y 轴对齐。
     /// </summary>
-    /// <param name="radius">The radius of the cone at its base.</param>
-    /// <param name="height">The height of the cone.</param>
+    /// <param name="radius">圆锥底面的半径。</param>
+    /// <param name="height">圆锥的高度。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> or <paramref name="height"/> is less than or equal to zero.
+    /// 当 <paramref name="radius"/> 或 <paramref name="height"/> 小于或等于零时抛出。
     /// </exception>
     public ConeShape(Real radius = (Real)0.5, Real height = (Real)1.0)
     {
@@ -74,15 +74,15 @@ public class ConeShape : RigidBodyShape
     public override void SupportMap(in JVector direction, out JVector result)
     {
         const Real zeroEpsilon = (Real)1e-12;
-        // cone = convex hull of disk and point
+        // 圆锥 = 圆盘与点的凸包
 
-        // The center of mass is at 0.25 height.
+        // 质心位于 0.25 高度处。
         JVector baseDir = new JVector(direction.X, (Real)0.0, direction.Z);
         baseDir = JVector.NormalizeSafe(baseDir, zeroEpsilon) * radius;
 
         baseDir.Y = -(Real)0.25 * height;
 
-        // disk support point vs. (0, 0.75 * height, 0)
+        // 圆盘支撑点与 (0, 0.75 * height, 0) 比较
         if (JVector.Dot(direction, baseDir) >= direction.Y * (Real)0.75 * height)
         {
             result = baseDir;

@@ -34,23 +34,22 @@ public class Demo24 : IDemo, IDrawUpdate
         var vertices = teapot.Mesh.Vertices.Select(v
             => new JVector(v.Position.X, v.Position.Y, v.Position.Z)).Distinct().ToList();
 
-        // Find a few points on the convex hull of the teapot.
+        // 在茶壶的凸包上找出少量点。
         var reducedVertices = ShapeHelper.SampleHull(vertices, subdivisions: 3);
 
-        // Use these points to create a PointCloudShape. One could also use all vertices
-        // of the teapot, but this would be slower since it also includes vertices that are
-        // inside the convex hull of the teapot.
+        // 用这些点创建 PointCloudShape。也可以使用茶壶的全部顶点，
+        // 但那样会更慢，因为其中还包含位于茶壶凸包内部的顶点。
         PointCloudShape pcs = new PointCloudShape(reducedVertices);
 
-        // Jitter requires the center of mass to be at the origin!
+        // Jitter 要求质心位于原点！
 
-        // get the center of mass and shift the convex hull, such that the new
-        // center of mass is at the origin.
+        // 获取质心并平移凸包，使新的
+        // 质心位于原点。
         pcs.GetCenter(out JVector ctr);
         pcs.Shift = -ctr;
-        // pcs.GetCenter(out JVector ctr); <- this would now return (0,0,0)
+        // pcs.GetCenter(out JVector ctr); <- 此时这里会返回 (0,0,0)
 
-        // also shift the visual representation of the teapot
+        // 同时平移茶壶的可视表示
         shift = MatrixHelper.CreateTranslation(-ctr.X, -ctr.Y, -ctr.Z);
 
         for (int i = 0; i < 16; i++)

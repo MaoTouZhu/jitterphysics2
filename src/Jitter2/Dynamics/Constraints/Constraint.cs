@@ -15,33 +15,33 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Low-level data for constraints that fit within <see cref="Precision.ConstraintSizeSmall"/> bytes.
+/// 适用于占用空间不超过 <see cref="Precision.ConstraintSizeSmall"/> 字节的约束的底层数据。
 /// </summary>
 /// <remarks>
 /// <para>
-/// This structure is stored in unmanaged memory and accessed via <see cref="Constraint.SmallHandle"/>.
-/// It contains a solver dispatch id, a stable constraint identifier, and handles to the connected bodies.
+/// 此结构存储于非托管内存中，通过 <see cref="Constraint.SmallHandle"/> 访问。
+/// 它包含求解器调度 id、稳定的约束标识符，以及所连接刚体的句柄。
 /// </para>
 /// <para>
-/// The data is valid only while the constraint is registered with the world. Do not cache references
-/// across simulation steps. Not safe to access concurrently with <see cref="World.Step(Real, bool)"/>.
+/// 仅当该约束已注册到世界时数据才有效。不要跨模拟步缓存引用。
+/// 不可与 <see cref="World.Step(Real, bool)"/> 并发访问。
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential, Size = Precision.ConstraintSizeSmall)]
 public unsafe struct SmallConstraintData
 {
     internal int _internal;
-    /// <summary>Identifier of the registered solver dispatch pair for this constraint.</summary>
+    /// <summary>此约束所注册的求解器调度对的标识符。</summary>
     public uint DispatchId;
-    /// <summary>Stable creation-order identifier used for deterministic sorting.</summary>
+    /// <summary>用于确定性排序的稳定创建顺序标识符。</summary>
     public ulong ConstraintId;
 
-    /// <summary>Handle to the first body's simulation data.</summary>
+    /// <summary>第一个刚体模拟数据的句柄。</summary>
     public JHandle<RigidBodyData> Body1;
-    /// <summary>Handle to the second body's simulation data.</summary>
+    /// <summary>第二个刚体模拟数据的句柄。</summary>
     public JHandle<RigidBodyData> Body2;
 
-    /// <summary>Gets whether this constraint is enabled.</summary>
+    /// <summary>获取此约束是否已启用。</summary>
     public readonly bool IsEnabled => DispatchId != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,33 +60,33 @@ public unsafe struct SmallConstraintData
 }
 
 /// <summary>
-/// Low-level data for constraints, stored in unmanaged memory.
+/// 约束的底层数据，存储于非托管内存中。
 /// </summary>
 /// <remarks>
 /// <para>
-/// This structure is stored in unmanaged memory and accessed via <see cref="Constraint.Handle"/>.
-/// It contains a solver dispatch id, a stable constraint identifier, and handles to the connected bodies.
+/// 此结构存储于非托管内存中，通过 <see cref="Constraint.Handle"/> 访问。
+/// 它包含求解器调度 id、稳定的约束标识符，以及所连接刚体的句柄。
 /// </para>
 /// <para>
-/// The data is valid only while the constraint is registered with the world. Do not cache references
-/// across simulation steps. Not safe to access concurrently with <see cref="World.Step(Real, bool)"/>.
+/// 仅当该约束已注册到世界时数据才有效。不要跨模拟步缓存引用。
+/// 不可与 <see cref="World.Step(Real, bool)"/> 并发访问。
 /// </para>
 /// </remarks>
 [StructLayout(LayoutKind.Sequential, Size = Precision.ConstraintSizeFull)]
 public unsafe struct ConstraintData
 {
     internal int _internal;
-    /// <summary>Identifier of the registered solver dispatch pair for this constraint.</summary>
+    /// <summary>此约束所注册的求解器调度对的标识符。</summary>
     public uint DispatchId;
-    /// <summary>Stable creation-order identifier used for deterministic sorting.</summary>
+    /// <summary>用于确定性排序的稳定创建顺序标识符。</summary>
     public ulong ConstraintId;
 
-    /// <summary>Handle to the first body's simulation data.</summary>
+    /// <summary>第一个刚体模拟数据的句柄。</summary>
     public JHandle<RigidBodyData> Body1;
-    /// <summary>Handle to the second body's simulation data.</summary>
+    /// <summary>第二个刚体模拟数据的句柄。</summary>
     public JHandle<RigidBodyData> Body2;
 
-    /// <summary>Gets whether this constraint is enabled.</summary>
+    /// <summary>获取此约束是否已启用。</summary>
     public readonly bool IsEnabled => DispatchId != 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -166,20 +166,20 @@ internal static unsafe class ConstraintDispatchTable
 }
 
 /// <summary>
-/// Generic base class for constraints that store custom data of type <typeparamref name="T"/>.
+/// 用于存储类型为 <typeparamref name="T"/> 的自定义数据的约束的泛型基类。
 /// </summary>
 /// <typeparam name="T">
-/// The unmanaged data structure containing constraint-specific state. Must fit within
-/// <see cref="ConstraintData"/> (i.e., <see cref="Precision.ConstraintSizeFull"/> bytes).
+/// 包含约束特定状态的非托管数据结构。必须能容纳于
+/// <see cref="ConstraintData"/>（即 <see cref="Precision.ConstraintSizeFull"/> 字节）之内。
 /// </typeparam>
 /// <remarks>
-/// Derive from this class to create constraints with custom data layouts. The <see cref="Data"/>
-/// property provides typed access to the constraint's unmanaged memory.
+/// 从此类派生可创建具有自定义数据布局的约束。<see cref="Data"/>
+/// 属性提供对约束非托管内存的类型化访问。
 /// </remarks>
 public abstract class Constraint<T> : Constraint where T : unmanaged
 {
     /// <summary>
-    /// Gets a reference to the constraint's typed data stored in unmanaged memory.
+    /// 获取对存储于非托管内存中的约束类型化数据的引用。
     /// </summary>
     public ref T Data
     {
@@ -198,69 +198,69 @@ public abstract class Constraint<T> : Constraint where T : unmanaged
 }
 
 /// <summary>
-/// Base class for constraints that connect two rigid bodies and restrict their relative motion.
+/// 连接两个刚体并限制其相对运动的约束的基类。
 /// </summary>
 public abstract class Constraint : IDebugDrawable
 {
-    /// <summary>Default softness (compliance) for angular constraints.</summary>
+    /// <summary>角度约束的默认柔软度（柔量）。</summary>
     public const Real DefaultAngularSoftness = (Real)0.001;
 
-    /// <summary>Default bias factor for angular error correction.</summary>
+    /// <summary>角度误差修正的默认偏置因子。</summary>
     public const Real DefaultAngularBias = (Real)0.2;
 
-    /// <summary>Default softness for angular limit enforcement.</summary>
+    /// <summary>角度限位施加的默认柔软度。</summary>
     public const Real DefaultAngularLimitSoftness = (Real)0.001;
 
-    /// <summary>Default bias factor for angular limit correction.</summary>
+    /// <summary>角度限位修正的默认偏置因子。</summary>
     public const Real DefaultAngularLimitBias = (Real)0.1;
 
-    /// <summary>Default softness (compliance) for linear constraints.</summary>
+    /// <summary>线性约束的默认柔软度（柔量）。</summary>
     public const Real DefaultLinearSoftness = (Real)0.00001;
 
-    /// <summary>Default bias factor for linear error correction.</summary>
+    /// <summary>线性误差修正的默认偏置因子。</summary>
     public const Real DefaultLinearBias = (Real)0.2;
 
-    /// <summary>Default softness for linear limit enforcement.</summary>
+    /// <summary>线性限位施加的默认柔软度。</summary>
     public const Real DefaultLinearLimitSoftness = (Real)0.0001;
 
-    /// <summary>Default bias factor for linear limit correction.</summary>
+    /// <summary>线性限位修正的默认偏置因子。</summary>
     public const Real DefaultLinearLimitBias = (Real)0.2;
 
 
-    /// <summary>Gets the first rigid body connected by this constraint.</summary>
+    /// <summary>获取此约束连接的第一个刚体。</summary>
     public RigidBody Body1 { private set; get; } = null!;
 
-    /// <summary>Gets the second rigid body connected by this constraint.</summary>
+    /// <summary>获取此约束连接的第二个刚体。</summary>
     public RigidBody Body2 { private set; get; } = null!;
 
     /// <summary>
-    /// A managed pointer to custom user data. This is not used by the engine.
+    /// 指向自定义用户数据的托管指针。引擎不使用此项。
     /// </summary>
     public object? Tag { get; set; }
 
-    /// <summary>Gets whether this constraint uses the smaller data layout.</summary>
+    /// <summary>获取此约束是否使用较小的数据布局。</summary>
     public virtual bool IsSmallConstraint { get; } = false;
 
     /// <summary>
-    /// A handle for accessing the raw constraint data.
+    /// 用于访问原始约束数据的句柄。
     /// </summary>
     public JHandle<ConstraintData> Handle { internal set; get; }
 
     /// <summary>
-    /// Gets a value indicating whether the underlying constraint data is still valid.
+    /// 获取一个值，指示底层约束数据是否仍然有效。
     /// </summary>
     public bool IsValid => !Handle.IsZero && !Body1.World.IsDisposed;
 
     /// <summary>
-    /// Gets a handle to the constraint data reinterpreted as <see cref="SmallConstraintData"/>.
+    /// 获取重新解释为 <see cref="SmallConstraintData"/> 的约束数据句柄。
     /// </summary>
     public JHandle<SmallConstraintData> SmallHandle => JHandle<ConstraintData>.AsHandle<SmallConstraintData>(Handle);
 
     /// <summary>
-    /// Checks that the constraint data type fits within <see cref="ConstraintData"/>.
+    /// 检查约束数据类型是否能容纳于 <see cref="ConstraintData"/> 之内。
     /// </summary>
-    /// <typeparam name="T">The constraint-specific data type.</typeparam>
-    /// <exception cref="InvalidOperationException">Thrown if the data type is too large.</exception>
+    /// <typeparam name="T">约束特定的数据类型。</typeparam>
+    /// <exception cref="InvalidOperationException">当数据类型过大时抛出。</exception>
     protected static unsafe void CheckDataSize<T>() where T : unmanaged
     {
         if (sizeof(T) > sizeof(ConstraintData))
@@ -270,11 +270,11 @@ public abstract class Constraint : IDebugDrawable
     }
 
     /// <summary>
-    /// Verifies that this constraint has been properly created via the World class.
+    /// 验证此约束是否已通过 World 类正确创建。
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the constraint was instantiated directly instead of through
-    /// <see cref="World.CreateConstraint{T}(RigidBody, RigidBody)"/>.
+    /// 当约束是直接实例化而非通过
+    /// <see cref="World.CreateConstraint{T}(RigidBody, RigidBody)"/> 创建时抛出。
     /// </exception>
     protected void VerifyNotZero()
     {
@@ -287,21 +287,21 @@ public abstract class Constraint : IDebugDrawable
     }
 
     /// <summary>
-    /// Sets the solver dispatch id used by this instance. Override this in derived classes
-    /// to assign the correct registered solver pair. The id is later written into the
-    /// unmanaged header when the constraint is enabled.
+    /// 设置此实例使用的求解器调度 id。在派生类中重写此方法
+    /// 以指定正确的已注册求解器对。当约束启用时，该 id 稍后会被写入
+    /// 非托管头部。
     /// </summary>
     protected virtual void Create()
     {
     }
 
     /// <summary>
-    /// Resets the cached warm-start state used by the solver for this constraint.
+    /// 重置求解器为此约束缓存的热启动状态。
     /// </summary>
     /// <remarks>
-    /// This clears only persistent solver impulses. Constraint configuration remains unchanged.
-    /// Useful after restoring snapshots or other discontinuous state changes where preserving
-    /// warm-starting is undesirable.
+    /// 此操作仅清除持久化的求解器冲量。约束配置保持不变。
+    /// 在恢复快照或其他不连续状态变化之后，若不希望保留
+    /// 热启动，则此方法很有用。
     /// </remarks>
     public virtual void ResetWarmStart()
     {
@@ -324,12 +324,12 @@ public abstract class Constraint : IDebugDrawable
     }
 
     /// <summary>
-    /// Gets or sets whether this constraint is enabled.
+    /// 获取或设置此约束是否已启用。
     /// </summary>
     /// <remarks>
-    /// Use <see cref="World.Remove(Constraint)"/> for permanent removal.
-    /// An enabled constraint is solved only while at least one connected body is dynamic and awake.
-    /// Changing body motion types or activation states does not change this property.
+    /// 若要永久移除约束，请使用 <see cref="World.Remove(Constraint)"/>。
+    /// 已启用的约束仅当至少一个所连接刚体为动态且处于唤醒状态时才会被求解。
+    /// 更改刚体运动类型或激活状态不会改变此属性。
     /// </remarks>
     public unsafe bool IsEnabled
     {
@@ -374,22 +374,22 @@ public abstract class Constraint : IDebugDrawable
     }
 
     /// <summary>
-    /// Draws a debug visualization of this constraint.
+    /// 绘制此约束的调试可视化。
     /// </summary>
-    /// <param name="drawer">The debug drawer to receive visualization primitives.</param>
-    /// <exception cref="NotImplementedException">Thrown if the derived class does not override this method.</exception>
+    /// <param name="drawer">接收可视化图元的调试绘制器。</param>
+    /// <exception cref="NotImplementedException">当派生类未重写此方法时抛出。</exception>
     public virtual void DebugDraw(IDebugDrawer drawer)
     {
         throw new NotImplementedException();
     }
 
     /// <summary>
-    /// Draws this constraint using the supplied visualization settings.
-    /// Custom constraints that only override <see cref="DebugDraw(IDebugDrawer)"/> use their default visualization.
+    /// 使用提供的可视化设置绘制此约束。
+    /// 仅重写 <see cref="DebugDraw(IDebugDrawer)"/> 的自定义约束将使用其默认可视化。
     /// </summary>
     public virtual void DebugDraw(IDebugDrawer drawer, in DebugDrawSettings settings) => DebugDraw(drawer);
 
-    /// <summary>Gets the display origin for an angular constraint, keeping world-relative guides near body 2.</summary>
+    /// <summary>获取角度约束的显示原点，使世界相对参考线保持在刚体 2 附近。</summary>
     protected JVector GetDebugDrawOrigin(in DebugDrawSettings settings) =>
         settings.Origin ?? (Body1 == Body1.World.NullBody ? Body2.Position : Body1.Position);
 }

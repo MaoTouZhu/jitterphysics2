@@ -16,8 +16,8 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
     private Playground pg = null!;
     private World world = null!;
 
-    // We need to track time manually for the physics steps
-    // to ensure the belt moves perfectly in sync with the solver.
+    // 我们需要手动为物理步追踪时间，
+    // 以确保传送带与求解器完全同步移动。
     private double physicsTime = 0.0;
 
     private struct BeltPlank
@@ -43,7 +43,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
 
             float curveLen = MathF.PI * Radius;
 
-            // 1. Bottom Straight
+            // 1. 底部直线段
             if (distance < StraightLength)
             {
                 float t = distance;
@@ -51,7 +51,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
                 vel = new JVector(Speed, 0, 0);
                 angVelY = 0;
             }
-            // 2. Right Turn
+            // 2. 右侧转弯
             else if (distance < StraightLength + curveLen)
             {
                 float t = distance - StraightLength;
@@ -60,7 +60,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
                 vel = new JVector(-MathF.Sin(angle), 0, MathF.Cos(angle)) * Speed;
                 angVelY = Speed / Radius;
             }
-            // 3. Top Straight
+            // 3. 顶部直线段
             else if (distance < (StraightLength * 2.0f) + curveLen)
             {
                 float t = distance - (StraightLength + curveLen);
@@ -68,7 +68,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
                 vel = new JVector(-Speed, 0, 0);
                 angVelY = 0;
             }
-            // 4. Left Turn
+            // 4. 左侧转弯
             else
             {
                 float t = distance - ((StraightLength * 2.0f) + curveLen);
@@ -88,7 +88,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
         planks.Clear();
         physicsTime = 0;
 
-        // Subscribe to the physics step event
+        // 订阅物理步事件
         world.PreSubStep += OnPreStep;
 
         float plankWidth = 0.6f;
@@ -107,7 +107,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
 
             body.Position = pos;
 
-            // Align initial orientation
+            // 对齐初始朝向
             JVector fwd = JVector.Normalize(vel);
             JVector up = JVector.UnitY;
             JVector right = JVector.Normalize(JVector.Cross(up, fwd));
@@ -118,7 +118,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
             planks.Add(new BeltPlank { Body = body, DistanceOffset = dist });
         }
 
-        // Debris
+        // 碎片
         for (int i = 0; i < 8; i++)
         {
             var box = world.CreateRigidBody();
@@ -132,7 +132,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
         floor.MotionType = MotionType.Static;
     }
 
-    // Called automatically by Jitter before every physics sub-step
+    // 由 Jitter 在每次物理子步之前自动调用
     private void OnPreStep(TimeStep timeStep)
     {
         physicsTime += timeStep.SubstepDt;
@@ -144,31 +144,31 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
 
             Curve.GetState(d, out JVector targetPos, out JVector targetVel, out float targetAngVelY);
 
-            // Motion Control Logic
+            // 运动控制逻辑
             //
-            // We want the platform to follow a path p(t) and orientation. Setting the position/orientation
-            // directly results in teleportation, which prevents proper physics simulation.
+            // 我们希望平台沿路径 p(t) 移动并保持相应朝向。直接设置位置/朝向
+            // 会导致瞬移，从而无法进行正常的物理模拟。
             //
-            // Instead, we use a control scheme that combines Feed-Forward (target velocity)
-            // with a Proportional Controller (position error correction) to drive the body velocity v(t)
-            // towards the target:
+            // 为此，我们采用一种控制方案，将前馈（目标速度）
+            // 与比例控制器（位置误差修正）结合起来，驱动刚体速度 v(t)
+            // 趋近目标：
             //
             // v(t) = alpha * (k(t) - x(t))
             //
-            // where x(t) is the current position and alpha is a gain constant.
-            // By choosing k(t) = p(t) + 1/alpha * p'(t), the differential equation solves to:
+            // 其中 x(t) 是当前位置，alpha 是增益常数。
+            // 通过选取 k(t) = p(t) + 1/alpha * p'(t)，该微分方程的解为：
             //
             // x(t) = C * exp(-alpha * t) + p(t)
             //
-            // This means the body's position x(t) exponentially converges to the target path p(t).
+            // 这意味着刚体的位置 x(t) 会以指数方式收敛到目标路径 p(t)。
             //
-            // We apply this same logic to both Linear Velocity (below) and Angular Velocity.
+            // 我们对线速度（见下文）和角速度应用同样的逻辑。
             plank.Body.Velocity = targetVel + (targetPos - plank.Body.Position) * 10.0f;
 
             JVector currentForward = plank.Body.Orientation.GetBasisZ();
             JVector targetForward = JVector.Normalize(targetVel);
 
-            // Calculate angle sine error (Cross Product Y-component)
+            // 计算角度误差的正弦值（叉积的 Y 分量）
             float angleError = (currentForward.Z * targetForward.X - currentForward.X * targetForward.Z);
 
             float correction = angleError * 20.0f;
@@ -178,7 +178,7 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
 
     public void DrawUpdate()
     {
-        // Only drawing logic remains here
+        // 此处只保留绘制逻辑
         const int stepMax = 200;
         float totalLen = Curve.TotalLength;
 
@@ -192,8 +192,8 @@ public class Demo22 : IDemo, ICleanDemo, IDrawUpdate
         }
     }
 
-    // Important: Unsubscribe when the demo is switched to avoid memory leaks
-    // or ghost logic running in the next demo.
+    // 重要：切换演示时要取消订阅，以避免内存泄漏，
+    // 或让残留逻辑在下一个演示中继续运行。
     public void CleanUp()
     {
         if (world != null)

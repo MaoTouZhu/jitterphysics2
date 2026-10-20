@@ -13,8 +13,8 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics.Constraints;
 
 /// <summary>
-/// Drives the signed separation of two anchors along an axis attached to body 1 using limited force.
-/// Controls one translational degree of freedom; perpendicular movement and rotation remain free.
+/// 使用受限的力驱动两个锚点沿附着于刚体 1 的轴线的有符号间距。
+/// 控制一个平动自由度；垂直方向的移动和旋转保持自由。
 /// </summary>
 public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServoData>
 {
@@ -52,12 +52,12 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
     /// <inheritdoc />
     public override void ResetWarmStart() => Data.AccumulatedImpulse = 0;
 
-    /// <summary>Initializes world-space anchors and an axis attached to body 1.</summary>
-    /// <param name="axis">The direction along which the servo acts, normalized internally.</param>
-    /// <param name="anchor1">The origin attached to body 1.</param>
-    /// <param name="anchor2">The anchor attached to body 2.</param>
-    /// <param name="targetPosition">The desired signed separation along the axis.</param>
-    /// <remarks>Maximum force defaults to zero. The current separation may differ from the target.</remarks>
+    /// <summary>初始化世界空间锚点以及附着于刚体 1 的轴线。</summary>
+    /// <param name="axis">伺服作用的轴线方向，内部会归一化。</param>
+    /// <param name="anchor1">附着于刚体 1 的原点。</param>
+    /// <param name="anchor2">附着于刚体 2 的锚点。</param>
+    /// <param name="targetPosition">沿轴线的期望有符号间距。</param>
+    /// <remarks>最大力默认为零。当前间距可以与目标不同。</remarks>
     public void Initialize(JVector axis, JVector anchor1, JVector anchor2, Real targetPosition = 0)
     {
         VerifyNotZero();
@@ -77,7 +77,7 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
         ResetWarmStart();
     }
 
-    /// <summary>Gets or sets the world-space anchor attached to body 1.</summary>
+    /// <summary>获取或设置附着于刚体 1 的世界空间锚点。</summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor1
     {
@@ -91,7 +91,7 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
         }
     }
 
-    /// <summary>Gets or sets the world-space anchor attached to body 2.</summary>
+    /// <summary>获取或设置附着于刚体 2 的世界空间锚点。</summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Anchor2
     {
@@ -105,7 +105,7 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
         }
     }
 
-    /// <summary>Gets or sets the world-space direction attached to body 1, normalized internally.</summary>
+    /// <summary>获取或设置附着于刚体 1 的世界空间方向，内部会归一化。</summary>
     [ReferenceFrame(ReferenceFrame.World)]
     public JVector Axis
     {
@@ -120,10 +120,10 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
         }
     }
 
-    /// <summary>Gets the current signed separation of the anchors along the axis.</summary>
+    /// <summary>获取两个锚点沿轴线的当前有符号间距。</summary>
     public Real Position => (Anchor2 - Anchor1) * Axis;
 
-    /// <summary>Gets or sets the desired signed separation along the axis. Default is zero.</summary>
+    /// <summary>获取或设置沿轴线的期望有符号间距。默认为零。</summary>
     public Real TargetPosition
     {
         get => Data.TargetPosition;
@@ -135,8 +135,8 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
         }
     }
 
-    /// <summary>Gets or sets the maximum total force the servo can apply.</summary>
-    /// <value>Default is zero. Positive infinity allows unlimited force.</value>
+    /// <summary>获取或设置伺服可施加的最大总力。</summary>
+    /// <value>默认为零。正无穷表示不限制力。</value>
     public Real MaximumForce
     {
         get => Data.MaximumForce;
@@ -147,23 +147,23 @@ public unsafe class LinearAxisServo : Constraint<LinearAxisServo.LinearAxisServo
         }
     }
 
-    /// <summary>Gets or sets the softness (compliance) of the servo.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultLinearSoftness"/>.</value>
+    /// <summary>获取或设置伺服的柔软度（柔顺度）。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultLinearSoftness"/>。</value>
     public Real Softness
     {
         get => Data.Softness;
         set => Data.Softness = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets or sets how aggressively the servo corrects its position error.</summary>
-    /// <value>Default is <see cref="Constraint.DefaultLinearBias"/>.</value>
+    /// <summary>获取或设置伺服修正其位置误差的强度。</summary>
+    /// <value>默认为 <see cref="Constraint.DefaultLinearBias"/>。</value>
     public Real Bias
     {
         get => Data.BiasFactor;
         set => Data.BiasFactor = ArgumentCheck.NonNegative(value, nameof(value));
     }
 
-    /// <summary>Gets the signed impulse applied along the axis to body 2 in the last solved substep.</summary>
+    /// <summary>获取上一个已求解子步中沿轴线施加到刚体 2 的有符号冲量。</summary>
     public Real Impulse => Data.AccumulatedImpulse;
 
     public static void PrepareForIterationLinearAxisServo(ref ConstraintData constraint, in TimeStep timeStep)

@@ -13,14 +13,14 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a convex hull shape defined by a set of triangles.
+/// 表示由一组三角形定义的凸包形状。
 /// </summary>
 public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
 {
     private struct CHullVector(in JVector vertex) : IEquatable<CHullVector>
     {
         public readonly JVector Vertex = vertex;
-        // The flattened neighbor list may exceed ushort.MaxValue before the vertex list does.
+        // 扁平化后的邻接列表可能先于顶点列表超过 ushort.MaxValue。
         public int NeighborMinIndex = 0;
         public int NeighborMaxIndex = 0;
 
@@ -69,23 +69,23 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
             JVector normal = (b - a) % (c - a);
             if (normal.LengthSquared() == 0) continue;
 
-            // Input faces may use either winding. The center of mass lies inside the convex hull.
+            // 输入面的绕序可以是任意方向。质心位于凸包内部。
             if (JVector.Dot(normal, a - cachedCenter) < 0) (b, c) = (c, b);
             triangleSink.Add(new JTriangle(a, b, c));
         }
     }
 
     /// <summary>
-    /// Initializes a new instance of the ConvexHullShape class, creating a convex hull.
+    /// 初始化 ConvexHullShape 类的新实例，创建一个凸包。
     /// </summary>
-    /// <param name="triangles">Triangles describing the convex hull surface. Their vertices must lie
-    /// on the surface of the convex hull to avoid incorrect results or indefinite hangs in the collision algorithm.</param>
+    /// <param name="triangles">描述凸包表面的三角形。其顶点必须位于
+    /// 凸包表面上，以避免错误结果或碰撞算法无限挂起。</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="triangles"/> is empty, or when the convex hull consists of more than
-    /// <see cref="ushort.MaxValue"/> vertices.
+    /// 当 <paramref name="triangles"/> 为空，或凸包包含超过
+    /// <see cref="ushort.MaxValue"/> 个顶点时抛出。
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when <paramref name="triangles"/> does not define a non-degenerate volume.
+    /// 当 <paramref name="triangles"/> 未定义非退化体积时抛出。
     /// </exception>
     public ConvexHullShape(ReadOnlySpan<JTriangle> triangles)
     {
@@ -145,7 +145,7 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
             tmpNeighbors[c].Add(b);
         }
 
-        // Estimate capacity to avoid resizing (Euler characteristic ~ 6 neighbors per vertex)
+        // 预估容量以避免扩容（欧拉示性数约为每个顶点 6 个邻居）
         var finalNeighbors = new List<ushort>(tmpVertices.Count * 6);
 
         var tmpVerticesSpan = CollectionsMarshal.AsSpan(tmpVertices);
@@ -157,7 +157,7 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
             AddDistinct(tmpNeighbors[i], finalNeighbors);
             element.NeighborMaxIndex = finalNeighbors.Count;
 
-            // Help GC
+            // 帮助 GC 回收
             tmpNeighbors[i] = null!;
         }
 
@@ -181,8 +181,8 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
     }
 
     /// <summary>
-    /// Helper to sort and add unique elements from source to destination.
-    /// Replaces LINQ Distinct() for better performance and zero allocations.
+    /// 辅助方法：对源列表排序并将唯一元素添加到目标列表。
+    /// 替代 LINQ Distinct()，以获得更好的性能和零分配。
     /// </summary>
     private static void AddDistinct(List<ushort>? source, List<ushort> destination)
     {
@@ -205,10 +205,9 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
     }
 
     /// <summary>
-    /// Creates a clone of the convex hull shape. Note that the underlying data structure is shared among instances.
+    /// 创建凸包形状的克隆。请注意，底层数据结构在各实例之间共享。
     /// </summary>
-    /// <returns>A new instance of the ConvexHullShape class that shares the same underlying data structure as the
-    /// original instance.
+    /// <returns>ConvexHullShape 类的新实例，它与原始实例共享相同的底层数据结构。
     /// </returns>
     public ConvexHullShape Clone()
     {
@@ -228,7 +227,7 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
     }
 
     /// <summary>
-    /// Gets or sets the shift applied to the convex hull vertices.
+    /// 获取或设置应用于凸包顶点的偏移。
     /// </summary>
     public JVector Shift
     {
@@ -241,10 +240,10 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
     }
 
     /// <summary>
-    /// Updates the shape's cached mass, inertia, and bounding box.
+    /// 更新形状缓存的质量、惯性和包围盒。
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the convex hull does not define a non-degenerate volume.
+    /// 当凸包未定义非退化体积时抛出。
     /// </exception>
     public void UpdateShape()
     {
@@ -262,10 +261,10 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
     }
 
     /// <summary>
-    /// Recalculates the mass, center of mass, and inertia tensor from the convex hull triangles.
+    /// 根据凸包三角形重新计算质量、质心和惯性张量。
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the convex hull does not define a non-degenerate volume.
+    /// 当凸包未定义非退化体积时抛出。
     /// </exception>
     public void CalculateMassInertia()
     {
@@ -292,7 +291,7 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
             JVector column1 = vertices[tri.IndexB].Vertex + shifted;
             JVector column2 = vertices[tri.IndexC].Vertex + shifted;
 
-            // check winding
+            // 检查绕序
             {
                 JVector normal = (column1 - column0) % (column2 - column0);
                 Real dot = JVector.Dot(normal, column0 - pointWithin);
@@ -402,15 +401,15 @@ public class ConvexHullShape : RigidBodyShape, ICloneableShape<ConvexHullShape>
 
             if (nbProduct > dotProduct + epsilonIncrement)
             {
-                // no need to find the "best" neighbor - as soon as we found a better
-                // candidate we move there.
+                // 无需寻找“最佳”邻居——一旦找到更好的
+                // 候选点就移动到那里。
                 dotProduct = nbProduct;
                 current = nb;
                 goto main;
             }
         }
 
-        // A secondary hill climbing algorithm in case of a plateau.
+        // 在出现平台时使用的次级爬山算法。
         if (needsVerify)
         {
             Real d0 = JVector.Dot(verifyDir, vertices[current].Vertex);

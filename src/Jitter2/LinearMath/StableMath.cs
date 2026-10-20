@@ -10,11 +10,11 @@ using System.Runtime.CompilerServices;
 namespace Jitter2.LinearMath;
 
 /// <summary>
-/// Internal trigonometric helpers for bit-identical results on different platforms (not guaranteed by Math and MathF).
+/// 内部三角函数辅助方法，用于在不同平台上获得逐位相同的结果（Math 与 MathF 不保证这一点）。
 /// </summary>
 /// <remarks>
-/// Until scalar trig in the BCL is both deterministic and fixed by managed source across targets,
-/// this helper keeps its own tiny approximation pipeline so the physics engine owns the behavior.
+/// 在 BCL 中的标量三角函数既具有确定性、又在各目标平台上由托管源码固定之前，
+/// 该辅助类保留自己的一套微型近似流程，使物理引擎掌控其行为。
 /// </remarks>
 internal static class StableMath
 {
@@ -23,14 +23,14 @@ internal static class StableMath
     internal const Real QuarterPi = (Real)0.785398163397448309615660845819875721;
     internal const Real TwoPi = (Real)6.283185307179586476925286766559005768;
 
-    // Used by atan's angle-addition identity: atan(x) = pi/4 + atan((x - 1) / (x + 1)).
+    // 供 atan 的角度加法恒等式使用：atan(x) = pi/4 + atan((x - 1) / (x + 1))。
     private const Real TanPiOver8 = (Real)0.414213562373095048801688724209698079;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int FloorToInt(Real value)
     {
-        // Casting truncates toward zero. The reducers need mathematical floor so that negative
-        // angles land in the same buckets on every platform and quadrant boundaries stay symmetric.
+        // 强制转换会向零截断。归约器需要数学意义上的 floor，以便负
+        // 角度在每个平台上落入相同的桶，且象限边界保持对称。
         int integer = (int)value;
         return value < integer ? integer - 1 : integer;
     }
@@ -38,11 +38,11 @@ internal static class StableMath
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Real ReduceAngle(Real angle)
     {
-        // This is intentionally the "naive" reducer: one modulo by 2*pi into [-pi, pi] in the
-        // current Real precision. It is not a Payne-Hanek/Cody-Waite style high-precision reducer.
-        // That means enormous inputs can lose low bits before the polynomial ever runs, but for the
-        // angle magnitudes seen in the solver this is a good tradeoff: tiny code, deterministic data
-        // flow, and no dependency on platform libm internals.
+        // 这里有意采用“朴素”归约器：以当前 Real 精度做一次对 2*pi 取模，将角度归入 [-pi, pi]。
+        // 它不是 Payne-Hanek/Cody-Waite 风格的高精度归约器。
+        // 这意味着极大的输入在多项式运行之前就可能丢失低位，但对于
+        // 求解器中出现的角度量级来说，这是一个不错的权衡：代码极小、数据流确定，
+        // 且不依赖平台 libm 的内部实现。
         int periods = FloorToInt((angle + Pi) / TwoPi);
         angle -= periods * TwoPi;
 
@@ -57,8 +57,8 @@ internal static class StableMath
     {
         angle = ReduceAngle(angle);
 
-        // Fold once more into [-pi/4, pi/4]. The returned quadrant stores the swaps/sign flips needed
-        // to reconstruct the original sine/cosine pair after the low-order polynomial is evaluated.
+        // 再折叠一次到 [-pi/4, pi/4]。返回的象限保存了在低阶多项式求值之后
+        // 重建原始正弦/余弦对所需的交换与符号翻转。
         int nearestQuarterTurn = FloorToInt((angle + QuarterPi) / HalfPi);
 
         reduced = angle - nearestQuarterTurn * HalfPi;
@@ -68,13 +68,13 @@ internal static class StableMath
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Real SinPolynomial(Real x)
     {
-        // 13th-order Maclaurin approximation of sin(x), evaluated in Horner form.
+        // sin(x) 的 13 阶 Maclaurin 近似，以 Horner 形式求值。
         //
-        // The reduction above is what makes this usable. In exact arithmetic the truncation remainder
-        // on [-pi/4, pi/4] is bounded by |x|^15 / 15!, which is about 2.04e-14 at the endpoint.
-        // If we skip reduction and run the same polynomial directly on [-pi, pi], a dense float scan
-        // lands around 2.14e-5 max absolute error. The quadrant fold is therefore not optional detail;
-        // it is the reason this low-order Taylor polynomial works for the engine.
+        // 上面的归约正是其可用性的关键。在精确算术下，[-pi/4, pi/4] 上的截断余项
+        // 以 |x|^15 / 15! 为界，在端点处约为 2.04e-14。
+        // 如果跳过归约，直接在 [-pi, pi] 上运行同一多项式，密集 float 扫描
+        // 的最大绝对误差约为 2.14e-5。因此象限折叠并非可选的细节；
+        // 它正是这个低阶泰勒多项式能用于该引擎的原因。
         Real x2 = x * x;
         Real poly = -(Real)(1.0 / 6227020800.0);
         poly = poly * x2 + (Real)(1.0 / 39916800.0);
@@ -89,11 +89,11 @@ internal static class StableMath
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Real CosPolynomial(Real x)
     {
-        // 12th-order Maclaurin approximation of cos(x), also in Horner form.
+        // cos(x) 的 12 阶 Maclaurin 近似，同样采用 Horner 形式。
         //
-        // The exact-series truncation remainder on [-pi/4, pi/4] is bounded by |x|^14 / 14!, about
-        // 3.90e-13 at the endpoint. Without reduction the same coefficients are much less acceptable:
-        // a dense float scan over [-pi, pi] lands around 1.01e-4 max absolute error.
+        // 在 [-pi/4, pi/4] 上，精确级数的截断余项以 |x|^14 / 14! 为界，端点处约为
+        // 3.90e-13。若不做归约，同样的系数就远没那么可接受：
+        // 在 [-pi, pi] 上做密集 float 扫描，最大绝对误差约为 1.01e-4。
         Real x2 = x * x;
         Real poly = -(Real)(1.0 / 479001600.0);
         poly = poly * x2 + (Real)(1.0 / 3628800.0);
@@ -108,7 +108,7 @@ internal static class StableMath
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (Real sin, Real cos) ApplyQuadrant(int quadrant, Real sin, Real cos)
     {
-        // Undo the octant/quadrant fold from ReduceToQuadrant.
+        // 撤销 ReduceToQuadrant 中的八分圆/象限折叠。
         return quadrant switch
         {
             0 => (sin, cos),
@@ -149,7 +149,7 @@ internal static class StableMath
             return (SinPolynomial(angle), CosPolynomial(angle));
         }
 
-        // Everything outside the minimal polynomial interval goes through the normal range reducer.
+        // 位于最小多项式区间之外的所有输入都会经过常规范围归约器。
         ReduceToQuadrant(angle, out int quadrant, out Real reduced);
 
         Real sin = SinPolynomial(reduced);
@@ -168,8 +168,8 @@ internal static class StableMath
 
         ReduceToQuadrant(angle, out int quadrant, out Real reduced);
 
-        // The single-output paths keep the same reduction logic but avoid computing the polynomial
-        // that is not needed for the selected quadrant.
+        // 单输出路径保留相同的归约逻辑，但避免计算
+        // 所选象限不需要的多项式。
         return quadrant switch
         {
             0 => SinPolynomial(reduced),
@@ -200,8 +200,8 @@ internal static class StableMath
 
     private static Real AtanTaylor(Real value)
     {
-        // 17th-order odd Taylor series for atan(x) in Horner form. The caller keeps |x| small
-        // enough that the notoriously slow convergence near x = 1 does not dominate the error.
+        // atan(x) 的 17 阶奇泰勒级数，采用 Horner 形式。调用方保证 |x| 足够小，
+        // 使 x = 1 附近出了名缓慢的收敛不会主导误差。
         Real x2 = value * value;
         Real poly = (Real)(1.0 / 17.0);
         poly = poly * x2 - (Real)(1.0 / 15.0);
@@ -227,8 +227,8 @@ internal static class StableMath
 
         if (value > TanPiOver8)
         {
-            // atan(x) = pi/4 + atan((x - 1) / (x + 1)). After this transform the Taylor series only
-            // sees values up to tan(pi/8) ~= 0.4142 instead of fighting the slow x ~= 1 case directly.
+            // atan(x) = pi/4 + atan((x - 1) / (x + 1))。经过该变换后，泰勒级数
+            // 只需处理最大到 tan(pi/8) ~= 0.4142 的值，而不必直接硬扛 x ~= 1 的缓慢情形。
             Real reduced = (value - (Real)1.0) / (value + (Real)1.0);
             return QuarterPi + AtanTaylor(reduced);
         }
@@ -239,8 +239,8 @@ internal static class StableMath
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Real AsinTaylor(Real value)
     {
-        // 15th-order Maclaurin approximation of asin(x). We only feed it |x| <= 0.5 directly; near
-        // the endpoints Asin/Acos switch to a half-angle form so the polynomial still sees a small x.
+        // asin(x) 的 15 阶 Maclaurin 近似。我们只直接向它输入 |x| <= 0.5；
+        // 在端点附近，Asin/Acos 会切换到半角形式，使多项式仍然看到较小的 x。
         Real x2 = value * value;
         Real poly = (Real)(143.0 / 10240.0);
         poly = poly * x2 + (Real)(231.0 / 13312.0);
@@ -255,7 +255,7 @@ internal static class StableMath
 
     internal static Real Atan2(Real y, Real x)
     {
-        // Classic quadrant reconstruction around the scalar atan approximation above.
+        // 围绕上述标量 atan 近似进行经典的象限重建。
         if (x > (Real)0.0)
         {
             return Atan(y / x);

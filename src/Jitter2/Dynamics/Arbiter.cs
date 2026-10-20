@@ -10,69 +10,69 @@ using Jitter2.Unmanaged;
 namespace Jitter2.Dynamics;
 
 /// <summary>
-/// Manages contact information between two different rigid bodies.
+/// 管理两个不同刚体之间的接触信息。
 /// </summary>
 /// <remarks>
 /// <para>
-/// An arbiter is created when contacts are registered, including speculative contacts before shapes overlap, and is removed when they separate
-/// or when one of the involved bodies is removed from the world. Each arbiter can hold up to
-/// four cached contact points (see <see cref="ContactData"/>).
+/// 仲裁器在接触被登记时创建（包括形状重叠之前的推测接触），并在二者分离
+/// 或其中一个相关刚体从世界中移除时删除。每个仲裁器最多可保存
+/// 四个缓存的接触点（参见 <see cref="ContactData"/>）。
 /// </para>
 /// <para>
-/// In most cases arbiters are keyed by shape identifiers. For arbiters created by the engine, the ordering
-/// is canonical: the shape with the smaller ID is always first.
+/// 大多数情况下仲裁器以形状标识符为键。对于由引擎创建的仲裁器，顺序
+/// 是规范的：ID 较小的形状始终排在前面。
 /// </para>
 /// <para>
-/// The <see cref="Handle"/> property provides access to the underlying <see cref="ContactData"/>
-/// stored in unmanaged memory. This data is only valid while the arbiter exists and must not
-/// be accessed concurrently with <see cref="World.Step(Real, bool)"/>.
+/// <see cref="Handle"/> 属性提供对存储于非托管内存中的底层 <see cref="ContactData"/>
+/// 的访问。该数据仅在仲裁器存在期间有效，不得
+/// 与 <see cref="World.Step(Real, bool)"/> 并发访问。
 /// </para>
 /// <para>
-/// Removed arbiters are recycled by their owning world. Do not retain an arbiter after
-/// removal: the same instance may subsequently represent a different pair of bodies.
+/// 被移除的仲裁器由其所属的世界回收。不要在移除后继续保留仲裁器：
+/// 同一实例随后可能表示另一对刚体。
 /// </para>
 /// </remarks>
 public sealed class Arbiter
 {
     /// <summary>
-    /// Gets the first rigid body involved in this contact.
+    /// 获取参与此接触的第一个刚体。
     /// </summary>
     public RigidBody Body1 { get; internal set; } = null!;
 
     /// <summary>
-    /// Gets the second rigid body involved in this contact.
+    /// 获取参与此接触的第二个刚体。
     /// </summary>
     public RigidBody Body2 { get; internal set; } = null!;
 
     /// <summary>
-    /// Gets the handle to the <see cref="ContactData"/> stored in unmanaged memory.
+    /// 获取存储在非托管内存中的 <see cref="ContactData"/> 的句柄。
     /// </summary>
     /// <remarks>
-    /// The underlying data is valid only while this arbiter is registered with the world.
-    /// After removal, the arbiter object may be recycled for a different contact pair; do not retain
-    /// or access the handle after the arbiter's collision lifetime ends.
+    /// 底层数据仅在仲裁器注册于世界期间有效。
+    /// 移除之后，仲裁器对象可能被回收用于另一对接触；在仲裁器的碰撞生命周期结束后，
+    /// 不要保留或访问该句柄。
     /// </remarks>
     public JHandle<ContactData> Handle { get; internal set; }
 }
 
 /// <summary>
-/// Represents an ordered pair of identifiers used to look up an <see cref="Arbiter"/>.
+/// 表示用于查找 <see cref="Arbiter"/> 的有序标识符对。
 /// </summary>
 /// <remarks>
-/// The order of <paramref name="key1"/> and <paramref name="key2"/> matters for equality comparison.
-/// For arbiters created by the physics engine, <paramref name="key1"/> is always less than <paramref name="key2"/>.
+/// <paramref name="key1"/> 和 <paramref name="key2"/> 的顺序对相等比较有影响。
+/// 对于由物理引擎创建的仲裁器，<paramref name="key1"/> 始终小于 <paramref name="key2"/>。
 /// </remarks>
-/// <param name="key1">The first identifier (typically the smaller shape ID).</param>
-/// <param name="key2">The second identifier (typically the larger shape ID).</param>
+/// <param name="key1">第一个标识符（通常是较小的形状 ID）。</param>
+/// <param name="key2">第二个标识符（通常是较大的形状 ID）。</param>
 public readonly struct ArbiterKey(ulong key1, ulong key2) : IEquatable<ArbiterKey>
 {
     /// <summary>
-    /// The first identifier in the pair.
+    /// 对中的第一个标识符。
     /// </summary>
     public readonly ulong Key1 = key1;
 
     /// <summary>
-    /// The second identifier in the pair.
+    /// 对中的第二个标识符。
     /// </summary>
     public readonly ulong Key2 = key2;
 

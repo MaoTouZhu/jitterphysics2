@@ -12,9 +12,9 @@ namespace JitterDemo;
 
 
 /// <summary>
-/// A simple implementation of Iterative Speculative Contact Discovery (ISCD).
-/// This is more a proof-of-concept than a production-ready solution. There is no multithreading support
-/// and the solver is not very efficient. For very few shapes (~10), it works well.
+/// 迭代式推测接触发现（Iterative Speculative Contact Discovery，ISCD）的一个简单实现。
+/// 这更像是一个概念验证，而非可用于生产的方案。它不支持多线程，
+/// 求解器效率也不高。对于极少量形状（约 10 个）效果良好。
 /// </summary>
 public class CcdSolver
 {
@@ -47,7 +47,7 @@ public class CcdSolver
             for (int iter = 0; iter < SelfConsistencyIterations; iter++)
             {
 
-                // Go through all rigid bodies which have been registered with the ccd-solver.
+                // 遍历所有已注册到 ccd-solver 的刚体。
                 for (int i = 0; i < spanBodies.Length; i++)
                 {
                     ref var body = ref spanBodies[i];
@@ -60,15 +60,15 @@ public class CcdSolver
 
                     foreach (var shape in body.Shapes)
                     {
-                        // Find the first future collision among the candidates returned
-                        // by the broad phase and register its contact.
+                        // 在宽相返回的候选中找出第一个未来碰撞，
+                        // 并注册其接触。
                         CreateContact(shape, timeStep.StepDt);
                     }
                 }
 
-                // The discovery solve starts with zero accumulated impulses. Later
-                // impulses are already reflected in body velocities, so preparation
-                // only recomputes the contact data.
+                // 发现阶段的求解从零累积冲量开始。后续
+                // 冲量已反映在刚体速度中，因此准备阶段
+                // 只重新计算接触数据。
                 for (int i = 0; i < discoveredArbiters.Count; i++)
                 {
                     ref var contact = ref discoveredArbiters[i].Handle.Data;
@@ -85,8 +85,8 @@ public class CcdSolver
         }
         finally
         {
-            // Discovery impulses are already reflected in body velocities. Keep
-            // them for the world solve, but do not replay them on its first prepare.
+            // 发现阶段的冲量已反映在刚体速度中。保留它们
+            // 供世界求解使用，但不要在其首次准备时重放。
             for (int i = 0; i < discoveredArbiters.Count; i++)
             {
                 ref var contact = ref discoveredArbiters[i].Handle.Data;
@@ -104,7 +104,7 @@ public class CcdSolver
         overlaps.Clear();
         world.DynamicTree.Query(overlaps, sweptBox);
 
-        // Find the candidate which collides with 'shape' at the smallest time of impact (TOI).
+        // 找出在最小碰撞时刻（TOI）与 'shape' 碰撞的候选。
 
         RigidBodyShape otherShape = null!;
 
@@ -134,8 +134,8 @@ public class CcdSolver
 
             if (world.NarrowPhaseFilter != null)
             {
-                // The filter contract expects signed separation, not time of impact.
-                // Keep TOI exclusively for ordering the swept hits.
+                // 过滤器约定期望的是有符号分离量，而不是碰撞时刻。
+                // TOI 仅用于对扫掠命中的排序。
                 float separation = JVector.Dot(normal, pA - pB) * world.SpeculativeRelaxationFactor;
                 bool result = world.NarrowPhaseFilter.Filter(shape, candidate,
                     ref pA, ref pB, ref normal, ref separation);
@@ -154,8 +154,8 @@ public class CcdSolver
 
         if (!(smallestToi < float.MaxValue)) return;
 
-        // Create an arbiter and register the contact. All discovered arbiters are
-        // prepared and iterated together after this detection pass.
+        // 创建一个仲裁器并注册该接触。所有发现的仲裁器会在
+        // 本次检测遍历之后一起准备并迭代。
 
         Arbiter arbiter;
 
@@ -170,12 +170,12 @@ public class CcdSolver
             world.RegisterContact(arbiter, bestpB, bestpA, -bestNormal);
         }
 
-        // This proof of concept explores motion created by contacts only. Constraints
-        // are intentionally left to the normal world solver after discovery.
+        // 该概念验证仅探索由接触产生的运动。在发现阶段之后，
+        // 约束会故意留给常规世界求解器处理。
         if (!discoveredArbiters.Contains(arbiter))
         {
             discoveredArbiters.Add(arbiter);
-            // Ignore impulses cached by an earlier world step during discovery.
+            // 忽略先前世界步在发现阶段缓存的冲量。
             arbiter.Handle.Data.ResetImpulses();
         }
     }
@@ -192,9 +192,9 @@ public class CcdSolver
         JBoundingBox endBox = new(currentBox.Min + translation, currentBox.Max + translation);
         JBoundingBox result = JBoundingBox.CreateMerged(currentBox, endBox);
 
-        // Every point moves at most |omega| * radius * dt due to rotation.
-        // Expanding the translational sweep by that distance covers all
-        // intermediate orientations without using an excessively large sphere.
+        // 由于旋转，每个点最多移动 |omega| * radius * dt。
+        // 将平移扫掠按该距离扩展，即可覆盖所有
+        // 中间朝向，而无需使用过大的球体。
         JVector angularExpansion = new(data.AngularVelocity.Length() * extent * dt);
         result.Min -= angularExpansion;
         result.Max += angularExpansion;

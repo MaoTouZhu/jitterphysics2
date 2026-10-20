@@ -74,7 +74,7 @@ public partial class Playground : RenderWindow
             {
                 foreach (Constraint constraint in body.Constraints)
                 {
-                    // Each constraint belongs to both bodies. NullBody is also in World.RigidBodies.
+                    // 每个约束同时属于两个刚体。NullBody 也位于 World.RigidBodies 中。
                     if (constraint.Body1 != body || !constraint.IsValid || !constraint.IsEnabled) continue;
                     DrawConstraint(constraint, settings);
                 }
@@ -108,7 +108,7 @@ public partial class Playground : RenderWindow
                 {
                     if (body.Shapes.Count == 0)
                     {
-                        // mass point
+                        // 质点
                         JBoundingBox.AddPointInPlace(ref box, body.Position);
                     }
                     else
@@ -145,8 +145,8 @@ public partial class Playground : RenderWindow
 
     private void DrawConstraint(Constraint constraint, DebugDrawSettings settings)
     {
-        // Composite joints use their ball socket's anchor for the angular guides.
-        // Search the smaller body's list, since NullBody can have many unrelated constraints.
+        // 复合关节使用其球窝的锚点作为角度参考。
+        // 搜索较小刚体的列表，因为 NullBody 可能带有许多无关约束。
         var candidates = constraint.Body1.Constraints.Count <= constraint.Body2.Constraints.Count
             ? constraint.Body1.Constraints
             : constraint.Body2.Constraints;

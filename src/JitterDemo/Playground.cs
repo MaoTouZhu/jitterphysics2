@@ -19,8 +19,8 @@ public class RigidBodyTag(bool doNotDraw = true)
     public Vector3? Color { get; set; }
 }
 
-// Built-in primitive drawables. Subclassing is the simplest way to key them in
-// the RenderWindow's Type-based registry and to configure per-shape material bits.
+// 内置的图元绘制对象。子类化是将它们注册到 RenderWindow 基于 Type 的注册表中的最简单方式，
+// 也便于为每种形状配置各自的材质位。
 public sealed class CubeDrawable() : InstancedDrawable(Mesh.Cube());
 public sealed class SphereDrawable() : InstancedDrawable(Mesh.Sphere());
 public sealed class ConeDrawable() : InstancedDrawable(Mesh.Cone());
@@ -82,25 +82,25 @@ public partial class Playground : RenderWindow
         new Demo05(),
         new Demo06(),
         new Demo07(),
-        //new Demo08(),   // contact manifold test
+        //new Demo08(),   // 接触流形测试
         new Demo09(),
         new Demo10(),
-        // new Demo11(),  // double pendulum
+        // new Demo11(),  // 双摆
         new Demo12(),
         new Demo13(),
         new Demo14(),
         new Demo15(),
         new Demo16(),
         new Demo17(),
-        // new Demo18(),  // point test
-        // new Demo19(),  // ray cast test
+        // new Demo18(),  // 点测试
+        // new Demo19(),  // 射线投射测试
         new Demo20(),
         new Demo21(),
         new Demo22(),
         new Demo23(),
         new Demo24(),
         new Demo25(),
-        new Demo26(), // angular sweep
+        new Demo26(), // 角度扫掠
         new Demo27(),
         new Demo28(),
         new Demo29(),

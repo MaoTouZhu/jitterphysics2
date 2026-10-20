@@ -1,6 +1,6 @@
-- name: Documentation
+- name: 文档
   href: ./docs/
-- name: Articles
+- name: 文章
   href: ./docs/articles/
-- name: API (single precision)
+- name: API（单精度）
   href: api/

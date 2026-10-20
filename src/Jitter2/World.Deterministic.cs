@@ -17,21 +17,21 @@ using Jitter2.Unmanaged;
 namespace Jitter2;
 
 /// <summary>
-/// Controls which solver strategy is used during <see cref="World.Step"/>.
+/// 控制 <see cref="World.Step"/> 期间使用的求解器策略。
 /// </summary>
 public enum SolveMode
 {
     /// <summary>
-    /// Standard parallel solver. Contacts and constraints are distributed across threads
-    /// in fixed-size batches. An incremental cache-friendly reorder pass keeps related
-    /// contacts adjacent in memory. Fast, but non-deterministic.
+    /// 标准并行求解器。接触和约束以固定大小的批次分配到各个线程。
+    /// 一次增量式、对缓存友好的重排序会让相关接触
+    /// 在内存中相邻。速度快，但不具确定性。
     /// </summary>
     Regular,
 
     /// <summary>
-    /// Island-based deterministic solver. Each simulation island is solved sequentially
-    /// as an independent task. Islands are distributed across threads when multithreading
-    /// is enabled. This mode can be significantly slower than <see cref="Regular"/>.
+    /// 基于岛的确定性求解器。每个模拟岛作为独立任务
+    /// 依次求解。启用多线程时，各岛会分配到多个线程。
+    /// 此模式可能比 <see cref="Regular"/> 慢得多。
     /// </summary>
     Deterministic
 }
@@ -41,14 +41,14 @@ public sealed partial class World
     private SolveMode solveMode = Jitter2.SolveMode.Regular;
 
     /// <summary>
-    /// The solver strategy used during <see cref="Step"/>. Defaults to <see cref="Jitter2.SolveMode.Regular"/>.
+    /// <see cref="Step"/> 期间使用的求解器策略。默认为 <see cref="Jitter2.SolveMode.Regular"/>。
     /// </summary>
     /// <remarks>
-    /// <see cref="Jitter2.SolveMode.Deterministic"/> can be significantly slower than
-    /// <see cref="Jitter2.SolveMode.Regular"/>.
+    /// <see cref="Jitter2.SolveMode.Deterministic"/> 可能比
+    /// <see cref="Jitter2.SolveMode.Regular"/> 慢得多。
     /// </remarks>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when an undefined <see cref="Jitter2.SolveMode"/>
-    /// value is assigned.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">当赋予未定义的 <see cref="Jitter2.SolveMode"/>
+    /// 值时抛出。</exception>
     public SolveMode SolveMode
     {
         get => solveMode;
@@ -65,7 +65,7 @@ public sealed partial class World
     }
 
     // -------------------------------------------------------------------------
-    // Internal state for island solving
+    // 岛求解的内部状态
     // -------------------------------------------------------------------------
 
     private struct IslandRange
@@ -96,10 +96,10 @@ public sealed partial class World
         public ulong ConstraintId;
     }
 
-    // Maps RigidBodyData._index to island SetIndex. Cleared each frame; capacity grows on demand and can be reduced by Trim().
+    // 将 RigidBodyData._index 映射到岛的 SetIndex。每帧清空；容量按需增长，可通过 Trim() 缩减。
     private readonly Dictionary<int, int> handleToIsland = new();
 
-    // Per-frame island ranges built from the sorted buffers.
+    // 每帧根据排序后的缓冲区构建的岛范围。
     private readonly List<IslandRange> islandRanges = new();
     private readonly List<ContactEntry> sortedContacts = new();
     private readonly List<SmallConstraintEntry> sortedSmallConstraints = new();
@@ -109,14 +109,14 @@ public sealed partial class World
     private int islandRelaxationIterations;
 
     // -------------------------------------------------------------------------
-    // Build island lookup.
+    // 构建岛查找表。
     // -------------------------------------------------------------------------
 
     private void BuildIslandLookup()
     {
         handleToIsland.Clear();
 
-        // Map each active body's handle-index to its active island partition index.
+        // 将每个活动刚体的句柄索引映射到其活动岛分区索引。
         for (int i = 0; i < bodies.ActiveCount; i++)
         {
             RigidBody body = bodies[i];
@@ -125,7 +125,7 @@ public sealed partial class World
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
+    // 辅助方法
     // -------------------------------------------------------------------------
 
     private int IslandOf(JHandle<RigidBodyData> b1, JHandle<RigidBodyData> b2)
@@ -136,7 +136,7 @@ public sealed partial class World
     }
 
     // -------------------------------------------------------------------------
-    // Build sorted sidecar lists for contacts and constraints.
+    // 为接触和约束构建排序后的附属列表。
     // -------------------------------------------------------------------------
 
     private void SortForIslands()
@@ -159,7 +159,7 @@ public sealed partial class World
             if (a.IslandIndex != b.IslandIndex) return a.IslandIndex.CompareTo(b.IslandIndex);
             if (a.Key.Key1 != b.Key.Key1) return a.Key.Key1 < b.Key.Key1 ? -1 : 1;
             if (a.Key.Key2 != b.Key.Key2) return a.Key.Key2 < b.Key.Key2 ? -1 : 1;
-            return 0; // Contacts must be the same. Sort *does* compare objects to themselves.
+            return 0; // 接触必须相同。排序 *确实会* 将对象与自身比较。
         });
 
         sortedSmallConstraints.Clear();
@@ -188,8 +188,8 @@ public sealed partial class World
             });
         }
 
-        // Group constraints by island and use the stored constraint identifier
-        // as a deterministic tie-breaker within each island.
+        // 按岛对约束分组，并使用存储的约束标识符
+        // 作为每个岛内的确定性决胜条件。
         sortedSmallConstraints.Sort(static (a, b) =>
         {
             if (a.IslandIndex != b.IslandIndex) return a.IslandIndex.CompareTo(b.IslandIndex);
@@ -203,7 +203,7 @@ public sealed partial class World
     }
 
     // -------------------------------------------------------------------------
-    // Build per-island ranges from the sorted buffers (single linear pass)
+    // 从排序后的缓冲区构建每个岛的范围（单次线性遍历）
     // -------------------------------------------------------------------------
 
     private void BuildIslandRanges()
@@ -218,7 +218,7 @@ public sealed partial class World
 
         while (ci < contacts.Length || si < small.Length || ri < constraints.Length)
         {
-            // Find the lowest island index among the three current scan positions.
+            // 在三个当前扫描位置中找出最小的岛索引。
             int minIsland = int.MaxValue;
             if (ci < contacts.Length) minIsland = Math.Min(minIsland, contacts[ci].IslandIndex);
             if (si < small.Length) minIsland = Math.Min(minIsland, small[si].IslandIndex);
@@ -243,8 +243,8 @@ public sealed partial class World
     }
 
     // -------------------------------------------------------------------------
-    // Island solve task: prepare + iterate all contacts/constraints for a range
-    // of islands sequentially. No locking needed — islands are independent.
+    // 岛求解任务：依次为一段岛范围准备并迭代所有接触/约束。
+    // 无需加锁——各岛相互独立。
     // -------------------------------------------------------------------------
 
     private void SolveIslandBatch(Parallel.Batch batch)
@@ -262,7 +262,7 @@ public sealed partial class World
             var small = allSmall[range.SmallStart..range.SmallEnd];
             var constraints = allConstraints[range.ConstraintStart..range.ConstraintEnd];
 
-            // --- Prepare ---
+            // --- 准备 ---
 
             for (int i = 0; i < contacts.Length; i++)
             {
@@ -284,7 +284,7 @@ public sealed partial class World
                     c.PrepareForIteration(ref c, timeStep);
             }
 
-            // --- Iterate ---
+            // --- 迭代 ---
 
             for (int iter = 0; iter < islandSolverIterations; iter++)
             {
@@ -334,7 +334,7 @@ public sealed partial class World
     }
 
     // -------------------------------------------------------------------------
-    // Entry point: build island lookup → sort sidecars → build ranges.
+    // 入口点：构建岛查找 → 排序附属列表 → 构建范围。
     // -------------------------------------------------------------------------
 
     private void PrepareIslandSolveOrder()
@@ -373,14 +373,14 @@ public sealed partial class World
 
         if (numTasks <= 1)
         {
-            // Single-threaded fallback: process all islands on the calling thread.
+            // 单线程回退：在调用线程上处理所有岛。
             SolveIslandBatch(new Parallel.Batch(0, numIslands));
             return;
         }
 
-        // Distribute island ranges evenly across threads. Each task gets a
-        // contiguous slice of islandRanges and solves them sequentially.
-        // Islands across tasks are fully independent — no locking required.
+        // 将各岛范围均匀分配到各个线程。每个任务获得 islandRanges 的
+        // 一段连续切片并依次求解。
+        // 各任务之间的岛完全独立——无需加锁。
         Parallel.ForBatch(0, numIslands, numTasks, solveIsland);
     }
 }

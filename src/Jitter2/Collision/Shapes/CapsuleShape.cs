@@ -10,7 +10,7 @@ using Jitter2.LinearMath;
 namespace Jitter2.Collision.Shapes;
 
 /// <summary>
-/// Represents a capsule shape defined by a radius and the length of its cylindrical section.
+/// 表示由半径及其圆柱段长度定义的胶囊形状。
 /// </summary>
 public class CapsuleShape : RigidBodyShape
 {
@@ -24,10 +24,10 @@ public class CapsuleShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the radius of the capsule.
+    /// 获取或设置胶囊的半径。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is less than or equal to zero.
+    /// 当 <paramref name="value"/> 小于或等于零时抛出。
     /// </exception>
     public Real Radius
     {
@@ -40,10 +40,10 @@ public class CapsuleShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Gets or sets the length of the cylindrical part of the capsule, excluding the half-spheres on both ends.
+    /// 获取或设置胶囊圆柱部分的长度，不包括两端的半球。
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="value"/> is negative.
+    /// 当 <paramref name="value"/> 为负数时抛出。
     /// </exception>
     public Real Length
     {
@@ -56,12 +56,12 @@ public class CapsuleShape : RigidBodyShape
     }
 
     /// <summary>
-    /// Initializes a new instance of the CapsuleShape class with the specified radius and length. The symmetry axis of the capsule is aligned along the Y-axis.
+    /// 使用指定的半径和长度初始化 CapsuleShape 类的新实例。胶囊的对称轴沿 Y 轴对齐。
     /// </summary>
-    /// <param name="radius">The radius of the capsule.</param>
-    /// <param name="length">The length of the cylindrical part of the capsule, excluding the half-spheres at both ends.</param>
+    /// <param name="radius">胶囊的半径。</param>
+    /// <param name="length">胶囊圆柱部分的长度，不包括两端的半球。</param>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="radius"/> is less than or equal to zero or when <paramref name="length"/> is negative.
+    /// 当 <paramref name="radius"/> 小于或等于零，或 <paramref name="length"/> 为负数时抛出。
     /// </exception>
     public CapsuleShape(Real radius = (Real)0.5, Real length = (Real)1.0)
     {
@@ -73,17 +73,17 @@ public class CapsuleShape : RigidBodyShape
     /// <inheritdoc/>
     public override void SupportMap(in JVector direction, out JVector result)
     {
-        // capsule = segment + sphere
+        // 胶囊 = 线段 + 球体
 
-        // sphere
+        // 球体
         result = JVector.Normalize(direction) * radius;
 
-        // two endpoints of the segment are
+        // 线段的两个端点为
         // p_1 = (0, +length/2, 0)
         // p_2 = (0, -length/2, 0)
 
-        // we have to calculate the dot-product with the direction
-        // vector to decide whether p_1 or p_2 is the correct support point
+        // 我们需要计算与方向向量的点积，
+        // 以判断 p_1 还是 p_2 是正确的支撑点
         result.Y += MathR.Sign(direction.Y) * halfLength;
     }
 

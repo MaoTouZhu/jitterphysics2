@@ -200,7 +200,7 @@ public class GLFWWindow
     private static void OnGLDebug(uint source, uint type, uint id, uint severity,
                                   int length, IntPtr message)
     {
-        // Ignore non-significant codes suggested by learnopengl.com
+        // 忽略 learnopengl.com 建议忽略的非重要错误码
         if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
         string msg = Marshal.PtrToStringUTF8(message) ?? string.Empty;

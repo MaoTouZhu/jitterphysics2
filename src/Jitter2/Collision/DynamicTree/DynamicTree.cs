@@ -15,11 +15,11 @@ using Jitter2.Parallelization;
 namespace Jitter2.Collision;
 
 /// <summary>
-/// Represents a dynamic AABB tree for broadphase collision detection.
+/// 表示用于宽相碰撞检测的动态 AABB 树。
 /// </summary>
 /// <remarks>
-/// Uses a bounding volume hierarchy with a Surface Area Heuristic (SAH) for insertion.
-/// Supports incremental updates for moving objects and bounded background optimization.
+/// 使用带表面积启发式（SAH）的包围体层次结构进行插入。
+/// 支持对移动对象进行增量更新以及有界后台优化。
 /// </remarks>
 public partial class DynamicTree
 {
@@ -34,7 +34,7 @@ public partial class DynamicTree
     private readonly SlimBag<IDynamicTreeProxy> movedProxies = [];
 
     /// <summary>
-    /// Gets a read-only view of all proxies registered with this tree.
+    /// 获取注册到此树的所有代理的只读视图。
     /// </summary>
     public ReadOnlyPartitionedSet<IDynamicTreeProxy> Proxies => new(proxies);
 
@@ -49,76 +49,76 @@ public partial class DynamicTree
     private PairHashSet potentialPairs = [];
 
     /// <summary>
-    /// Sentinel value indicating a null/invalid node index.
+    /// 表示空/无效节点索引的哨兵值。
     /// </summary>
     public const int NullNode = -1;
 
     /// <summary>
-    /// Initial capacity of the internal node array.
+    /// 内部节点数组的初始容量。
     /// </summary>
     public const int InitialSize = 1024;
 
     /// <summary>
-    /// Fraction of the potential pairs hash set to scan per update for pruning invalid entries.
-    /// A value of 128 means 1/128th of the hash set is scanned each update.
+    /// 每次更新时扫描的潜在配对哈希集合比例，用于剪除无效条目。
+    /// 值为 128 表示每次更新扫描哈希集合的 1/128。
     /// </summary>
     public const int PruningFraction = 128;
 
     /// <summary>
-    /// Specifies the factor by which the bounding box in the dynamic tree structure is expanded. The expansion is calculated as
-    /// <see cref="IDynamicTreeProxy.Velocity"/> * ExpandFactor * (1 + alpha), where alpha is a pseudo-random number in the range [0, 1).
+    /// 指定动态树结构中包围盒的扩展系数。扩展量计算为
+    /// <see cref="IDynamicTreeProxy.Velocity"/> * ExpandFactor * (1 + alpha)，其中 alpha 是范围为 [0, 1) 的伪随机数。
     /// </summary>
     public const Real ExpandFactor = (Real)0.1;
 
     /// <summary>
-    /// Specifies a small additional expansion of the bounding box which is constant.
+    /// 指定包围盒一个恒定的少量额外扩展。
     /// </summary>
     public const Real ExpandEps = (Real)0.1;
 
     /// <summary>
-    /// Represents a node in the AABB tree.
+    /// 表示 AABB 树中的节点。
     /// </summary>
     public struct Node
     {
-        /// <summary>Index of the left child node, or <see cref="NullNode"/> if this is a leaf.</summary>
+        /// <summary>左子节点的索引；如果是叶节点，则为 <see cref="NullNode"/>。</summary>
         public int Left;
 
-        /// <summary>Index of the right child node, or <see cref="NullNode"/> if this is a leaf.</summary>
+        /// <summary>右子节点的索引；如果是叶节点，则为 <see cref="NullNode"/>。</summary>
         public int Right;
 
-        /// <summary>Index of the parent node, or <see cref="NullNode"/> if this is the root.</summary>
+        /// <summary>父节点的索引；如果是根节点，则为 <see cref="NullNode"/>。</summary>
         public int Parent;
 
         /// <summary>
-        /// The expanded bounding box of this node, used for broadphase culling.
-        /// For leaf nodes, this is the proxy's bounding box expanded by velocity and a margin.
-        /// For internal nodes, this is the union of its children's boxes.
+        /// 该节点的扩展包围盒，用于宽相剔除。
+        /// 对于叶节点，它是代理的包围盒按速度与边距扩展后的结果。
+        /// 对于内部节点，它是其子节点盒的并集。
         /// </summary>
         public TreeBox ExpandedBox;
 
         /// <summary>
-        /// Number of leaf nodes contained in this subtree. Leaf nodes have a count of one.
+        /// 该子树包含的叶节点数量。叶节点的计数为一。
         /// </summary>
         public int LeafCount;
 
         /// <summary>
-        /// Height of this subtree. Leaf nodes have a height of zero.
+        /// 该子树的高度。叶节点的高度为零。
         /// </summary>
         public int Height;
 
         /// <summary>
-        /// The proxy associated with this node, or <c>null</c> for internal nodes.
+        /// 与该节点关联的代理；对于内部节点为 <c>null</c>。
         /// </summary>
         public IDynamicTreeProxy? Proxy;
 
         /// <summary>
-        /// When set, forces the node to be updated in the next <see cref="DynamicTree.Update"/> call,
-        /// even if its bounding box hasn't changed.
+        /// 设置后，强制在下次 <see cref="DynamicTree.Update"/> 调用中更新该节点，
+        /// 即使其包围盒未发生变化。
         /// </summary>
         public bool ForceUpdate;
 
         /// <summary>
-        /// Returns <c>true</c> if this is a leaf node (has an associated proxy).
+        /// 如果这是叶节点（有关联的代理），则返回 <c>true</c>。
         /// </summary>
         public readonly bool IsLeaf => Proxy != null;
     }
@@ -126,8 +126,8 @@ public partial class DynamicTree
     private Node[] nodes = new Node[InitialSize];
 
     /// <summary>
-    /// Read-only view of the internal tree nodes for debugging or visualization.
-    /// Do not cache the returned span across tree operations.
+    /// 内部树节点的只读视图，用于调试或可视化。
+    /// 不要在树操作之间缓存返回的 span。
     /// </summary>
     public ReadOnlySpan<Node> Nodes => nodes.AsSpan(0, nodePointer + 1);
 
@@ -136,21 +136,21 @@ public partial class DynamicTree
     private int root = NullNode;
 
     /// <summary>
-    /// Gets the index of the root node, or <see cref="NullNode"/> if the tree is empty.
+    /// 获取根节点的索引；如果树为空，则为 <see cref="NullNode"/>。
     /// </summary>
     public int Root => root;
 
     private Func<IDynamicTreeProxy, IDynamicTreeProxy, bool> filter = null!;
 
     /// <summary>
-    /// Gets or sets the filter function used to exclude proxy pairs from collision detection.
+    /// 获取或设置用于将代理对排除在碰撞检测之外的过滤器函数。
     /// </summary>
     /// <remarks>
-    /// The filter is called during overlap enumeration. Return <c>false</c> to exclude a pair.
-    /// In Jitter, this is typically used to exclude shapes belonging to the same rigid body.
-    /// Changing the filter rebuilds potential pairs for registered proxies.
+    /// 该过滤器在重叠枚举期间调用。返回 <c>false</c> 即可排除某一配对。
+    /// 在 Jitter 中，通常用于排除属于同一刚体的形状。
+    /// 更改过滤器会为已注册的代理重建潜在配对。
     /// </remarks>
-    /// <exception cref="ArgumentNullException">Thrown when the value is null.</exception>
+    /// <exception cref="ArgumentNullException">当值为 null 时抛出。</exception>
     public Func<IDynamicTreeProxy, IDynamicTreeProxy, bool> Filter
     {
         get => filter;
@@ -196,14 +196,14 @@ public partial class DynamicTree
     private readonly Func<double> rndFunc;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DynamicTree"/> class.
+    /// 初始化 <see cref="DynamicTree"/> 类的新实例。
     /// </summary>
     /// <param name="filter">
-    /// A function that returns <c>false</c> to exclude a proxy pair from collision detection.
-    /// See <see cref="Filter"/>.
+    /// 返回 <c>false</c> 以将代理对排除在碰撞检测之外的函数。
+    /// 参见 <see cref="Filter"/>。
     /// </param>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="filter"/> is <see langword="null"/>.
+    /// 当 <paramref name="filter"/> 为 <see langword="null"/> 时抛出。
     /// </exception>
     public DynamicTree(Func<IDynamicTreeProxy, IDynamicTreeProxy, bool> filter)
     {
@@ -218,48 +218,47 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Profiling buckets for <see cref="DebugTimings"/>, representing stages of <see cref="Update"/>.
+    /// 用于 <see cref="DebugTimings"/> 的性能分析分段，表示 <see cref="Update"/> 的各个阶段。
     /// </summary>
     public enum Timings
     {
-        /// <summary>Time spent removing stale pairs from the potential pairs set.</summary>
+        /// <summary>从潜在配对集合中移除失效配对所花费的时间。</summary>
         PruneInvalidPairs,
 
-        /// <summary>Time spent updating proxy bounding boxes.</summary>
+        /// <summary>更新代理包围盒所花费的时间。</summary>
         UpdateBoundingBoxes,
 
-        /// <summary>Time spent scanning for proxies that moved outside their expanded boxes.</summary>
+        /// <summary>扫描移出其扩展盒的代理所花费的时间。</summary>
         ScanMoved,
 
-        /// <summary>Time spent reinserting moved proxies into the tree.</summary>
+        /// <summary>将移动过的代理重新插入树中所花费的时间。</summary>
         UpdateProxies,
 
-        /// <summary>Time spent scanning for new overlapping pairs.</summary>
+        /// <summary>扫描新的重叠配对所花费的时间。</summary>
         ScanOverlaps,
 
-        /// <summary>Time spent on incremental tree optimization.</summary>
+        /// <summary>增量树优化所花费的时间。</summary>
         Optimize,
 
-        /// <summary>Sentinel value for array sizing. Not a real timing bucket.</summary>
+        /// <summary>用于数组大小的哨兵值。不是真正的计时分段。</summary>
         Last
     }
 
     private readonly double[] debugTimings = new double[(int)Timings.Last];
 
     /// <summary>
-    /// Contains timings for the stages of the last call to <see cref="Update"/>.
-    /// Values are in milliseconds. Index using <c>(int)Timings.XYZ</c>.
+    /// 包含上次调用 <see cref="Update"/> 各阶段的计时。
+    /// 单位为毫秒。使用 <c>(int)Timings.XYZ</c> 索引。
     /// </summary>
     public ReadOnlySpan<double> DebugTimings => debugTimings;
 
     /// <summary>
-    /// Gets the number of updated proxies during the last call to <see cref="Update"/>.
+    /// 获取上次调用 <see cref="Update"/> 期间更新的代理数量。
     /// </summary>
     public int UpdatedProxyCount => movedProxies.Count;
 
     /// <summary>
-    /// Gets the total allocated slot count and the number of entries in the internal hash set
-    /// used to store potential overlaps.
+    /// 获取内部哈希集合中分配的总槽数，以及用于存储潜在重叠的条目数。
     /// </summary>
     public (int TotalSize, int Count) HashSetInfo => (potentialPairs.Slots.Length, potentialPairs.Count);
 
@@ -286,10 +285,10 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Enumerates all potential collision pairs and invokes the specified action for each.
+    /// 枚举所有潜在碰撞配对，并对每个配对调用指定操作。
     /// </summary>
-    /// <param name="action">The action to invoke for each overlapping pair.</param>
-    /// <param name="multiThread">If <c>true</c>, uses multithreading for enumeration.</param>
+    /// <param name="action">对每个重叠配对调用的操作。</param>
+    /// <param name="multiThread">如果为 <c>true</c>，则使用多线程进行枚举。</param>
     public void EnumerateOverlaps(Action<IDynamicTreeProxy, IDynamicTreeProxy> action, bool multiThread = false)
     {
         OverlapEnumerationParam overlapEnumerationParam;
@@ -301,9 +300,9 @@ public partial class DynamicTree
         {
             var tpi = ThreadPool.Instance;
 
-            // Typically, this is the first multithreaded phase of a simulation step.
-            // Threads may still be asleep, so we use multiple tasks per thread
-            // to improve load distribution as they wake up.
+            // 通常，这是模拟步中第一个多线程阶段。
+            // 线程可能仍在休眠，因此我们为每个线程分配多个任务，
+            // 以在线程陆续唤醒时改善负载分布。
             const int taskMultiplier = 6;
             int taskCount = tpi.ThreadCount * taskMultiplier;
 
@@ -324,10 +323,10 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Updates all active proxies in the tree.
+    /// 更新树中所有活动代理。
     /// </summary>
-    /// <param name="multiThread">If <c>true</c>, uses multithreading for the update.</param>
-    /// <param name="dt">The timestep in seconds, used for velocity-based bounding box expansion.</param>
+    /// <param name="multiThread">如果为 <c>true</c>，则使用多线程进行更新。</param>
+    /// <param name="dt">时间步（秒），用于基于速度的包围盒扩展。</param>
     public void Update(bool multiThread, Real dt)
     {
         long time = Stopwatch.GetTimestamp();
@@ -381,9 +380,8 @@ public partial class DynamicTree
         Tracer.ProfileEnd(TraceName.ScanOverlaps);
         SetTime(Timings.ScanOverlaps);
 
-        // Make sure we do not hold too many dangling references
-        // in the internal array of the SlimBag<T> data structure which might
-        // prevent GC. But do only free them one-by-one to prevent overhead.
+        // 确保我们不会在 SlimBag<T> 数据结构的内部数组中持有过多
+        // 可能导致 GC 无法回收的悬空引用。但每次只释放一个，以避免额外开销。
         movedProxies.TrackAndNullOutOne();
     }
 
@@ -406,21 +404,21 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Forces an immediate update of a single proxy in the tree.
+    /// 强制立即更新树中的单个代理。
     /// </summary>
-    /// <typeparam name="T">The proxy type.</typeparam>
-    /// <param name="proxy">The proxy to update.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the proxy is not registered with this tree.</exception>
+    /// <typeparam name="T">代理类型。</typeparam>
+    /// <param name="proxy">要更新的代理。</param>
+    /// <exception cref="InvalidOperationException">如果该代理未注册到此树中，则抛出。</exception>
     public void Update<T>(T proxy) where T : class, IDynamicTreeProxy
         => Update(proxy, (Real)0.0);
 
     /// <summary>
-    /// Forces an immediate update of a single proxy in the tree using the specified timestep.
+    /// 使用指定的时间步强制立即更新树中的单个代理。
     /// </summary>
-    /// <typeparam name="T">The proxy type.</typeparam>
-    /// <param name="proxy">The proxy to update.</param>
-    /// <param name="dt">The timestep passed to an <see cref="IUpdatableBoundingBox"/> proxy when updating its bounding box.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the proxy is not registered with this tree.</exception>
+    /// <typeparam name="T">代理类型。</typeparam>
+    /// <param name="proxy">要更新的代理。</param>
+    /// <param name="dt">更新包围盒时传递给 <see cref="IUpdatableBoundingBox"/> 代理的时间步。</param>
+    /// <exception cref="InvalidOperationException">如果该代理未注册到此树中，则抛出。</exception>
     public void Update<T>(T proxy, Real dt) where T : class, IDynamicTreeProxy
     {
         ThrowIfUnregistered(proxy);
@@ -432,17 +430,17 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Adds a proxy to the tree.
+    /// 向树中添加一个代理。
     /// </summary>
-    /// <typeparam name="T">The proxy type.</typeparam>
-    /// <param name="proxy">The proxy to add.</param>
-    /// <param name="active">If <c>true</c>, the proxy is tracked for movement each update.</param>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="proxy"/> is null.</exception>
+    /// <typeparam name="T">代理类型。</typeparam>
+    /// <param name="proxy">要添加的代理。</param>
+    /// <param name="active">如果为 <c>true</c>，则每次更新时跟踪该代理的移动。</param>
+    /// <exception cref="ArgumentNullException">如果 <paramref name="proxy"/> 为 null，则抛出。</exception>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="proxy"/> is already registered with this tree instance.
+    /// 当 <paramref name="proxy"/> 已注册到此树实例时抛出。
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="proxy"/>'s bounding box is too large for robust tree optimization.
+    /// 当 <paramref name="proxy"/> 的包围盒过大，无法进行稳健的树优化时抛出。
     /// </exception>
     public void AddProxy<T>(T proxy, bool active = true) where T : class, IDynamicTreeProxy
     {
@@ -453,12 +451,12 @@ public partial class DynamicTree
                 $"The proxy '{proxy}' has already been added to this tree instance.", nameof(proxy));
         }
 
-        // 2^53 (approx 9e15) is the limit where double-precision values lose integer precision
-        // (i.e., x + 1.0 == x). Beyond this surface area, the Surface Area Heuristic (SAH)
-        // cannot detect small changes, causing tree insertion and optimization to degrade.
+        // 2^53（约 9e15）是双精度数值丢失整数精度的极限
+        // （即 x + 1.0 == x）。超过此表面积后，表面积启发式（SAH）
+        // 无法检测到细微变化，导致树的插入和优化性能下降。
         //
-        // Note: Since TreeBox calculates surface area using 'double', this assertion
-        // is valid and necessary for both Single (float) and Double (double) precision builds.
+        // 注意：由于 TreeBox 使用 'double' 计算表面积，此断言
+        // 在 Single（float）和 Double（double）精度构建中都是有效且必要的。
         double surfaceArea = proxy.WorldBoundingBox.GetSurfaceArea();
         if (surfaceArea > 9.007e15)
         {
@@ -477,14 +475,14 @@ public partial class DynamicTree
         }
         catch
         {
-            // The filter may throw after some pairs have already been added.
+            // 过滤器可能在已添加部分配对后抛出异常。
             for (int i = 0; i < potentialPairs.Slots.Length; i++)
             {
                 var pair = potentialPairs.Slots[i];
                 if (pair.ID == 0 || (pair.ID1 != node && pair.ID2 != node)) continue;
 
                 potentialPairs.Remove(i);
-                i = -1; // Removal can move entries or resize the table.
+                i = -1; // 移除操作可能移动条目或调整表的大小。
             }
 
             if (proxies.Contains(proxy)) proxies.Remove(proxy);
@@ -495,11 +493,11 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Checks whether the specified proxy is currently active.
+    /// 检查指定代理当前是否处于活动状态。
     /// </summary>
-    /// <typeparam name="T">The proxy type.</typeparam>
-    /// <param name="proxy">The proxy to check.</param>
-    /// <returns><c>true</c> if the proxy is active; otherwise, <c>false</c>. Unregistered proxies return false.</returns>
+    /// <typeparam name="T">代理类型。</typeparam>
+    /// <param name="proxy">要检查的代理。</param>
+    /// <returns>如果代理处于活动状态，则为 <c>true</c>；否则为 <c>false</c>。未注册的代理返回 false。</returns>
     public bool IsActive<T>(T proxy) where T : class, IDynamicTreeProxy
     {
         ArgumentNullException.ThrowIfNull(proxy);
@@ -507,11 +505,11 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Marks a proxy as active, causing it to be tracked for movement during updates.
+    /// 将代理标记为活动状态，使其在更新期间被跟踪移动。
     /// </summary>
-    /// <typeparam name="T">The proxy type.</typeparam>
-    /// <param name="proxy">The proxy to activate.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the proxy is not registered with this tree.</exception>
+    /// <typeparam name="T">代理类型。</typeparam>
+    /// <param name="proxy">要激活的代理。</param>
+    /// <exception cref="InvalidOperationException">如果该代理未注册到此树中，则抛出。</exception>
     public void ActivateProxy<T>(T proxy) where T : class, IDynamicTreeProxy
     {
         ThrowIfUnregistered(proxy);
@@ -522,11 +520,11 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Marks a proxy as inactive, assuming it will not move outside its expanded bounding box.
+    /// 将代理标记为非活动状态，假定它不会移出其扩展包围盒。
     /// </summary>
-    /// <typeparam name="T">The proxy type.</typeparam>
-    /// <param name="proxy">The proxy to deactivate.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the proxy is not registered with this tree.</exception>
+    /// <typeparam name="T">代理类型。</typeparam>
+    /// <param name="proxy">要停用的代理。</param>
+    /// <exception cref="InvalidOperationException">如果该代理未注册到此树中，则抛出。</exception>
     public void DeactivateProxy<T>(T proxy) where T : class, IDynamicTreeProxy
     {
         ThrowIfUnregistered(proxy);
@@ -534,10 +532,10 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Removes a proxy from the tree.
+    /// 从树中移除一个代理。
     /// </summary>
-    /// <param name="proxy">The proxy to remove.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the proxy is not in this tree.</exception>
+    /// <param name="proxy">要移除的代理。</param>
+    /// <exception cref="InvalidOperationException">如果该代理不在此树中，则抛出。</exception>
     public void RemoveProxy(IDynamicTreeProxy proxy)
     {
         ThrowIfUnregistered(proxy);
@@ -549,9 +547,9 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Calculates the SAH cost of the tree (sum of all node surface areas).
+    /// 计算树的 SAH 代价（所有节点表面积之和）。
     /// </summary>
-    /// <returns>The total cost. Lower values indicate better spatial grouping.</returns>
+    /// <returns>总代价。值越小表示空间分组越好。</returns>
     public double CalculateCost()
     {
         if (root == NullNode) return 0.0d;
@@ -559,9 +557,9 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Enumerates all axis-aligned bounding boxes in the tree.
+    /// 枚举树中所有轴对齐包围盒。
     /// </summary>
-    /// <param name="action">The action to perform on each bounding box and node height in the tree.</param>
+    /// <param name="action">要对树中每个包围盒和节点高度执行的操作。</param>
     public void EnumerateTreeBoxes(Action<TreeBox, int> action)
     {
         if (root == -1) return;
@@ -580,9 +578,9 @@ public partial class DynamicTree
     private uint stepper;
 
     /// <summary>
-    /// Removes entries from the internal bookkeeping when both proxies are inactive or
-    /// their expanded bounding boxes no longer overlap.
-    /// Only searches a small subset of all elements per call to reduce overhead.
+    /// 当两个代理都处于非活动状态，或其扩展包围盒不再重叠时，
+    /// 从内部记录中移除相应条目。
+    /// 每次调用只搜索所有元素的一小部分，以减少开销。
     /// </summary>
     private void PruneInvalidPairs()
     {
@@ -620,12 +618,12 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Queries the tree for proxies whose world bounding boxes intersect a ray and appends the candidates to the sink.
+    /// 查询树中世界包围盒与射线相交的代理，并将候选对象追加到接收器。
     /// </summary>
-    /// <typeparam name="TSink">The sink type receiving candidate proxies.</typeparam>
-    /// <param name="hits">The sink receiving candidate proxies; their shapes may not intersect the ray.</param>
-    /// <param name="rayOrigin">The origin of the ray.</param>
-    /// <param name="rayDirection">The direction of the ray.</param>
+    /// <typeparam name="TSink">接收候选代理的接收器类型。</typeparam>
+    /// <param name="hits">接收候选代理的接收器；它们的形状可能并不与射线相交。</param>
+    /// <param name="rayOrigin">射线的起点。</param>
+    /// <param name="rayDirection">射线的方向。</param>
     public void Query<TSink>(ref TSink hits, in JVector rayOrigin, in JVector rayDirection)
         where TSink : ISink<IDynamicTreeProxy>
     {
@@ -673,11 +671,11 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Queries the tree for proxies overlapping an axis-aligned bounding box and appends all hits to the specified sink.
+    /// 查询树中与轴对齐包围盒重叠的代理，并将所有命中追加到指定接收器。
     /// </summary>
-    /// <typeparam name="TSink">The sink type receiving all overlapping proxies.</typeparam>
-    /// <param name="hits">The sink receiving all overlapping proxies.</param>
-    /// <param name="box">The bounding box to query.</param>
+    /// <typeparam name="TSink">接收所有重叠代理的接收器类型。</typeparam>
+    /// <param name="hits">接收所有重叠代理的接收器。</param>
+    /// <param name="box">要查询的包围盒。</param>
     public void Query<TSink>(ref TSink hits, in JBoundingBox box)
         where TSink : ISink<IDynamicTreeProxy>
     {
@@ -727,12 +725,12 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Queries the tree for proxies whose world bounding boxes intersect a ray.
+    /// 查询树中世界包围盒与射线相交的代理。
     /// </summary>
-    /// <typeparam name="T">The collection type.</typeparam>
-    /// <param name="hits">Collection to store candidate proxies; their shapes may not intersect the ray.</param>
-    /// <param name="rayOrigin">The origin of the ray.</param>
-    /// <param name="rayDirection">The direction of the ray.</param>
+    /// <typeparam name="T">集合类型。</typeparam>
+    /// <param name="hits">用于存储候选代理的集合；它们的形状可能并不与射线相交。</param>
+    /// <param name="rayOrigin">射线的起点。</param>
+    /// <param name="rayDirection">射线的方向。</param>
     public void Query<T>(T hits, in JVector rayOrigin, in JVector rayDirection)
         where T : class, ICollection<IDynamicTreeProxy>
     {
@@ -741,11 +739,11 @@ public partial class DynamicTree
     }
 
     /// <summary>
-    /// Queries the tree for proxies overlapping an axis-aligned bounding box.
+    /// 查询树中与轴对齐包围盒重叠的代理。
     /// </summary>
-    /// <typeparam name="T">The collection type.</typeparam>
-    /// <param name="hits">Collection to store overlapping proxies.</param>
-    /// <param name="box">The bounding box to query.</param>
+    /// <typeparam name="T">集合类型。</typeparam>
+    /// <param name="hits">用于存储重叠代理的集合。</param>
+    /// <param name="box">要查询的包围盒。</param>
     public void Query<T>(T hits, in JBoundingBox box)
         where T : class, ICollection<IDynamicTreeProxy>
     {
@@ -756,22 +754,22 @@ public partial class DynamicTree
     readonly List<IDynamicTreeProxy> tempList = new();
 
     /// <summary>
-    /// Attempts to improve the tree topology by randomly reinserting existing leaf nodes.
+    /// 尝试通过随机重新插入现有叶节点来改善树拓扑。
     /// </summary>
-    /// <param name="sweeps">Number of synchronous optimization passes. Must be greater than zero.</param>
-    /// <param name="chance">Probability of reinserting each proxy per probabilistic sweep. Range: [0, 1].</param>
+    /// <param name="sweeps">同步优化遍数。必须大于零。</param>
+    /// <param name="chance">每个概率性扫描中重新插入每个代理的概率。范围：[0, 1]。</param>
     /// <param name="incremental">
-    /// If <c>false</c>, all proxies are reinserted in random order on the first sweep. If
-    /// <c>true</c>, every sweep selects proxies according to <paramref name="chance"/>.
-    /// This option does not spread work across calls or simulation steps.
+    /// 如果为 <c>false</c>，则在第一遍中按随机顺序重新插入所有代理。如果
+    /// 为 <c>true</c>，则每一遍根据 <paramref name="chance"/> 选择代理。
+    /// 此选项不会在多次调用或模拟步之间分摊工作。
     /// </param>
     /// <remarks>
-    /// Optimization preserves leaf node indices, expanded bounding boxes, proxy activity, and
-    /// the potential-pair cache. The operation is stochastic and is not guaranteed to reduce
-    /// <see cref="CalculateCost"/> on every invocation.
+    /// 优化会保留叶节点索引、扩展包围盒、代理活动状态以及
+    /// 潜在配对缓存。该操作是随机的，不保证每次调用都能降低
+    /// <see cref="CalculateCost"/>。
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when <paramref name="sweeps"/> is less than one, or when <paramref name="chance"/> is outside [0, 1].
+    /// 当 <paramref name="sweeps"/> 小于一，或 <paramref name="chance"/> 超出 [0, 1] 时抛出。
     /// </exception>
     public void Optimize(int sweeps = 100, Real chance = (Real)0.01, bool incremental = false)
     {
@@ -779,11 +777,11 @@ public partial class DynamicTree
     }
 
     /// <inheritdoc cref="Optimize(int, Real, bool)"/>
-    /// <param name="getNextRandom">A function returning random values in [0, 1).</param>
-    /// <param name="sweeps">The number of optimization sweeps.</param>
-    /// <param name="chance">Probability of selecting each leaf in a sweep, from 0 to 1.</param>
-    /// <param name="incremental">Whether to update the tree incrementally during optimization.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="getNextRandom"/> is <see langword="null"/>.</exception>
+    /// <param name="getNextRandom">返回 [0, 1) 范围内随机值的函数。</param>
+    /// <param name="sweeps">优化扫描遍数。</param>
+    /// <param name="chance">每遍中选中每个叶节点的概率，从 0 到 1。</param>
+    /// <param name="incremental">是否在优化期间增量更新树。</param>
+    /// <exception cref="ArgumentNullException">当 <paramref name="getNextRandom"/> 为 <see langword="null"/> 时抛出。</exception>
     public void Optimize(Func<double> getNextRandom, int sweeps, Real chance, bool incremental)
     {
         ArgumentNullException.ThrowIfNull(getNextRandom);
@@ -807,7 +805,7 @@ public partial class DynamicTree
                     nodes[leaf].Parent = NullNode;
                 }
 
-                // Fisher-Yates shuffle
+                // Fisher-Yates 洗牌
                 int n = tempList.Count;
 
                 for (int i = n - 1; i > 0; i--)
@@ -831,9 +829,9 @@ public partial class DynamicTree
 
         if (!incremental)
         {
-            // In non-incremental mode, the first sweep processes all proxies and may
-            // cause tempList to grow significantly. Since we're unlikely to need that
-            // capacity again, we trim the excess to reduce memory usage.
+            // 在非增量模式下，第一遍会处理所有代理，可能导致
+            // tempList 显著增长。由于我们不太可能再次需要该
+            // 容量，因此裁剪多余部分以减少内存占用。
             tempList.TrimExcess();
         }
     }
@@ -964,8 +962,8 @@ public partial class DynamicTree
     {
         JBoundingBox box = proxy.WorldBoundingBox;
 
-        // We store the parent of the node which gets removed. This
-        // information is later used to reinsert the node *keeping updates local*.
+        // 我们保存被移除节点的父节点。稍后利用该信息重新插入该节点，
+        // *使更新保持局部*。
         int parent = RemoveLeaf(proxy.NodePtr);
 
         int index = proxy.NodePtr;
@@ -983,9 +981,9 @@ public partial class DynamicTree
 
         nodes[index].ExpandedBox = new TreeBox(box);
 
-        // InsertLeaf takes 'where' as a hint, i.e. it still walks up the tree until
-        // the new node is fully contained. Note: The insertion node could also be found when searching
-        // from the root, since the search always descends into child nodes fully containing the new node.
+        // InsertLeaf 将 'where' 作为提示，即它仍会沿树向上遍历，
+        // 直到新节点被完全包含。注意：从根节点搜索也能找到插入节点，
+        // 因为搜索总是向下进入完全包含新节点的子节点。
         InsertLeaf(index, parent);
     }
 
@@ -1053,10 +1051,10 @@ public partial class DynamicTree
     private readonly PriorityQueue<int, double> priorityQueue = new();
 
     /// <summary>
-    /// Finds the exact best insertion point for <paramref name="node"/> in the BVH,
-    /// starting from <paramref name="where"/>, using a priority-queue driven
-    /// Surface Area Heuristic (SAH) search. This method guarantees the same
-    /// result as a brute-force search, unlike the faster greedy version <see cref="FindBestGreedy"/>.
+    /// 使用优先队列驱动的表面积启发式（SAH）搜索，从 <paramref name="where"/> 开始，
+    /// 为 <paramref name="node"/> 在 BVH 中找到确切的最佳插入点。
+    /// 与更快的贪心版本 <see cref="FindBestGreedy"/> 不同，此方法保证
+    /// 与暴力搜索相同的结果。
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     private int FindBest(int node, int where)
@@ -1068,23 +1066,23 @@ public partial class DynamicTree
         double bestCost = double.MaxValue;
         int currentBest = where;
 
-        // value = node index, priority = full cost at that node
+        // value = 节点索引，priority = 该节点的完整代价
         priorityQueue.Enqueue(where, rootMergedArea);
 
         while (priorityQueue.TryDequeue(out int currentIndex, out double cost))
         {
             ref Node cn = ref nodes[currentIndex];
 
-            // Reconstruct inherited cost *before* this node:
+            // 重建该节点*之前*的继承代价：
             // cost = inhCostBefore + SA(merge(node, nb))
             double mergedHere = TreeBox.MergedSurface(cn.ExpandedBox, nb.ExpandedBox);
             double inhCostBeforeNode = cost - mergedHere;
 
-            // Prune: even the lower bound is already worse than best
+            // 剪枝：即使下界也已比当前最优更差
             if (inhCostBeforeNode > bestCost)
                 continue;
 
-            // This node is a candidate insertion position
+            // 该节点是一个候选插入位置
             if (cost < bestCost)
             {
                 bestCost = cost;
@@ -1095,17 +1093,17 @@ public partial class DynamicTree
 
             double oldSurface = cn.ExpandedBox.GetSurfaceArea();
 
-            // Inherited cost *after* this node
+            // 该节点*之后*的继承代价
             double inhCostAfterNode = cost - oldSurface;
 
-            // Expand to children
+            // 向子节点扩展
             double leftMerged = TreeBox.MergedSurface(nodes[cn.Left].ExpandedBox, nb.ExpandedBox);
             double rightMerged = TreeBox.MergedSurface(nodes[cn.Right].ExpandedBox, nb.ExpandedBox);
 
             double leftCost = inhCostAfterNode + leftMerged;
             double rightCost = inhCostAfterNode + rightMerged;
 
-            // Store only index + full cost; inhCost will be reconstructed on pop
+            // 只存储索引与完整代价；inhCost 将在出队时重建
             priorityQueue.Enqueue(cn.Left, leftCost);
             priorityQueue.Enqueue(cn.Right, rightCost);
         }
@@ -1172,7 +1170,7 @@ public partial class DynamicTree
             inheritedCost += directCost - areaBase;
 
             //
-            // Cost of descending into left child
+            // 下探到左子节点的代价
             //
             double lowerCostLeft = double.MaxValue;
             double directCostLeft = TreeBox.MergedSurface(nodes[left].ExpandedBox, nodeTreeBox);
@@ -1180,11 +1178,11 @@ public partial class DynamicTree
 
             if (nodes[left].IsLeaf)
             {
-                // Left child is a leaf
-                // Cost of creating new node and increasing area of node P
+                // 左子节点是叶节点
+                // 创建新节点并增大节点 P 面积的代价
                 double costLeft = directCostLeft + inheritedCost;
 
-                // Need this here due to while condition above
+                // 由于上面的 while 条件，需要在此处处理
                 if (costLeft < bestCost)
                 {
                     bestSibling = left;
@@ -1193,15 +1191,15 @@ public partial class DynamicTree
             }
             else
             {
-                // Left child is an internal node
+                // 左子节点是内部节点
                 areaLeft = nodes[left].ExpandedBox.GetSurfaceArea();
 
-                // Lower bound cost of inserting under left child.
+                // 在左子节点下插入的下界代价。
                 lowerCostLeft = inheritedCost + directCostLeft + double.Min(areaD - areaLeft, 0.0d);
             }
 
             //
-            // Cost of descending into right child
+            // 下探到右子节点的代价
             //
             double lowerCostRight = double.MaxValue;
             double directCostRight = TreeBox.MergedSurface(nodes[right].ExpandedBox, nodeTreeBox);
@@ -1209,7 +1207,7 @@ public partial class DynamicTree
 
             if (nodes[right].IsLeaf)
             {
-                // Right child is a leaf
+                // 右子节点是叶节点
                 double costRight = directCostRight + inheritedCost;
 
                 if (costRight < bestCost)
@@ -1220,16 +1218,16 @@ public partial class DynamicTree
             }
             else
             {
-                // Right child is an internal node
+                // 右子节点是内部节点
                 areaRight = nodes[right].ExpandedBox.GetSurfaceArea();
                 lowerCostRight = inheritedCost + directCostRight + double.Min(areaD - areaRight, 0.0d);
             }
 
-            // If neither subtree offers improvement, stop descending.
+            // 如果两个子树都不能带来改进，则停止下探。
             if (bestCost <= lowerCostLeft && bestCost <= lowerCostRight)
                 break;
 
-            // Tie-break by proximity to the new node's center
+            // 依据与新节点中心的接近程度来打破平局
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (lowerCostLeft == lowerCostRight)
             {
@@ -1238,7 +1236,7 @@ public partial class DynamicTree
                 lowerCostRight = (nodes[right].ExpandedBox.Center - center).LengthSquared();
             }
 
-            // Descend into whichever child is better
+            // 下探到更优的那个子节点
             if (lowerCostLeft < lowerCostRight)
             {
                 where = left;
@@ -1273,12 +1271,12 @@ public partial class DynamicTree
 
             if (nodes[left].IsLeaf)
             {
-                // cost of additional node
+                // 额外节点的代价
                 leftCost = TreeBox.MergedSurface(nodes[left].ExpandedBox, nodeTreeBox);
             }
             else
             {
-                // cost of descending
+                // 下探的代价
                 double oldArea = nodes[left].ExpandedBox.GetSurfaceArea();
                 double newArea = TreeBox.MergedSurface(nodes[left].ExpandedBox, nodeTreeBox);
                 leftCost = newArea - oldArea;
@@ -1324,10 +1322,10 @@ public partial class DynamicTree
             where = nodes[where].Parent;
         }
 
-        // search for the best sibling
+        // 搜索最佳兄弟节点
         int sibling = FindBestGreedy(node, where);
 
-        // create a new parent
+        // 创建新的父节点
         int oldParent = nodes[sibling].Parent;
         int newParent = AllocateNode();
 

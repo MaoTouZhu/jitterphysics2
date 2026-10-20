@@ -77,7 +77,7 @@ public class InertiaTests
         var first = new TransformedShape(box, new JVector(1, 0, 0));
         var second = new TransformedShape(first, new JVector(1, 0, 0));
 
-        // A unit box centered at x = 2 has Ixx = 1/6 and Iyy = Izz = 1/6 + 4.
+        // 一个中心位于 x = 2 的单位立方体，其 Ixx = 1/6，Iyy = Izz = 1/6 + 4。
         JSymmetricMatrix expected = new((Real)(1.0 / 6.0), 0, 0,
             (Real)(25.0 / 6.0), 0, (Real)(25.0 / 6.0));
         Check(second, expected, new JVector(2, 0, 0), 1);
@@ -156,8 +156,8 @@ public class InertiaTests
     [TestCase(true)]
     public static void TransformedInertia_MatchesAnalyticalShearedBox(bool reflected)
     {
-        // The box has mass 48 and second moments diag(16, 64, 144).
-        // Shearing produces all three independent off-diagonal inertia components after translation.
+        // 该立方体质量为 48，二阶矩为 diag(16, 64, 144)。
+        // 剪切在平移后会产生全部三个独立的非对角线惯性分量。
         var box = new BoxShape(2, 4, 6);
         JMatrix transform = new(1, (Real)0.5, 0, 0, 1, 0, (Real)0.25, 0, 1);
         if (reflected)

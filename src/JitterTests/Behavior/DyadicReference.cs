@@ -33,8 +33,8 @@ using System.Numerics;
 
 namespace JitterTests.Behavior;
 
-// Test-only reference arithmetic on the supplied IEEE coordinates. No division is needed by
-// the orientation predicates: a dyadic is closed under addition and multiplication.
+// 仅用于测试的参考算术，作用在所给定的 IEEE 坐标上。定向谓词不需要除法：
+// 二进分数在加法和乘法下是封闭的。
 internal readonly struct Dyadic
 {
     private readonly BigInteger mantissa;
