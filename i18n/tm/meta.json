@@ -1,8 +1,8 @@
 {
   "base_ref": "upstream/main",
   "base_commit": "8c5cd35ae8a2a496d4b5a1eddca8ab6df00c1879",
-  "localized_ref": "zh-draft",
-  "localized_commit": "fdf1ea9930ac36f40a558fc31127cadf3fcd40f9",
+  "localized_ref": "zh",
+  "localized_commit": "cdc11cbe95782cc920f2b3edbd43b0534239a8bc",
   "counts": {
     "md": 815,
     "md_files": 27,
