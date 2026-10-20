@@ -71,6 +71,7 @@ rm -rf "$WORKTREE/i18n/review"
 mkdir -p "$WORKTREE/tools"
 cp -a "$ROOT/tools/i18n" "$WORKTREE/tools/i18n"
 find "$WORKTREE/tools" -name __pycache__ -type d -prune -exec rm -rf {} +
+if [[ -f "$ROOT/AGENTS.md" ]]; then cp -a "$ROOT/AGENTS.md" "$WORKTREE/AGENTS.md"; fi
 if [[ -f "$ROOT/.gitignore" ]]; then cp -a "$ROOT/.gitignore" "$WORKTREE/.gitignore"; fi
 if [[ -f "$ROOT/Makefile" ]]; then cp -a "$ROOT/Makefile" "$WORKTREE/Makefile"; fi
 if [[ -f "$ROOT/.github/workflows/i18n.yml" ]]; then
